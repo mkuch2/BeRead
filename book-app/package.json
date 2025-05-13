@@ -5,12 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:server": "nodemon --exec tsx src/backend/server.ts",
+    "dev:server": "tsx --watch --env-file=./src/backend/.env ./src/backend/src/server.ts",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "jsonwebtoken": "^9.0.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
