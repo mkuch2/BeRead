@@ -6,7 +6,7 @@ import express, {
 } from "express";
 
 const app: Application = express();
-const PORT: number = 5004;
+const PORT: string | number = process.env.PORT || 5004;
 
 app.use(express.json());
 
