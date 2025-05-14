@@ -7,11 +7,13 @@
     "dev": "vite",
     "dev:server": "tsx --watch --env-file=./src/backend/.env ./src/backend/server.ts",
     "build": "tsc -b && vite build",
+    "start": "npm run build && npm run dev:server",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
+    "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
