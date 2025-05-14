@@ -12,6 +12,7 @@ const __dirname = path.dirname(__filename);
 const app: Application = express();
 const PORT: string | number = process.env.PORT || 5004;
 
+//Middleware
 app.use(express.json());
 
 //Serve all files from dist folder as static assets / files
