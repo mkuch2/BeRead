@@ -21,7 +21,7 @@ app.use(express.static(path.join(__dirname, "..", "..", "dist")));
 //API Routes
 
 //Non-API Routes
-app.all("/", (_req: Request, res: Response): void => {
+app.all("/{*splat}", (_req: Request, res: Response): void => {
   res.sendFile(path.join(__dirname, "..", "..", "dist", "index.html"));
 });
 
