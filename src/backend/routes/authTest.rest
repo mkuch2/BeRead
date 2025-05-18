@@ -1,0 +1,19 @@
+### TEST POST /API/SIGNUP
+POST http://localhost:5004/api/signup 
+content-type: application/json
+
+{
+  "username":"johnnyseed",
+  "email": "john21@gmail.com",
+  "password": "johnseed22"
+}
+
+### TEST POST API/SIGNUP INVALID USERNAME
+POST http://localhost:5004/api/signup 
+content-type: application/json
+
+{
+  "username":"jd",
+  "email": "john21@gmail.com",
+  "password": "johnseed22"
+}

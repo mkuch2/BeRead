@@ -1,0 +1,122 @@
+### TEST: Valid Username
+POST http://localhost:5004/api/signup 
+content-type: application/json
+
+{
+  "username":"johndoe123",
+  "email": "john@example.com",
+  "password": "Password123!"
+}
+
+### TEST: Username Too Short
+POST http://localhost:5004/api/signup 
+content-type: application/json
+
+{
+  "username":"jd",
+  "email": "john@example.com",
+  "password": "Password123!"
+}
+
+### TEST: Username With Invalid Characters
+POST http://localhost:5004/api/signup 
+content-type: application/json
+
+{
+  "username":"john-doe@123",
+  "email": "john@example.com",
+  "password": "Password123!"
+}
+
+### TEST: Empty Username
+POST http://localhost:5004/api/signup 
+content-type: application/json
+
+{
+  "username":"",
+  "email": "john@example.com",
+  "password": "Password123!"
+}
+
+### TEST: Invalid Email Format
+POST http://localhost:5004/api/signup 
+content-type: application/json
+
+{
+  "username":"johndoe123",
+  "email": "not-an-email",
+  "password": "Password123!"
+}
+
+### TEST: Empty Email
+POST http://localhost:5004/api/signup 
+content-type: application/json
+
+{
+  "username":"johndoe123",
+  "email": "",
+  "password": "Password123!"
+}
+
+### TEST: Missing Email Field
+POST http://localhost:5004/api/signup 
+content-type: application/json
+
+{
+  "username":"johndoe123",
+  "password": "Password123!"
+}
+### TEST: Password Too Short
+POST http://localhost:5004/api/signup 
+content-type: application/json
+
+{
+  "username":"johndoe123",
+  "email": "john@example.com",
+  "password": "Pass1!"
+}
+
+### TEST: Password With Invalid Characters
+POST http://localhost:5004/api/signup 
+content-type: application/json
+
+{
+  "username":"johndoe123",
+  "email": "john@example.com",
+  "password": "Password+123"
+}
+
+### TEST: Empty Password
+POST http://localhost:5004/api/signup 
+content-type: application/json
+
+{
+  "username":"johndoe123",
+  "email": "john@example.com",
+  "password": ""
+}
+
+### TEST: All Fields Missing
+POST http://localhost:5004/api/signup 
+content-type: application/json
+
+{}
+
+### TEST: Username With Whitespace
+POST http://localhost:5004/api/signup 
+content-type: application/json
+
+{
+  "username":" johndoe123 ",
+  "email": "john@example.com",
+  "password": "Password123!"
+}
+
+### TEST: Malformed JSON
+POST http://localhost:5004/api/signup 
+content-type: application/json
+
+{
+  "username":"johndoe123",
+  "email": "john@example.com",
+  "password": "Password123!"

@@ -19,17 +19,23 @@ const User = z.object({
   username: z
     .string()
     .trim()
-    .min(2, { message: "Please provide a username longer than 2 characters" })
+    .nonempty({ message: "Please provide a username" })
+    .min(5, { message: "Please provide a username longer than 5 characters" })
     .max(50, {
       message: "Please provide a username shorter than 50 characters",
     })
     .regex(/^[a-zA-Z0-9_]+$/, {
       message: "Username can only consist of letters, numbers, and underscores",
     }),
-  email: z.string().trim().email(),
+  email: z
+    .string()
+    .trim()
+    .nonempty({ message: "Please provide an email" })
+    .email(),
   password: z
     .string()
     .trim()
+    .nonempty({ message: "Please provide a password " })
     .min(8, { message: "Password must be at least 8 characters!" })
     .max(50, { message: "Password can not be longer than 50 characters!" })
     .regex(/^[a-zA-Z0-9!@#$%^&*]+$/, {
@@ -51,7 +57,8 @@ function Signup() {
     },
   });
 
-  const onSubmit: SubmitHandler<FormFields> = (data) => console.log(data);
+  //TODO: IMPLEMENT
+  const onSubmit: SubmitHandler<FormFields> = async (data) => {};
 
   return (
     <>
