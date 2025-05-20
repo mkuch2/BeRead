@@ -3,8 +3,8 @@ POST http://localhost:5004/api/signup
 content-type: application/json
 
 {
-  "username":"johndoe123",
-  "email": "john@example.com",
+  "username":"johndoe1234",
+  "email": "john42@example.com",
   "password": "Password123!"
 }
 

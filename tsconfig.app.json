@@ -30,5 +30,6 @@
     "noUncheckedSideEffectImports": true
   },
   "include": ["src"],
-  "exclude": ["src/generated/**/*"]
+  "exclude": ["src/backend/generated/**/*", "dist/**", "node_modules/**"],
+  "noUnusedLocals": false
 }

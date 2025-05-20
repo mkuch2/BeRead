@@ -58,7 +58,9 @@ function Signup() {
   });
 
   //TODO: IMPLEMENT
-  const onSubmit: SubmitHandler<FormFields> = async (data) => {};
+  const onSubmit: SubmitHandler<FormFields> = async (data) => {
+    console.log(data);
+  };
 
   return (
     <>
