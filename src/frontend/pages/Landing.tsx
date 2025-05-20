@@ -1,14 +1,22 @@
 import { useNavigate, Link } from "react-router";
 import { Button } from "../components/ui/button";
-import auth from "../firebase";
 import { FirebaseError } from "firebase/app";
+import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 
 function Landing() {
   const navigate = useNavigate();
 
+  const { currentUser, signOut } = useAuthContext() as AuthContextType;
+
+  if (currentUser) {
+    console.log(currentUser);
+  } else {
+    console.log("No user detected");
+  }
+
   const handleSignOut = async () => {
     try {
-      await auth.signOut();
+      await signOut();
 
       //Redirect to Login
       navigate("/login");

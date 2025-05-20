@@ -1,7 +1,5 @@
 import { useNavigate, Link } from "react-router";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import auth from "../../firebase";
 import { Button } from "@/frontend/components/ui/button";
 import { Input } from "@/frontend/components/ui/input";
 import {
@@ -13,6 +11,10 @@ import {
   FormMessage,
 } from "@/frontend/components/ui/form";
 import { FirebaseError } from "firebase/app";
+import {
+  useAuthContext,
+  type AuthContextType,
+} from "../../hooks/useAuthContext";
 
 type FormFields = {
   email: string;
@@ -20,6 +22,8 @@ type FormFields = {
 };
 
 function Login() {
+  const { login } = useAuthContext() as AuthContextType;
+
   const form = useForm<FormFields>({
     defaultValues: {
       email: "",
@@ -34,7 +38,7 @@ function Login() {
     password: string;
   }) => {
     try {
-      await signInWithEmailAndPassword(auth, data.email, data.password);
+      await login(data.email, data.password);
 
       navigate("/");
     } catch (e) {
@@ -94,7 +98,7 @@ function Login() {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input placeholder="password" {...field} />
+                  <Input placeholder="password" type="password" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

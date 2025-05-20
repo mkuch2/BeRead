@@ -15,8 +15,11 @@ import {
 } from "@/frontend/components/ui/form";
 import axios from "axios";
 import { isAxiosError } from "axios";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import auth from "../../firebase";
+import {
+  useAuthContext,
+  type AuthContextType,
+} from "../../hooks/useAuthContext";
+import { useState } from "react";
 
 //Validation schema for user
 const User = z.object({
@@ -52,6 +55,7 @@ const User = z.object({
 type FormFields = z.infer<typeof User>;
 
 function Signup() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const form = useForm<FormFields>({
@@ -72,19 +76,23 @@ function Signup() {
     code?: string;
   }
 
+  const { signUp } = useAuthContext() as AuthContextType;
+
   //TODO: IMPLEMENT
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     console.log("In onSubmit");
+    setIsSubmitting(true);
     try {
-      await axios.post("/api/signup", {
+      const backendPromise = axios.post("/api/signup", {
         username: data.username,
         email: data.email,
         password: data.password,
       });
 
-      //Add user to Firebase auth
-      console.log(data);
-      await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const firebasePromise = signUp(data.email, data.password);
+
+      //Succeed if both axios and firebase promise fulfilled, fail otherwise
+      await Promise.all([backendPromise, firebasePromise]);
 
       navigate("/");
     } catch (e: unknown) {
@@ -129,6 +137,8 @@ function Signup() {
           message: "An unknown error occurred",
         });
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -180,7 +190,9 @@ function Signup() {
               </FormItem>
             )}
           />
-          <Button type="submit">Submit</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            Submit
+          </Button>
         </form>
       </Form>
 
