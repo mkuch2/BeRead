@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { useNavigate, Link } from "react-router";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -13,9 +13,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/frontend/components/ui/form";
-
 import axios from "axios";
 import { isAxiosError } from "axios";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import auth from "../../firebase";
 
 //Validation schema for user
 const User = z.object({
@@ -51,6 +52,8 @@ const User = z.object({
 type FormFields = z.infer<typeof User>;
 
 function Signup() {
+  const navigate = useNavigate();
+
   const form = useForm<FormFields>({
     resolver: zodResolver(User),
     defaultValues: {
@@ -78,6 +81,12 @@ function Signup() {
         email: data.email,
         password: data.password,
       });
+
+      //Add user to Firebase auth
+      console.log(data);
+      await createUserWithEmailAndPassword(auth, data.email, data.password);
+
+      navigate("/");
     } catch (e: unknown) {
       if (isAxiosError(e)) {
         if (e.response) {

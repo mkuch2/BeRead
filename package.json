@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:server": "tsx --watch --env-file=./src/backend/.env ./src/backend/server.ts",
+    "server": "tsx --watch --env-file=./src/backend/.env ./src/backend/server.ts",
     "build": "tsc -b && vite build",
-    "start": "npm run build && npm run dev:server",
+    "start": "npm run build && npm run server",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -23,6 +23,7 @@
     "clsx": "^2.1.1",
     "express": "^5.1.0",
     "express-validator": "^7.2.1",
+    "firebase": "^11.7.3",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.510.0",
     "pg": "^8.16.0",
