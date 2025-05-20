@@ -14,6 +14,9 @@ import {
   FormMessage,
 } from "@/frontend/components/ui/form";
 
+import axios from "axios";
+import { isAxiosError } from "axios";
+
 //Validation schema for user
 const User = z.object({
   username: z
@@ -57,13 +60,76 @@ function Signup() {
     },
   });
 
+  interface ServerError {
+    msg: string;
+    meta: {
+      modelName: string;
+      target: string[];
+    };
+    code?: string;
+  }
+
   //TODO: IMPLEMENT
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
-    console.log(data);
+    console.log("In onSubmit");
+    try {
+      await axios.post("/api/signup", {
+        username: data.username,
+        email: data.email,
+        password: data.password,
+      });
+    } catch (e: unknown) {
+      if (isAxiosError(e)) {
+        if (e.response) {
+          console.log("Response data", e.response.data);
+          console.log("Response", e.response);
+          // Server responded with error code
+          if (e.response.data?.errors) {
+            //Display error message at appropiate field
+            console.log("Inside if statement", e.response.data?.errors);
+            e.response.data.errors.forEach((err: ServerError) => {
+              if (
+                err.meta.target[0] &&
+                err.meta.target[0] in form.getValues()
+              ) {
+                form.setError(err.meta.target[0] as keyof FormFields, {
+                  type: "server",
+                  message: err.msg,
+                });
+              }
+            });
+          }
+        } else if (e.request) {
+          console.log(e.request);
+          // Request made but no response recieved
+          form.setError("root", {
+            type: "server",
+            message: "Connection error. Please try again.",
+          });
+        } else {
+          // Error setting up request
+          form.setError("root", {
+            type: "server",
+            message: e.message || "Error setting up request",
+          });
+        }
+      } else {
+        console.log("Unknown error:", e);
+        form.setError("root", {
+          type: "server",
+          message: "An unknown error occurred",
+        });
+      }
+    }
   };
 
   return (
     <>
+      {form.formState.errors.root && (
+        <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4">
+          {form.formState.errors.root.message}
+        </div>
+      )}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <FormField

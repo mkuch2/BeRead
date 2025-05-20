@@ -75,7 +75,7 @@ router.post(
           const field = target[0] || "field";
 
           res.status(409).json({
-            error: [
+            errors: [
               {
                 msg: `${field} is already taken`,
                 meta: e.meta,
