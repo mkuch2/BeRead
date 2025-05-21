@@ -43,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut,
     signUp,
     getUser,
+    isLoading,
   };
 
   return (

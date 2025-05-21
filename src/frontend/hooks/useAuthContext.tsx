@@ -7,6 +7,7 @@ export interface AuthContextType {
   signOut: () => Promise<void>;
   signUp: (email: string, password: string) => Promise<UserCredential>;
   getUser: () => User | null;
+  isLoading: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);

@@ -55,7 +55,6 @@ const User = z.object({
 type FormFields = z.infer<typeof User>;
 
 function Signup() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const form = useForm<FormFields>({
@@ -77,10 +76,10 @@ function Signup() {
   }
 
   const { signUp } = useAuthContext() as AuthContextType;
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   //TODO: IMPLEMENT
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
-    console.log("In onSubmit");
     setIsSubmitting(true);
     try {
       const backendPromise = axios.post("/api/signup", {
@@ -95,7 +94,7 @@ function Signup() {
       await Promise.all([backendPromise, firebasePromise]);
 
       navigate("/");
-    } catch (e: unknown) {
+    } catch (e) {
       if (isAxiosError(e)) {
         if (e.response) {
           console.log("Response data", e.response.data);
@@ -114,6 +113,11 @@ function Signup() {
                   message: err.msg,
                 });
               }
+            });
+          } else {
+            form.setError("root", {
+              type: "server",
+              message: "Server error. Please try again.",
             });
           }
         } else if (e.request) {
@@ -191,7 +195,7 @@ function Signup() {
             )}
           />
           <Button type="submit" disabled={isSubmitting}>
-            Submit
+            {isSubmitting ? "Submitting" : "Submit"}
           </Button>
         </form>
       </Form>

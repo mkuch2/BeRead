@@ -15,6 +15,7 @@ import {
   useAuthContext,
   type AuthContextType,
 } from "../../hooks/useAuthContext";
+import { useState } from "react";
 
 type FormFields = {
   email: string;
@@ -23,6 +24,7 @@ type FormFields = {
 
 function Login() {
   const { login } = useAuthContext() as AuthContextType;
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormFields>({
     defaultValues: {
@@ -37,6 +39,8 @@ function Login() {
     email: string;
     password: string;
   }) => {
+    setIsSubmitting(true);
+
     try {
       await login(data.email, data.password);
 
@@ -67,6 +71,8 @@ function Login() {
           message: "Unknown error occured.",
         });
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -104,7 +110,9 @@ function Login() {
               </FormItem>
             )}
           />
-          <Button type="submit">Log in</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Loading..." : "Log in"}
+          </Button>
         </form>
       </Form>
       {form.formState.errors.root && (
