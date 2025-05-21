@@ -23,13 +23,13 @@
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
   "include": ["src"],
-  "exclude": ["src/backend/generated/**/*", "dist/**", "node_modules/**"],
+  "exclude": ["src/backend/generated/**/*", "dist/**", "node_modules/**", "src/backend/generated/prisma"],
   "noUnusedLocals": false
 }
