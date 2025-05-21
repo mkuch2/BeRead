@@ -4,6 +4,7 @@ import Signup from "./pages/auth/Signup";
 import Login from "./pages/auth/Login";
 import Home from "./pages/Home";
 import ProtectedRoute from "./ProtectedRoute";
+import BookSearch from "./components/BookSearch.tsx";
 
 const router = createBrowserRouter([
   { path: "/", Component: Landing },
@@ -17,6 +18,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+  { path: "/books", Component: BookSearch }, // book search page
 ]);
 
 export default router;
