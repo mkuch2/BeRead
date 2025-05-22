@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './BookSearch.css';
 
-// book properties defined
 interface Book {
   id: string;
   title: string;
@@ -12,82 +10,90 @@ interface Book {
   publishedDate: string;
 }
 
-// api response properties defined
 interface BookSearchResponse {
   totalItems: number;
   books: Book[];
 }
 
-// react component w/ query input, book list, loading state, errors
 const BookSearch = () => {
-  const [query, setQuery] = useState<string>('');
+  const [query, setQuery] = useState('');
   const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-
-  // if input given, sends to /api/books (server.ts), server.ts response goes to books variable
   const searchBooks = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await axios.get<BookSearchResponse>(`/api/books?query=${encodeURIComponent(query)}`);
-      setBooks(response.data.books);  // used axios to make HTTP request from browser (/api/books handled by server.ts in backend)
-    } catch (err) {
+      setBooks(response.data.books);
+    } catch {
       setError('Failed to fetch books. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-
-  // visual stuff
   return (
-    <div className="book-search-container">
-      <h1>book search test page</h1>
-      
-      <form onSubmit={searchBooks} className="search-form">
-        <input // search box and button
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search for books..."
-          className="search-input"
-        />
-        <button type="submit" className="search-button">Search</button>
-      </form>
-      
-      {loading && <div className="loading">Loading...</div>}
-      {error && <div className="error">{error}</div>}
-      
-      { /* makes grid for book display (can change later) */ }
-      <div className="books-grid"> {/* makes grid from CSS file */ }
-        {books.map(book => (
-          <div key={book.id} className="book-card">
-            {book.thumbnail ? (
-              <img src={book.thumbnail} alt={book.title} className="book-cover" />
-            ) : (
-              <div className="no-cover">No Cover</div>
-            )}
-            <div className="book-details"> { /* this part shows all the book info */ }
-              <h3 className="book-title">{book.title}</h3>
-              <p className="book-authors">{book.authors.join(', ')}</p>
-              <p className="book-published">Published: {book.publishedDate}</p>
-              <p className="book-description">
-                {book.description && book.description.length > 100 
-                  ? `${book.description.substring(0, 100)}...` 
-                  : book.description}
-              </p>
+    <div className="min-h-screen bg-black text-white p-6 font-sans">
+      <div className="max-w-5xl mx-auto">
+        <h1 className="text-3xl font-bold text-center mb-6">Search the Library</h1>
+
+        <form onSubmit={searchBooks} className="flex gap-4 mb-10">
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search for books..."
+            className="flex-grow px-4 py-3 rounded-md bg-neutral-800 text-white border border-neutral-700 placeholder-gray-400"
+          />
+          <button
+            type="submit"
+            className="bg-white text-black font-semibold px-6 py-3 rounded-md hover:bg-gray-200 transition"
+          >
+            Search
+          </button>
+        </form>
+
+        {loading && <p className="text-center text-gray-400 mb-4">Loading...</p>}
+        {error && <p className="text-center text-red-500 mb-4">{error}</p>}
+        {books.length === 0 && !loading && query && (
+          <p className="text-center text-gray-400 mb-4">No books found. Try a different search term.</p>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {books.map((book) => (
+            <div
+              key={book.id}
+              className="bg-neutral-900 p-4 rounded-xl shadow-md hover:shadow-lg transition transform hover:scale-[1.02]"
+            >
+              {book.thumbnail ? (
+                <img
+                  src={book.thumbnail}
+                  alt={book.title}
+                  className="w-full h-48 object-cover rounded-md mb-4"
+                />
+              ) : (
+                <div className="w-full h-48 bg-neutral-800 text-center flex items-center justify-center rounded-md mb-4">
+                  <span className="text-gray-400">No Cover</span>
+                </div>
+              )}
+              <div className="text-center">
+                <h3 className="text-lg font-semibold mb-1">{book.title}</h3>
+                <p className="text-sm text-gray-400 mb-1">{book.authors.join(', ')}</p>
+                <p className="text-xs text-gray-500 mb-2">Published: {book.publishedDate}</p>
+                <p className="text-sm text-gray-300 line-clamp-3">
+                  {book.description || "No description"}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-      
-      {books.length === 0 && !loading && query && <p>No books found. Try a different search term.</p>}
     </div>
   );
 };
