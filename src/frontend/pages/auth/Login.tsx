@@ -73,8 +73,8 @@ function Login() {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center text-white font-sans">
       <div className="bg-neutral-900 px-8 py-10 rounded-lg shadow-xl w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center mb-1">FINDUO</h1>
-        <p className="text-center text-sm text-gray-400 mb-6">Sign in</p>
+        <h1 className="text-3xl font-bold text-center mb-1">BeRead</h1>
+        <p className="text-center text-sm text-gray-400 mb-6">Because books deserve a feed too.</p>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

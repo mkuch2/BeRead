@@ -13,15 +13,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/frontend/components/ui/form";
-import axios from "axios";
-import { isAxiosError } from "axios";
+import axios, { isAxiosError } from "axios";
 import {
   useAuthContext,
   type AuthContextType,
 } from "../../hooks/useAuthContext";
 import { useState } from "react";
 
-//Validation schema for user
+// Validation schema
 const User = z.object({
   username: z
     .string()
@@ -42,21 +41,19 @@ const User = z.object({
   password: z
     .string()
     .trim()
-    .nonempty({ message: "Please provide a password " })
-    .min(8, { message: "Password must be at least 8 characters!" })
-    .max(50, { message: "Password can not be longer than 50 characters!" })
+    .nonempty({ message: "Please provide a password" })
+    .min(8, { message: "Password must be at least 8 characters" })
+    .max(50, { message: "Password must be less than 50 characters" })
     .regex(/^[a-zA-Z0-9!@#$%^&*]+$/, {
       message:
-        "Password must consist of only letters, numbers, and characters !@#$%^&*",
+        "Password must contain only letters, numbers, and !@#$%^&*",
     }),
 });
 
-//Define types for form fields from zod's validation schema
 type FormFields = z.infer<typeof User>;
 
 function Signup() {
   const navigate = useNavigate();
-
   const form = useForm<FormFields>({
     resolver: zodResolver(User),
     defaultValues: {
@@ -66,19 +63,9 @@ function Signup() {
     },
   });
 
-  interface ServerError {
-    msg: string;
-    meta: {
-      modelName: string;
-      target: string[];
-    };
-    code?: string;
-  }
-
   const { signUp } = useAuthContext() as AuthContextType;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  //TODO: IMPLEMENT
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     setIsSubmitting(true);
     try {
@@ -89,53 +76,27 @@ function Signup() {
       });
 
       const firebasePromise = signUp(data.email, data.password);
-
-      //Succeed if both axios and firebase promise fulfilled, fail otherwise
       await Promise.all([backendPromise, firebasePromise]);
 
       navigate("/");
     } catch (e) {
       if (isAxiosError(e)) {
-        if (e.response) {
-          console.log("Response data", e.response.data);
-          console.log("Response", e.response);
-          // Server responded with error code
-          if (e.response.data?.errors) {
-            //Display error message at appropiate field
-            console.log("Inside if statement", e.response.data?.errors);
-            e.response.data.errors.forEach((err: ServerError) => {
-              if (
-                err.meta.target[0] &&
-                err.meta.target[0] in form.getValues()
-              ) {
-                form.setError(err.meta.target[0] as keyof FormFields, {
-                  type: "server",
-                  message: err.msg,
-                });
-              }
-            });
-          } else {
-            form.setError("root", {
-              type: "server",
-              message: "Server error. Please try again.",
-            });
-          }
-        } else if (e.request) {
-          console.log(e.request);
-          // Request made but no response recieved
-          form.setError("root", {
-            type: "server",
-            message: "Connection error. Please try again.",
+        if (e.response?.data?.errors) {
+          e.response.data.errors.forEach((err: any) => {
+            if (err.meta.target[0]) {
+              form.setError(err.meta.target[0] as keyof FormFields, {
+                type: "server",
+                message: err.msg,
+              });
+            }
           });
         } else {
-          // Error setting up request
           form.setError("root", {
             type: "server",
-            message: e.message || "Error setting up request",
+            message: "Server error. Please try again.",
           });
         }
       } else {
-        console.log("Unknown error:", e);
         form.setError("root", {
           type: "server",
           message: "An unknown error occurred",
@@ -147,62 +108,80 @@ function Signup() {
   };
 
   return (
-    <>
-      {form.formState.errors.root && (
-        <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4">
-          {form.formState.errors.root.message}
-        </div>
-      )}
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <FormField
-            control={form.control}
-            name="username"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Username</FormLabel>
-                <FormControl>
-                  <Input placeholder="username" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder="password" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Submitting" : "Submit"}
-          </Button>
-        </form>
-      </Form>
+    <div className="min-h-screen bg-black flex items-center justify-center text-white font-sans">
+      <div className="bg-neutral-900 px-8 py-10 rounded-lg shadow-xl w-full max-w-md">
+        <h1 className="text-3xl font-bold text-center mb-1">BeRead</h1>
+        <p className="text-center text-sm text-gray-400 mb-6">
+          Create an account to join the feed.
+        </p>
 
-      <Link to="/">Home Page</Link>
-      <Link to="/login">Login Page</Link>
-    </>
+        {form.formState.errors.root && (
+          <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm mb-4">
+            {form.formState.errors.root.message}
+          </div>
+        )}
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white">Username</FormLabel>
+                  <FormControl>
+                    <Input placeholder="username" {...field} className="bg-neutral-800 text-white" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white">Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="email" {...field} className="bg-neutral-800 text-white" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white">Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="password"
+                      {...field}
+                      className="bg-neutral-800 text-white"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" disabled={isSubmitting} className="w-full mt-2">
+              {isSubmitting ? "Submitting..." : "Sign up"}
+            </Button>
+          </form>
+        </Form>
+
+        <div className="mt-4 text-center text-sm text-gray-400">
+          Already have an account?{" "}
+          <Link to="/login" className="underline text-white">
+            Log in
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }
 
