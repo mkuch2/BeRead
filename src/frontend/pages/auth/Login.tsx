@@ -1,4 +1,4 @@
-import { useNavigate, Link } from "react-router";
+import { useLocation, useNavigate, Link } from "react-router";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { Button } from "@/frontend/components/ui/button";
 import { Input } from "@/frontend/components/ui/input";
@@ -34,13 +34,15 @@ function Login() {
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = "/home"; // always go to home after login
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     setIsSubmitting(true);
 
     try {
       await login(data.email, data.password);
-      navigate("/");
+      navigate(from);
     } catch (e) {
       if (e instanceof FirebaseError) {
         if (e.code === "auth/invalid-credential") {
