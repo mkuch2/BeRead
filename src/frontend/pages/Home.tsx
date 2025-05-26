@@ -31,8 +31,9 @@ function Home() {
         <div className="flex items-center space-x-4">
           <h1 className="font-bold text-xl text-white">BeRead</h1>
           <Link to="/books" className="text-sm font-light text-zinc-400">Search Books</Link>
+          <Link to="/profile" className="text-sm font-light text-zinc-400">Profile</Link>
         </div>
-        <button type="button" onClick={handleSignOut} className="text-sm font-light text-zinc-400">Logout</button>
+        <button type="button" onClick={handleSignOut} className="text-sm font-light text-zinc-400 ml-2">Logout</button>
       </header>
       <main>
         <div className="border border-zinc-600 ml-2 mr-2 mb-2">
