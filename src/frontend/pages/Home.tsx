@@ -27,7 +27,7 @@ function Home() {
   };
 
   return (
-    <div>
+    <>
       <header className="border border-zinc-600 flex justify-between items-center px-4 py-2 mb-2">
         <div className="flex items-center space-x-4">
           <h1 className="font-bold text-xl text-white">BeRead</h1>
@@ -46,7 +46,7 @@ function Home() {
         <p className="text-xs m-1 text-left italic text-zinc-200 font-thin">Most Recent</p>
         <p>TODO: List of Friend's Posts</p>
       </main>
-    </div>
+    </>
   );
 }
 export default Home;
