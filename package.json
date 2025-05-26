@@ -25,6 +25,7 @@
     "express": "^5.1.0",
     "express-validator": "^7.2.1",
     "firebase": "^11.7.3",
+    "firebase-admin": "^13.4.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.510.0",
     "node-fetch": "^3.3.2",

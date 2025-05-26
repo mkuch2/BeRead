@@ -33,6 +33,7 @@ router.post(
       max: 50,
     })
     .matches(/^[a-zA-Z0-9!@#$%^&*]+$/),
+  body("firebase_uid").notEmpty().isString(),
   async (req, res) => {
     const result: Result<ValidationError> = validationResult(req);
 
@@ -52,11 +53,12 @@ router.post(
 
     try {
       //Add user to database
-      const user = await prisma.user.create({
+      const user = await prisma.users.create({
         data: {
           username: data.username,
           email: data.email,
           password_hash: hash,
+          firebase_uid: data.firebase_uid,
         },
       });
 

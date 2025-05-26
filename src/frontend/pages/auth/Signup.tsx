@@ -66,66 +66,43 @@ function Signup() {
     },
   });
 
-  interface ServerError {
-    msg: string;
-    meta: {
-      modelName: string;
-      target: string[];
-    };
-    code?: string;
-  }
-
-  const { signUp } = useAuthContext() as AuthContextType;
+  const { signUp, getFirebaseId, getUser } =
+    useAuthContext() as AuthContextType;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  //TODO: IMPLEMENT
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     setIsSubmitting(true);
     try {
-      const backendPromise = axios.post("/api/signup", {
+      //Add user to Firebase
+      await signUp(data.email, data.password);
+
+      //Get auth token
+      const firebase_uid: string = getFirebaseId();
+
+      //Add user to database
+      await axios.post("/api/signup", {
         username: data.username,
         email: data.email,
         password: data.password,
+        firebase_uid: firebase_uid,
       });
-
-      const firebasePromise = signUp(data.email, data.password);
-
-      //Succeed if both axios and firebase promise fulfilled, fail otherwise
-      await Promise.all([backendPromise, firebasePromise]);
 
       navigate("/");
     } catch (e) {
       if (isAxiosError(e)) {
+        //Delete Firebase entry
+        const user = getUser();
+        if (user) {
+          await user.delete();
+        } else {
+          console.log("Error deleting user from Firebase");
+        }
+
         if (e.response) {
-          console.log("Response data", e.response.data);
-          console.log("Response", e.response);
-          // Server responded with error code
-          if (e.response.data?.errors) {
-            //Display error message at appropiate field
-            console.log("Inside if statement", e.response.data?.errors);
-            e.response.data.errors.forEach((err: ServerError) => {
-              if (
-                err.meta.target[0] &&
-                err.meta.target[0] in form.getValues()
-              ) {
-                form.setError(err.meta.target[0] as keyof FormFields, {
-                  type: "server",
-                  message: err.msg,
-                });
-              }
-            });
-          } else {
-            form.setError("root", {
-              type: "server",
-              message: "Server error. Please try again.",
-            });
-          }
-        } else if (e.request) {
-          console.log(e.request);
-          // Request made but no response recieved
+          //Server responded with error
           form.setError("root", {
             type: "server",
-            message: "Connection error. Please try again.",
+            message: e.message || "Unexpected server error",
           });
         } else {
           // Error setting up request
