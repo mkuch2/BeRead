@@ -4,6 +4,7 @@ import Signup from "./pages/auth/Signup";
 import Login from "./pages/auth/Login";
 import Home from "./pages/Home";
 import ProtectedRoute from "./ProtectedRoute";
+import Profile from "./pages/profile/Profile";
 import BookSearch from "./components/BookSearch.tsx";
 import AddPost from "./pages/AddPost";
 
@@ -17,6 +18,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <Home />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/profile",
+    element: (
+      <ProtectedRoute>
+        <Profile />
       </ProtectedRoute>
     ),
   },

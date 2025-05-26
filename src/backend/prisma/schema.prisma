@@ -8,11 +8,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model user {
-  id            String @id(map: "users_pkey") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  username      String @unique(map: "users_username_key") @db.VarChar(50)
-  email         String @unique(map: "users_email_key") @db.VarChar(255)
+model users {
+  id            String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  username      String @unique @db.VarChar(50)
+  email         String @unique @db.VarChar(255)
   password_hash String @db.VarChar(255)
+  tokenId       String @db.VarChar
+  
 
   @@index([email], map: "idx_users_email")
   @@index([username], map: "idx_users_username")
