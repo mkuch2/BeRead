@@ -36,7 +36,7 @@ function Landing() {
         book search test button </Link> {/* this is just a test button to see if book search works */}
       <Link to="/addpost" style={{ padding: '10px 20px', backgroundColor: 'blue', color: 'white', borderRadius: '4px', textDecoration: 'none', display: 'inline-block', margin: '20px 0' }}>
         add post button </Link>
-
+      <Link to="/home" style={{ padding: '10px 20px', backgroundColor: 'blue', color: 'white', borderRadius: '4px', textDecoration: 'none', display: 'inline-block', margin: '20px 0' }}> Home </Link>
       <h1 className="text-3xl font-bold underline">Hello world!</h1>
       <Button onClick={handleSignOut}>Signout Button</Button>
     </>
