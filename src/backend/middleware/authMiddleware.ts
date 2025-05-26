@@ -23,8 +23,6 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
     const decodedToken = await getAuth(app).verifyIdToken(token);
 
     if (decodedToken) {
-      console.log("Decoded token: ", decodedToken);
-
       (req as AuthRequest).user = {
         uid: decodedToken.uid,
         email: decodedToken.email,

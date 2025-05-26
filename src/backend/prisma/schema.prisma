@@ -13,8 +13,7 @@ model users {
   username      String @unique @db.VarChar(50)
   email         String @unique @db.VarChar(255)
   password_hash String @db.VarChar(255)
-  tokenId       String @db.VarChar
-  
+  firebase_uid  String @unique @db.VarChar(128)
 
   @@index([email], map: "idx_users_email")
   @@index([username], map: "idx_users_username")
