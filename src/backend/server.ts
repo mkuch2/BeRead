@@ -50,6 +50,7 @@ app.use(express.static(path.join(__dirname, "..", "..", "dist")));
 async function handleBookSearch(req: Request, res: Response): Promise<void> {
   const query = req.query.query as string; // gets user search input
 
+  console.log(query);
   if (!query) {
     res.status(400).json({ error: "Query parameter required" });
     return;
