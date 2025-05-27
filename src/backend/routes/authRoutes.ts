@@ -8,7 +8,7 @@ import {
 } from "express-validator";
 import prismaClient from "../prismaClient";
 import bcrypt from "bcryptjs";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library.js";
 
 const router: Router = Router();
 const prisma = prismaClient;

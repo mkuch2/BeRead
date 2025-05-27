@@ -4,19 +4,31 @@ import {
   useAuthContext,
   type AuthContextType,
 } from "@/frontend/hooks/useAuthContext";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
+import { FirebaseError } from "firebase/app";
 
 interface UserProfile {
   username: string;
 }
 
 function Profile() {
-  const { currentUser, getToken } = useAuthContext() as AuthContextType;
+  const { currentUser, getToken, signOut } = useAuthContext() as AuthContextType;
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState<boolean>(false);
 
   const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate("/login");
+    } catch (e) {
+      if (e instanceof FirebaseError) {
+        console.log(e.code, e.message);
+      }
+    }
+  };
 
   useEffect(() => {
     async function fetchProfile() {
@@ -67,6 +79,14 @@ function Profile() {
 
   return (
     <>
+      <header className="border border-zinc-600 flex justify-between items-center px-4 py-2 mb-2">
+        <div className="flex items-center space-x-4">
+          <h1 className="font-bold text-xl text-white">BeRead</h1>
+          <Link to="/books" className="text-sm font-light text-zinc-400">Search Books</Link>
+          <Link to="/profile" className="text-sm font-light text-zinc-400">Profile</Link>
+        </div>
+        <button type="button" onClick={handleSignOut} className="text-sm font-light text-zinc-400 ml-2">Logout</button>
+      </header>
       <h1>Profile Page</h1>
 
       <h3>Username: {profile.username}</h3>
