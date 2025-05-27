@@ -32,9 +32,14 @@ interface PostFormValues {
   quote: string;
 }
 
+interface Post extends PostFormValues {
+  username: string;
+  published_at: string;
+}
+
 export default function AddPost() {
   const { currentUser } = useAuthContext() as AuthContextType;
-  const [posts, setPosts] = useState<PostFormValues[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [uid, setUid] = useState<string | null>(null);
   const [username, setUsername] = useState<string>("");
@@ -84,14 +89,13 @@ export default function AddPost() {
   };
 
   async function onSubmit(data: PostFormValues) {
-    // to database
-    // for now, just local
     console.log("Submitted post:", data);
 
     console.log(username);
 
+    //Send post to database
     try {
-      await axios.post("/api/post", {
+      const createdPost = await axios.post("/api/post", {
         user_id: uid,
         book_title: data.book_title,
         pages: data.pages,
@@ -101,7 +105,14 @@ export default function AddPost() {
         username: username,
       });
 
-      setPosts((prev) => [...prev, data]);
+      setPosts((prev) => [
+        ...prev,
+        {
+          ...data,
+          username: createdPost.data.username,
+          published_at: createdPost.data.published_at,
+        },
+      ]);
       setSelectedBook(null);
 
       form.reset();
@@ -204,6 +215,8 @@ export default function AddPost() {
         {posts.map((p, idx) => (
           <Post
             key={idx}
+            username={p.username}
+            published_at={p.published_at}
             title={p.book_title}
             content={p.content}
             quote={p.quote}
