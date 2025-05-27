@@ -9,11 +9,11 @@ datasource db {
 }
 
 model users {
-  id            String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  username      String @unique @db.VarChar(50)
-  email         String @unique @db.VarChar(255)
-  password_hash String @db.VarChar(255)
-  firebase_uid  String @unique @db.VarChar(128)
+  id            String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  username      String  @unique @db.VarChar(50)
+  email         String  @unique @db.VarChar(255)
+  password_hash String  @db.VarChar(255)
+  firebase_uid  String  @unique @db.VarChar(128)
 
   @@index([email], map: "idx_users_email")
   @@index([username], map: "idx_users_username")
