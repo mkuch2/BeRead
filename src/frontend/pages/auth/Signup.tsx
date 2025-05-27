@@ -93,9 +93,10 @@ function Signup() {
         if (user) {
           try{
             await user.delete();
+            console.log("Deleting User");
           }
           catch(deleteError){
-            console.log("Error deleting Firebase user:", deleteErrror);
+            console.log("Error deleting Firebase user:", deleteError);
           }
         } 
         
