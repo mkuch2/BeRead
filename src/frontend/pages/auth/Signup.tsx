@@ -45,8 +45,7 @@ const User = z.object({
     .min(8, { message: "Password must be at least 8 characters" })
     .max(50, { message: "Password must be less than 50 characters" })
     .regex(/^[a-zA-Z0-9!@#$%^&*]+$/, {
-      message:
-        "Password must contain only letters, numbers, and !@#$%^&*",
+      message: "Password must contain only letters, numbers, and !@#$%^&*",
     }),
 });
 
@@ -93,13 +92,14 @@ function Signup() {
         if (user) {
           try{
             await user.delete();
-            console.log("Deleting User");
           }
           catch(deleteError){
             console.log("Error deleting Firebase user:", deleteError);
           }
         } 
-        
+          user.delete();
+        }
+
         if (e.response) {
           //Server responded with error
           form.setError("root", {
@@ -146,7 +146,11 @@ function Signup() {
                 <FormItem>
                   <FormLabel className="text-white">Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="username" {...field} className="bg-neutral-800 text-white" />
+                    <Input
+                      placeholder="username"
+                      {...field}
+                      className="bg-neutral-800 text-white"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -159,7 +163,11 @@ function Signup() {
                 <FormItem>
                   <FormLabel className="text-white">Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="email" {...field} className="bg-neutral-800 text-white" />
+                    <Input
+                      placeholder="email"
+                      {...field}
+                      className="bg-neutral-800 text-white"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -184,7 +192,11 @@ function Signup() {
               )}
             />
 
-            <Button type="submit" disabled={isSubmitting} className="w-full mt-2">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full mt-2"
+            >
               {isSubmitting ? "Submitting..." : "Sign up"}
             </Button>
           </form>
