@@ -90,13 +90,6 @@ function Signup() {
         //Delete Firebase entry
         const user = getUser();
         if (user) {
-          try{
-            await user.delete();
-          }
-          catch(deleteError){
-            console.log("Error deleting Firebase user:", deleteError);
-          }
-        } 
           user.delete();
         }
 
