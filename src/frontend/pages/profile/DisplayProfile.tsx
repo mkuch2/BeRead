@@ -6,12 +6,16 @@ import {
 } from "@/frontend/hooks/useAuthContext";
 import { useNavigate, Link } from "react-router";
 import { FirebaseError } from "firebase/app";
+import pencil from "@/frontend/assets/images/pencil.png";
 
 interface UserProfile {
   username: string;
+  name?: string;
+  bio?: string;
+  email?: string;
 }
 
-function Profile() {
+function DisplayProfile() {
   const { currentUser, getToken, signOut } = useAuthContext() as AuthContextType;
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -28,6 +32,11 @@ function Profile() {
         console.log(e.code, e.message);
       }
     }
+  };
+
+  const handleEditProfile = async () => {
+    console.log("Edit profile clicked");
+    navigate("/edit-profile");
   };
 
   useEffect(() => {
@@ -82,16 +91,33 @@ function Profile() {
       <header className="border border-zinc-600 flex justify-between items-center px-4 py-2 mb-2">
         <div className="flex items-center space-x-4">
           <h1 className="font-bold text-xl text-white">BeRead</h1>
+          <Link to="/home" className="text-sm font-light text-zinc-400">Home</Link>
           <Link to="/books" className="text-sm font-light text-zinc-400">Search Books</Link>
-          <Link to="/profile" className="text-sm font-light text-zinc-400">Profile</Link>
         </div>
         <button type="button" onClick={handleSignOut} className="text-sm font-light text-zinc-400 ml-2">Logout</button>
       </header>
-      <h1>Profile Page</h1>
-
-      <h3>Username: {profile.username}</h3>
+      <main>
+        <p className="flex font-semibold">Profile</p>
+        <div className="border border-zinc-600 flex flex-col text-left px-2">
+          <div className="flex items-center">
+            <p className="mr-1">Name: </p>
+            <img src={pencil} className="w-2"/>
+          </div>
+          <div className="flex items-center">
+            <p className="mr-1">Username: {profile.username}</p>
+            <img src={pencil} className="w-2"/>
+          </div>
+          <div className="flex items-center">
+            <p className="mr-1">Bio: All I can do for today...</p>
+            <img //Needs to be fixed
+              onClick={handleEditProfile}
+              src={pencil}
+              className="w-4 cursor-pointer"/>
+          </div>
+        </div>
+      </main>
     </>
   );
 }
 
-export default Profile;
+export default DisplayProfile;
