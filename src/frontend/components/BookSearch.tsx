@@ -18,8 +18,12 @@ interface BookSearchResponse {
   books: Book[];
 }
 
+interface BookSearchProps {
+  onSelectBook?: (book: Book) => void;
+}
+
 // react component w/ query input, book list, loading state, errors
-const BookSearch = () => {
+const BookSearch = ({ onSelectBook }: BookSearchProps) => {
   const [query, setQuery] = useState<string>("");
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -34,7 +38,9 @@ const BookSearch = () => {
     setError(null);
 
     try {
-      const response = await axios.get<BookSearchResponse>("/api/books");
+      const response = await axios.get<BookSearchResponse>(
+        `/api/books?query=${encodeURIComponent(query)}`
+      );
       setBooks(response.data.books); // used axios to make HTTP request from browser (/api/books handled by server.ts in backend)
       console.log("Response:", response.data.books);
     } catch (err) {
@@ -42,6 +48,13 @@ const BookSearch = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBookSelect = (book: Book) => {
+    if (onSelectBook) {
+      onSelectBook(book);
+    }
+    console.log(book);
   };
 
   // visual stuff
@@ -70,7 +83,12 @@ const BookSearch = () => {
         {" "}
         {/* makes grid from CSS file */}
         {books.map((book) => (
-          <div key={book.id} className="book-card">
+          <div
+            key={book.id}
+            className="book-card"
+            style={{ cursor: "pointer" }}
+            onClick={() => handleBookSelect(book)}
+          >
             {book.thumbnail ? (
               <img
                 src={book.thumbnail}
