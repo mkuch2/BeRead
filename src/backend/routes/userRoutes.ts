@@ -69,6 +69,11 @@ router.put(
     } catch (e) {
       if (e instanceof Error) {
         res.status(500).json({ msg: e.message });
+      }
+    }
+  }
+);
+
 router.get("/user", async (req: Request, res: Response): Promise<void> => {
   const uid = req.query.query as string;
 
