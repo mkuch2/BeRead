@@ -71,43 +71,47 @@ router.get("/user", async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-router.post("/post", async (req: Request, res: Response): Promise<void> => {
-  const data = req.body;
+router.post(
+  "/post",
+  verifyToken,
+  async (req: Request, res: Response): Promise<void> => {
+    const data = req.body;
 
-  if (!data) {
-    res.status(400).json({ error: "Request body not found" });
-    return;
-  }
-
-  console.log(data);
-
-  try {
-    const post = await prisma.posts.create({
-      data: {
-        user_id: data.user_id,
-        book_title: data.book_title,
-        pages: data.pages,
-        content: data.content,
-        quote: data.quote,
-        author: data.author,
-        username: data.username,
-      },
-    });
-
-    res.status(200).json(post);
-    return;
-  } catch (e) {
-    console.log("Server error sending post", e);
-
-    if (e instanceof Error) {
-      res.status(500).json({ error: e.message });
-      return;
-    } else {
-      res.status(500).json({ error: "Unknown error occurred" });
+    if (!data) {
+      res.status(400).json({ error: "Request body not found" });
       return;
     }
+
+    console.log(data);
+
+    try {
+      const post = await prisma.posts.create({
+        data: {
+          user_id: data.user_id,
+          book_title: data.book_title,
+          pages: data.pages,
+          content: data.content,
+          quote: data.quote,
+          author: data.author,
+          username: data.username,
+        },
+      });
+
+      res.status(200).json(post);
+      return;
+    } catch (e) {
+      console.log("Server error sending post", e);
+
+      if (e instanceof Error) {
+        res.status(500).json({ error: e.message });
+        return;
+      } else {
+        res.status(500).json({ error: "Unknown error occurred" });
+        return;
+      }
+    }
   }
-});
+);
 
 router.get(
   "/posts",

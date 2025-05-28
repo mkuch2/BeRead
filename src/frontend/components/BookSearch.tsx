@@ -117,7 +117,7 @@ const BookSearch = ({ onSelectBook }: BookSearchProps) => {
       </div>
 
       {books.length === 0 && !loading && query && (
-        <p>No books found. Try a different search term.</p>
+        <p>Click 'search' to find your book!</p>
       )}
     </div>
   );

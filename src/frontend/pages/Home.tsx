@@ -41,6 +41,7 @@ function Home() {
             Profile
           </Link>
         </div>
+
         <button
           type="button"
           onClick={handleSignOut}
@@ -59,7 +60,7 @@ function Home() {
               Admin Generated Prompt
             </p>
             <Link
-              to="/addpost"
+              to="/add-post"
               className="text-xs border border-zinc-600 rounded-xs text-white px-1 m-2"
             >
               Post
@@ -70,9 +71,8 @@ function Home() {
           Most Recent
         </p>
         <p>TODO: List of Friend's Posts</p>
+        <PostSearch />
       </main>
-
-      <PostSearch />
     </>
   );
 }

@@ -38,7 +38,7 @@ interface Post extends PostFormValues {
 }
 
 export default function AddPost() {
-  const { currentUser } = useAuthContext() as AuthContextType;
+  const { currentUser, getToken } = useAuthContext() as AuthContextType;
   const [posts, setPosts] = useState<Post[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [uid, setUid] = useState<string | null>(null);
@@ -93,17 +93,27 @@ export default function AddPost() {
 
     console.log(username);
 
+    const token = await getToken();
+
     //Send post to database
     try {
-      const createdPost = await axios.post("/api/post", {
-        user_id: uid,
-        book_title: data.book_title,
-        pages: data.pages,
-        content: data.content,
-        quote: data.quote,
-        author: selectedBook?.authors || [],
-        username: username,
-      });
+      const createdPost = await axios.post(
+        "/api/post",
+        {
+          user_id: uid,
+          book_title: data.book_title,
+          pages: data.pages,
+          content: data.content,
+          quote: data.quote,
+          author: selectedBook?.authors || [],
+          username: username,
+        },
+        {
+          headers: {
+            auth: token,
+          },
+        }
+      );
 
       setPosts((prev) => [
         ...prev,

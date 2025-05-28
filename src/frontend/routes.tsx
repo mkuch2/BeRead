@@ -14,8 +14,16 @@ const router = createBrowserRouter([
   { path: "/", Component: Landing },
   { path: "/signup", Component: Signup },
   { path: "/login", Component: Login },
-  { path: "/addpost", Component: AddPost },
+  {
+    path: "/add-post",
+    element: (
+      <ProtectedRoute>
+        <AddPost />
+      </ProtectedRoute>
+    ),
+  },
   { path: "/display-post", Component: DisplayPost },
+
   {
     path: "/home",
     element: (
