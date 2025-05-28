@@ -6,7 +6,6 @@ import {
 } from "@/frontend/hooks/useAuthContext";
 import { useNavigate, Link } from "react-router";
 import { FirebaseError } from "firebase/app";
-import pencil from "@/frontend/assets/images/pencil.png";
 
 interface UserProfile {
   username: string;
@@ -34,11 +33,6 @@ function DisplayProfile() {
     }
   };
 
-  const handleEditProfile = async () => {
-    console.log("Edit profile clicked");
-    navigate("/edit-profile");
-  };
-
   useEffect(() => {
     async function fetchProfile() {
       //User not logged in
@@ -55,7 +49,7 @@ function DisplayProfile() {
           throw new Error("No authentication token available");
         }
 
-        const response = await axios.get("/api/profile", {
+        const response = await axios.get("/api/display-profile", {
           headers: {
             auth: token,
           },
@@ -97,23 +91,18 @@ function DisplayProfile() {
         <button type="button" onClick={handleSignOut} className="text-sm font-light text-zinc-400 ml-2">Logout</button>
       </header>
       <main>
-        <p className="flex font-semibold">Profile</p>
-        <div className="border border-zinc-600 flex flex-col text-left px-2">
-          <div className="flex items-center">
-            <p className="mr-1">Name: </p>
-            <img src={pencil} className="w-2"/>
-          </div>
-          <div className="flex items-center">
-            <p className="mr-1">Username: {profile.username}</p>
-            <img src={pencil} className="w-2"/>
-          </div>
-          <div className="flex items-center">
-            <p className="mr-1">Bio: All I can do for today...</p>
-            <img //Needs to be fixed
-              onClick={handleEditProfile}
-              src={pencil}
-              className="w-4 cursor-pointer"/>
-          </div>
+        <div className="flex justify-between items-center">
+          <p className="font-semibold">Profile</p>
+          <div className="flex justify-between items-center">
+            <Link to="/display-profile" className="hover:underline text-xs">View</Link>
+            <p>|</p>
+            <Link to="/edit-profile" className="hover:underline text-zinc-400 text-xs">Edit</Link>
+        </div>
+        </div>
+        <div className="border border-zinc-600 flex flex-col text-left px-2 py-2">
+          <p className="mr-1">Name: </p>
+          <p className="mr-1">Username: {profile.username}</p>
+          <p className="mr-1">Bio: All I can do for today...</p>
         </div>
       </main>
     </>

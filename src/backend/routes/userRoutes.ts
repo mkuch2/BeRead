@@ -7,7 +7,7 @@ const router: Router = Router();
 const prisma = prismaClient;
 
 router.get(
-  "/profile",
+  "/display-profile",
   verifyToken,
   async (req: AuthRequest, res: Response): Promise<void> => {
     try {
