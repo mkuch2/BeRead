@@ -16,6 +16,9 @@ router.get(
         where: { email: userEmail },
         select: {
           username: true,
+          bio: true,
+          name: true,
+          email: true,
         },
       });
 
@@ -27,6 +30,40 @@ router.get(
       }
 
       res.status(200).json({ profile: userProfile });
+    } catch (e) {
+      if (e instanceof Error) {
+        res.status(500).json({ msg: e.message });
+      }
+    }
+  }
+);
+
+router.put(
+  "/update-profile",
+  verifyToken,
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const userEmail = req.user?.email;
+      if (!userEmail) {
+        res.status(401).json({ msg: "Unauthorized" });
+        return;
+      }
+      const { username, name, bio } = req.body;
+      const updatedUser = await prisma.users.update({
+        where: { email: userEmail },
+        data: {
+          username,
+          name,
+          bio,
+        },
+        select: {
+          username: true,
+          name: true,
+          bio: true,
+          email: true,
+        },
+      });
+      res.status(200).json({ profile: updatedUser });
     } catch (e) {
       if (e instanceof Error) {
         res.status(500).json({ msg: e.message });

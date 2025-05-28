@@ -6,7 +6,6 @@ import {
 } from "@/frontend/hooks/useAuthContext";
 import { useNavigate, Link } from "react-router";
 import { FirebaseError } from "firebase/app";
-import pencil from "@/frontend/assets/images/pencil.png"
 
 interface UserProfile {
   username: string;
@@ -20,6 +19,9 @@ function EditProfile() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState<boolean>(false);
+  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
+  const [bio, setBio] = useState("");
 
   const navigate = useNavigate();
 
@@ -32,6 +34,31 @@ function EditProfile() {
         console.log(e.code, e.message);
       }
     }
+  };
+
+  useEffect(() => {
+    if (profile?.name) setName(profile.name);
+  }, [profile]);
+
+  useEffect(() => {
+    if (profile?.username) setUsername(profile.username);
+  }, [profile]);
+
+  useEffect(() => {
+    if (profile?.bio) setBio(profile.bio);
+  }, [profile]);
+
+  const handleSave = async () => {
+    console.log("Save clicked!")
+    const token = await getToken();
+    const response = await axios.put("/api/update-profile", {
+      username,
+      name,
+      bio,
+    }, {
+      headers: { auth: token }
+    });
+    setProfile(response.data.profile);
   };
 
   useEffect(() => {
@@ -95,24 +122,16 @@ function EditProfile() {
         <div className="flex justify-between items-center">
           <p className="font-semibold">Profile</p>
           <div className="flex justify-between items-center">
-            <Link to="/display-profile" className="hover:underline text-zinc-400 text-xs">View</Link>
+            <Link to="/display-profile" className="hover:underline text-zinc-400 text-xs mr-1">View</Link>
             <p>|</p>
-            <Link to="/edit-profile" className="hover:underline text-xs">Edit</Link>
+            <Link to="/edit-profile" className="hover:underline text-xs ml-1">Edit</Link>
           </div>
         </div>
         <div className="border border-zinc-600 flex flex-col text-left px-2 py-2">
-          <div className="flex justify-between items-center">
-            <p className="mr-1">Name: </p>
-            <img src={pencil} className="w-3"></img>
-          </div>
-          <div className="flex justify-between items-center">
-            <p className="mr-1">Username: {profile.username}</p>
-            <img src={pencil} className="w-3"></img>
-          </div>
-          <div className="flex justify-between items-center">
-            <p className="mr-1">Bio: All I can do for today...</p>
-            <img src={pencil} className="w-3"></img>
-          </div>
+          <label>Name: <input value={name} onChange={e => setName(e.target.value)}/></label>
+          <label>Username: <input value={username}/></label>
+          <label>Bio: <input value={bio} onChange={e => setBio(e.target.value)}/></label>
+          <button onClick={handleSave} className="cursor-pointer">Save</button>
         </div>
       </main>
     </>
