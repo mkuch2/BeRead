@@ -1,9 +1,121 @@
+import axios from "axios";
+import { useState, useEffect } from "react";
+import {
+  useAuthContext,
+  type AuthContextType,
+} from "@/frontend/hooks/useAuthContext";
+import { useNavigate, Link } from "react-router";
+import { FirebaseError } from "firebase/app";
+import pencil from "@/frontend/assets/images/pencil.png"
+
+interface UserProfile {
+  username: string;
+  name?: string;
+  bio?: string;
+  email?: string;
+}
+
 function EditProfile() {
+  const { currentUser, getToken, signOut } = useAuthContext() as AuthContextType;
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [error, setError] = useState<boolean>(false);
+
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate("/login");
+    } catch (e) {
+      if (e instanceof FirebaseError) {
+        console.log(e.code, e.message);
+      }
+    }
+  };
+
+  useEffect(() => {
+    async function fetchProfile() {
+      //User not logged in
+      if (!currentUser) {
+        navigate("/login");
+        return;
+      }
+
+      try {
+        const token = await getToken();
+
+        if (!token) {
+          setError(true);
+          throw new Error("No authentication token available");
+        }
+
+        const response = await axios.get("/api/display-profile", {
+          headers: {
+            auth: token,
+          },
+        });
+
+        setProfile(response.data.profile);
+      } catch (e) {
+        if (e instanceof Error) {
+          setError(true);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchProfile();
+  }, [currentUser, navigate, getToken]);
+
+  if (isLoading) {
+    return <div>Loading profile..</div>;
+  }
+
+  if (error) {
+    return <div>An error occurred! Please sign out and sign back in</div>;
+  }
+
+  if (!profile) {
+    return <div>Error loading profile</div>;
+  }
+
   return (
-    <div>
-      <h1>Edit Profile</h1>
-      <p>This is the edit profile page.</p>
-    </div>
+    <>
+      <header className="border border-zinc-600 flex justify-between items-center px-4 py-2 mb-2">
+        <div className="flex items-center space-x-4">
+          <h1 className="font-bold text-xl text-white">BeRead</h1>
+          <Link to="/home" className="text-sm font-light text-zinc-400">Home</Link>
+          <Link to="/books" className="text-sm font-light text-zinc-400">Search Books</Link>
+        </div>
+        <button type="button" onClick={handleSignOut} className="text-sm font-light text-zinc-400 ml-2">Logout</button>
+      </header>
+      <main>
+        <div className="flex justify-between items-center">
+          <p className="font-semibold">Profile</p>
+          <div className="flex justify-between items-center">
+            <Link to="/display-profile" className="hover:underline text-zinc-400 text-xs">View</Link>
+            <p>|</p>
+            <Link to="/edit-profile" className="hover:underline text-xs">Edit</Link>
+          </div>
+        </div>
+        <div className="border border-zinc-600 flex flex-col text-left px-2 py-2">
+          <div className="flex justify-between items-center">
+            <p className="mr-1">Name: </p>
+            <img src={pencil} className="w-3"></img>
+          </div>
+          <div className="flex justify-between items-center">
+            <p className="mr-1">Username: {profile.username}</p>
+            <img src={pencil} className="w-3"></img>
+          </div>
+          <div className="flex justify-between items-center">
+            <p className="mr-1">Bio: All I can do for today...</p>
+            <img src={pencil} className="w-3"></img>
+          </div>
+        </div>
+      </main>
+    </>
   );
 }
 export default EditProfile;
