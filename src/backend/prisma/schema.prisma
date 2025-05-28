@@ -14,6 +14,8 @@ model users {
   email         String  @unique @db.VarChar(255)
   password_hash String  @db.VarChar(255)
   firebase_uid  String  @unique @db.VarChar(128)
+  name          String? @db.VarChar(255)
+  bio           String? @db.Text
 
   @@index([email], map: "idx_users_email")
   @@index([username], map: "idx_users_username")

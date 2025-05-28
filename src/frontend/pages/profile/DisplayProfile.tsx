@@ -94,15 +94,15 @@ function DisplayProfile() {
         <div className="flex justify-between items-center">
           <p className="font-semibold">Profile</p>
           <div className="flex justify-between items-center">
-            <Link to="/display-profile" className="hover:underline text-xs">View</Link>
+            <Link to="/display-profile" className="hover:underline text-xs mr-1">View</Link>
             <p>|</p>
-            <Link to="/edit-profile" className="hover:underline text-zinc-400 text-xs">Edit</Link>
+            <Link to="/edit-profile" className="hover:underline text-zinc-400 text-xs ml-1">Edit</Link>
         </div>
         </div>
         <div className="border border-zinc-600 flex flex-col text-left px-2 py-2">
-          <p className="mr-1">Name: </p>
+          <p className="mr-1">Name: {profile.name}</p>
           <p className="mr-1">Username: {profile.username}</p>
-          <p className="mr-1">Bio: All I can do for today...</p>
+          <p className="mr-1">Bio: {profile.bio}</p>
         </div>
       </main>
     </>
