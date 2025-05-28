@@ -18,8 +18,12 @@ interface BookSearchResponse {
   books: Book[];
 }
 
+interface BookSearchProps {
+  onSelectBook?: (book: Book) => void;
+}
+
 // react component w/ query input, book list, loading state, errors
-const BookSearch = () => {
+const BookSearch = ({ onSelectBook }: BookSearchProps) => {
   const [query, setQuery] = useState<string>("");
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -32,16 +36,27 @@ const BookSearch = () => {
 
     setLoading(true);
     setError(null);
-
     try {
-      const response = await axios.get<BookSearchResponse>("/api/books");
+      const response = await axios.get<BookSearchResponse>(
+        `/api/books?query=${encodeURIComponent(query)}`
+      );
       setBooks(response.data.books); // used axios to make HTTP request from browser (/api/books handled by server.ts in backend)
       console.log("Response:", response.data.books);
     } catch (err) {
       setError("Failed to fetch books. Please try again.");
     } finally {
+      console.log("Loading set to false");
       setLoading(false);
     }
+  };
+
+  console.log("After try", loading);
+
+  const handleBookSelect = (book: Book) => {
+    if (onSelectBook) {
+      onSelectBook(book);
+    }
+    console.log(book);
   };
 
   // visual stuff
@@ -70,7 +85,12 @@ const BookSearch = () => {
         {" "}
         {/* makes grid from CSS file */}
         {books.map((book) => (
-          <div key={book.id} className="book-card">
+          <div
+            key={book.id}
+            className="book-card"
+            style={{ cursor: "pointer" }}
+            onClick={() => handleBookSelect(book)}
+          >
             {book.thumbnail ? (
               <img
                 src={book.thumbnail}
@@ -97,7 +117,7 @@ const BookSearch = () => {
       </div>
 
       {books.length === 0 && !loading && query && (
-        <p>No books found. Try a different search term.</p>
+        <p>Click 'search' to find your book!</p>
       )}
     </div>
   );

@@ -1,0 +1,3 @@
+GET http://localhost:5004/api/posts?query=Animal%20Farm
+content-type: application/json
+
