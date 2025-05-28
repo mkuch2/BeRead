@@ -8,12 +8,14 @@ import DisplayProfile from "./pages/profile/DisplayProfile.tsx";
 import BookSearch from "./components/BookSearch.tsx";
 import AddPost from "./pages/AddPost";
 import EditProfile from "./pages/profile/EditProfile.tsx";
+import DisplayPost from "./pages/DisplayPost.tsx";
 
 const router = createBrowserRouter([
   { path: "/", Component: Landing },
   { path: "/signup", Component: Signup },
   { path: "/login", Component: Login },
   { path: "/addpost", Component: AddPost },
+  { path: "/display-post", Component: DisplayPost },
   {
     path: "/home",
     element: (
@@ -38,7 +40,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
-  
+
   { path: "/books", Component: BookSearch }, // book search page
 ]);
 

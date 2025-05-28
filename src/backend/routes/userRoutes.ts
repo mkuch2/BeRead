@@ -1,6 +1,8 @@
 import { type Request, type Response, Router } from "express";
 import prismaClient from "../prismaClient";
 import verifyToken, { type AuthRequest } from "../middleware/authMiddleware";
+import { query, matchedData, validationResult } from "express-validator";
+
 const router: Router = Router();
 const prisma = prismaClient;
 
@@ -106,5 +108,37 @@ router.post("/post", async (req: Request, res: Response): Promise<void> => {
     }
   }
 });
+
+router.get(
+  "/posts",
+  query("query").isString().trim().isLength({ max: 100 }).escape(),
+  async (req: Request, res: Response): Promise<void> => {
+    const errors = validationResult(req);
+    console.log("Errors, ", errors);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ errors: errors.array() });
+      return;
+    }
+
+    const data = matchedData(req);
+
+    const book_title = data.query;
+
+    try {
+      const posts = await prisma.posts.findMany({
+        where: {
+          book_title: { contains: book_title, mode: "insensitive" },
+        },
+        take: 10,
+      });
+
+      console.log("Server posts: ", posts);
+      res.status(200).json(posts);
+    } catch (e) {
+      console.log("Error getting posts: ", e);
+      res.status(500).json({ error: "Failed to get posts" });
+    }
+  }
+);
 
 export default router;

@@ -1,6 +1,5 @@
 // src/app/components/Post.tsx
 import React, { useMemo } from "react";
-import { cn } from "@/frontend/lib/utils";
 import {
   Card,
   CardHeader,
