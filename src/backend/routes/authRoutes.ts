@@ -70,7 +70,11 @@ router.post(
         },
       });
     } catch (e) {
+      console.error("Unexpected signup error:", e);
       if (e instanceof PrismaClientKnownRequestError) {
+
+          
+
         if (e.code === "P2002") {
           //User with same username or email already exists in database
           const target = (e.meta?.target as string[]) || [];
