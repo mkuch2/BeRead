@@ -9,29 +9,46 @@ datasource db {
 }
 
 model users {
-  id            String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  username      String  @unique @db.VarChar(50)
-  email         String  @unique @db.VarChar(255)
-  password_hash String  @db.VarChar(255)
-  firebase_uid  String  @unique @db.VarChar(128)
-  name          String? @db.VarChar(255)
-  bio           String? @db.Text
+  id            String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  username      String     @unique @db.VarChar(50)
+  email         String     @unique @db.VarChar(255)
+  password_hash String     @db.VarChar(255)
+  firebase_uid  String     @unique @db.VarChar(128)
+  bio           String?
+  name          String?    @db.VarChar(255)
+  comments      comments[]
+  posts         posts[]
 
   @@index([email], map: "idx_users_email")
   @@index([username], map: "idx_users_username")
 }
 
 model posts {
-  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  book_title   String   @db.VarChar(255)
-  pages        String   @db.VarChar(100)
+  id           String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  book_title   String     @db.VarChar(255)
+  pages        String     @db.VarChar(100)
   content      String
-  published_at DateTime @default(now()) @db.Timestamptz(6)
-  quote        String   @db.VarChar(255)
-  author       String[] @db.VarChar(100)
-  username     String   @db.VarChar(255)
-  user_id      String   @db.VarChar(128)
+  published_at DateTime   @default(now()) @db.Timestamptz(6)
+  quote        String     @db.VarChar(255)
+  author       String[]   @db.VarChar(100)
+  username     String     @db.VarChar(255)
+  user_id      String     @db.VarChar(128)
+  comments     comments[]
+  users        users      @relation(fields: [user_id], references: [firebase_uid], onDelete: Cascade, onUpdate: NoAction, map: "fk_author")
 
   @@index([book_title], map: "idx_post_book_title")
   @@index([user_id], map: "idx_posts_user_id")
+}
+
+model comments {
+  id           String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id      String    @db.VarChar(128)
+  post_id      String    @db.Uuid
+  context      String
+  published_at DateTime? @default(now()) @db.Timestamptz(6)
+  users        users     @relation(fields: [user_id], references: [firebase_uid], onDelete: Cascade, onUpdate: NoAction, map: "fk_author")
+  posts        posts     @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_post")
+
+  @@index([post_id], map: "idx_comments_post_id")
+  @@index([user_id], map: "idx_comments_user_id")
 }
