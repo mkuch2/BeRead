@@ -80,7 +80,7 @@ router.get(
   }
 );
 
-router.post("/comment", async (req: Request, res: Response) => {
+router.post("/comment", async (req: Request, res: Response): Promise<void> => {
   const data = req.body;
 
   if (!data) {
@@ -113,6 +113,27 @@ router.post("/comment", async (req: Request, res: Response) => {
       res.status(500).json({ error: "Unknown error occurred" });
       return;
     }
+  }
+});
+
+router.get("/comments", async (req: Request, res: Response): Promise<void> => {
+  const query = req.query.query as string;
+
+  try {
+    const comments = await prisma.comments.findMany({
+      where: {
+        post_id: query,
+      },
+      take: 10,
+      orderBy: {
+        published_at: "desc",
+      },
+    });
+
+    res.status(200).json(comments);
+  } catch (e) {
+    console.log("Error getting posts: ", e);
+    res.status(500).json({ error: "Failed to get posts" });
   }
 });
 
