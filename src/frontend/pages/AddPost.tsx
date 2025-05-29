@@ -35,6 +35,7 @@ interface PostFormValues {
 interface Post extends PostFormValues {
   username: string;
   published_at: string;
+  post_id: string;
 }
 
 export default function AddPost() {
@@ -121,6 +122,7 @@ export default function AddPost() {
           ...data,
           username: createdPost.data.username,
           published_at: createdPost.data.published_at,
+          post_id: createdPost.data.id,
         },
       ]);
       setSelectedBook(null);
@@ -222,9 +224,9 @@ export default function AddPost() {
 
       {/* Render new posts immediately below the form */}
       <div className="mt-8 space-y-6">
-        {posts.map((p, idx) => (
+        {posts.map((p) => (
           <Post
-            key={idx}
+            key={p.post_id}
             username={p.username}
             published_at={p.published_at}
             title={p.book_title}

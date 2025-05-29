@@ -45,12 +45,9 @@ const BookSearch = ({ onSelectBook }: BookSearchProps) => {
     } catch (err) {
       setError("Failed to fetch books. Please try again.");
     } finally {
-      console.log("Loading set to false");
       setLoading(false);
     }
   };
-
-  console.log("After try", loading);
 
   const handleBookSelect = (book: Book) => {
     if (onSelectBook) {

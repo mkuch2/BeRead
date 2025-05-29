@@ -17,7 +17,7 @@ router.post(
       return;
     }
 
-    console.log("Data: ", data);
+    console.log("Post data: ", data);
 
     try {
       const post = await prisma.posts.create({
@@ -79,5 +79,41 @@ router.get(
     }
   }
 );
+
+router.post("/comment", async (req: Request, res: Response) => {
+  const data = req.body;
+
+  if (!data) {
+    res.status(400).json({ error: "Request body not found" });
+    return;
+  }
+
+  console.log("Comment data: ", data);
+
+  try {
+    const comment = await prisma.comments.create({
+      data: {
+        username: data.username,
+        content: data.content,
+        user_id: data.user_id,
+        post_id: data.post_id,
+        replies: [],
+      },
+    });
+
+    res.status(200).json(comment);
+    return;
+  } catch (e) {
+    console.log("Server error sending comment", e);
+
+    if (e instanceof Error) {
+      res.status(500).json({ error: e.message });
+      return;
+    } else {
+      res.status(500).json({ error: "Unknown error occurred" });
+      return;
+    }
+  }
+});
 
 export default router;

@@ -12,7 +12,6 @@ export interface PostInterface {
   published_at: string;
 }
 
-//TODO: VALIDATE QUERY ON USERROUTES.ts
 const PostSearch = () => {
   const [query, setQuery] = useState<string>("");
   const [posts, setPosts] = useState<PostInterface[]>([]);
