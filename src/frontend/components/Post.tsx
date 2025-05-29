@@ -1,5 +1,4 @@
 // src/app/components/Post.tsx
-import React, { useMemo } from "react";
 import {
   Card,
   CardHeader,
@@ -7,6 +6,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/frontend/components/ui/card";
+import { formatDate } from "../lib/utils";
 
 interface PostProps {
   username: string;
@@ -23,20 +23,7 @@ export function Post({
   content,
   quote,
 }: PostProps) {
-  const formattedDate = useMemo(() => {
-    const date = new Date(published_at);
-
-    const formatted = new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    }).format(date);
-
-    return formatted;
-  }, [published_at]);
+  const formattedDate = formatDate(published_at);
 
   return (
     <Card className="max-w-2xl mx-auto mb-6">

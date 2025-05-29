@@ -9,6 +9,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
+import postRoutes from "./routes/postRoutes";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -94,7 +95,7 @@ async function handleBookSearch(req: Request, res: Response): Promise<void> {
 
 // set up express routes
 app.get("/api/books", handleBookSearch);
-app.use("/api", authRoutes, userRoutes);
+app.use("/api", authRoutes, userRoutes, postRoutes);
 
 //Non-API Routes
 app.all("/{*splat}", (_req: Request, res: Response): void => {
