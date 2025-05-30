@@ -68,6 +68,7 @@ export default function AddPost() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [uid, setUid] = useState<string | null>(null);
   const [username, setUsername] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
   //Get user's (Firebase) uid
   useEffect(() => {
@@ -121,6 +122,8 @@ export default function AddPost() {
 
     const token = await getToken();
 
+    setLoading(true);
+
     //Send post to database
     try {
       const createdPost = await axios.post(
@@ -163,6 +166,8 @@ export default function AddPost() {
         type: "server",
         message: "Could not upload post, please try again.",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -240,7 +245,7 @@ export default function AddPost() {
 
               <Button
                 type="submit"
-                disabled={!isValid}
+                disabled={loading || !isValid}
                 className="hover:cursor-pointer"
               >
                 Submit

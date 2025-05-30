@@ -28,6 +28,7 @@ const BookSearch = ({ onSelectBook }: BookSearchProps) => {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
 
   // if input given, sends to /api/books (server.ts), server.ts response goes to books variable
   const searchBooks = async (e: React.FormEvent) => {
@@ -42,6 +43,8 @@ const BookSearch = ({ onSelectBook }: BookSearchProps) => {
       );
       setBooks(response.data.books); // used axios to make HTTP request from browser (/api/books handled by server.ts in backend)
       console.log("Response:", response.data.books);
+
+      setHasSearched(true);
     } catch (err) {
       setError("Failed to fetch books. Please try again.");
     } finally {
@@ -113,9 +116,7 @@ const BookSearch = ({ onSelectBook }: BookSearchProps) => {
         ))}
       </div>
 
-      {books.length === 0 && !loading && query && (
-        <p>Click 'search' to find your book!</p>
-      )}
+      {books.length === 0 && !loading && hasSearched && <p>No books found!</p>}
     </div>
   );
 };

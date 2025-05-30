@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router";
+import { formatDate } from "../lib/utils";
 
 export interface PostInterface {
   id: string;
@@ -16,6 +17,7 @@ const PostSearch = () => {
   const [query, setQuery] = useState<string>("");
   const [posts, setPosts] = useState<PostInterface[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const searchPosts = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +29,7 @@ const PostSearch = () => {
       );
 
       setPosts([...response.data]);
+      setHasSearched(true);
     } catch (e) {
       if (e instanceof Error) {
         setError(e.message);
@@ -55,28 +58,34 @@ const PostSearch = () => {
         {error && <div className="error">{error}</div>}
       </form>
 
-      <div className="books-grid">
-        {" "}
-        {/* makes grid from CSS file */}
-        {posts.map((post) => (
-          <Link
-            to="/display-post"
-            state={{ post: post }}
-            key={post.id}
-            className="book-card"
-            style={{ cursor: "pointer" }}
-          >
-            <div>
-              {" "}
-              {/* this part shows all the book info */}
-              <h3 className="book-title">{post.book_title}</h3>
-              <p className="book-authors">{post.username}</p>
-              <p className="book-published">Posted: {post.published_at}</p>
-              <p className="book-description">{post.content};</p>
-            </div>
-          </Link>
-        ))}
-      </div>
+      {!posts.length && hasSearched ? (
+        <div className="text-center">
+          <p className="text-lg font-medium">No posts found</p>
+        </div>
+      ) : (
+        <div className="books-grid">
+          {" "}
+          {/* makes grid from CSS file */}
+          {posts.map((post) => (
+            <Link
+              to="/display-post"
+              state={{ post: post }}
+              key={post.id}
+              className="book-card"
+              style={{ cursor: "pointer" }}
+            >
+              <div>
+                {" "}
+                {/* this part shows all the post info */}
+                <h3>{post.book_title}</h3>
+                <p>{post.username}</p>
+                <p>Posted: {formatDate(post.published_at)}</p>
+                <p>{post.content};</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
