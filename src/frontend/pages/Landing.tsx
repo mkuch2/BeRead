@@ -7,7 +7,6 @@ function Landing() {
       <header className="border border-zinc-600 flex justify-between items-center px-4 py-2 mb-2">
         <div className="flex items-center space-x-4">
           <h1 className="font-bold text-xl text-white">BeRead</h1>
-          <Link to="/books" className="text-sm font-light text-zinc-400">Search Books</Link>
         </div>
         <Link to="/login" className="text-sm font-light text-zinc-400">Login</Link>
       </header>
