@@ -14,14 +14,14 @@ export interface CommentProps {
   replies: CommentProps[];
 }
 
-export interface Comment {
+export interface CommentInterface {
   id: string;
   user_id: string;
   post_id: string;
   content: string;
   published_at: string;
   username: string;
-  replies: Comment[];
+  replies: CommentInterface[];
 }
 
 export function Comment({
