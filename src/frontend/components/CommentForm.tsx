@@ -12,21 +12,32 @@ import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Button } from "./ui/button";
-
-interface CommentFormValues {
-  content: string;
-}
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface CommentFormProps {
   post_id: string;
 }
+
+const CommentSchema = z.object({
+  content: z
+    .string()
+    .trim()
+    .nonempty({ message: "Comments can not be empty" })
+    .max(350, {
+      message: "Comment can not be longer than 350 characters!",
+    }),
+});
+
+type FormFields = z.infer<typeof CommentSchema>;
 
 export default function CommentForm({ post_id }: CommentFormProps) {
   const [uid, setUid] = useState<string | null>(null);
   const [username, setUsername] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
-  const form = useForm<CommentFormValues>({
+  const form = useForm<FormFields>({
+    resolver: zodResolver(CommentSchema),
     defaultValues: {
       content: "",
     },
@@ -61,7 +72,7 @@ export default function CommentForm({ post_id }: CommentFormProps) {
     getUsername();
   }, [uid]);
 
-  async function onSubmit(data: CommentFormValues) {
+  async function onSubmit(data: FormFields) {
     console.log("Submitted comment:", data);
 
     setLoading(true);
