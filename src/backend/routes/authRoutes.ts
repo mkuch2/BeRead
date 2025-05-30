@@ -34,21 +34,16 @@ router.post(
   async (req, res) => {
     const result: Result<ValidationError> = validationResult(req);
 
-    //Result object has validation errors
     if (!result.isEmpty()) {
-      //Send back array of all errors
       res.status(400).json({ errors: result.array() });
       return;
     }
 
-    //Get data as an object
     const data = matchedData(req);
-    //Hash password
     const saltRounds = 10;
     const hash = bcrypt.hashSync(data.password, saltRounds);
 
     try {
-      //Add user to database
       const user = await prisma.users.create({
         data: {
           username: data.username,
@@ -96,6 +91,10 @@ router.get("/display-profile", verifyToken, async (req: AuthRequest, res: Respon
         name: true,
         bio: true,
         email: true,
+        currentlyReadingId: true,
+        currentlyReadingTitle: true,
+        currentlyReadingAuthors: true,
+        currentlyReadingThumbnail: true,
         favoriteBooks: {
           select: {
             id: true,
@@ -115,6 +114,12 @@ router.get("/display-profile", verifyToken, async (req: AuthRequest, res: Respon
 
     const formattedProfile = {
       ...userProfile,
+      currentlyReading: userProfile.currentlyReadingId ? {
+        id: userProfile.currentlyReadingId,
+        title: userProfile.currentlyReadingTitle || "",
+        authors: userProfile.currentlyReadingAuthors ? userProfile.currentlyReadingAuthors.split(", ") : [],
+        thumbnail: userProfile.currentlyReadingThumbnail,
+      } : null,
       favoriteBooks: userProfile.favoriteBooks.map((book) => ({
         id: book.bookId,
         title: book.title,
@@ -173,6 +178,79 @@ router.post("/favorite-books", verifyToken, async (req: AuthRequest, res: Respon
     });
 
     res.status(201).json({ msg: "Book added to favorites", favoriteBook });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
+// ========== SET CURRENTLY READING BOOK ==========
+router.post("/currently-reading", verifyToken, async (req: AuthRequest, res: Response) => {
+  try {
+    const { bookId, title, authors, thumbnail } = req.body;
+    const userFirebaseUid = req.user?.uid;
+    
+    if (!userFirebaseUid) {
+      res.status(401).json({ msg: "Unauthorized" });
+      return;
+    }
+
+    const user = await prisma.users.findUnique({
+      where: { firebase_uid: userFirebaseUid },
+    });
+    
+    if (!user) {
+      res.status(404).json({ msg: "User not found" });
+      return;
+    }
+
+    const updatedUser = await prisma.users.update({
+      where: { firebase_uid: userFirebaseUid },
+      data: {
+        currentlyReadingId: bookId,
+        currentlyReadingTitle: title,
+        currentlyReadingAuthors: Array.isArray(authors) ? authors.join(", ") : authors,
+        currentlyReadingThumbnail: thumbnail,
+      },
+    });
+
+    res.status(200).json({ msg: "Currently reading book set successfully" });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
+// ========== REMOVE CURRENTLY READING BOOK ==========
+router.delete("/currently-reading", verifyToken, async (req: AuthRequest, res: Response) => {
+  try {
+    const userFirebaseUid = req.user?.uid;
+    
+    if (!userFirebaseUid) {
+      res.status(401).json({ msg: "Unauthorized" });
+      return;
+    }
+
+    const user = await prisma.users.findUnique({
+      where: { firebase_uid: userFirebaseUid },
+    });
+    
+    if (!user) {
+      res.status(404).json({ msg: "User not found" });
+      return;
+    }
+
+    await prisma.users.update({
+      where: { firebase_uid: userFirebaseUid },
+      data: {
+        currentlyReadingId: null,
+        currentlyReadingTitle: null,
+        currentlyReadingAuthors: null,
+        currentlyReadingThumbnail: null,
+      },
+    });
+
+    res.status(200).json({ msg: "Currently reading book removed successfully" });
   } catch (e) {
     console.error(e);
     res.status(500).json({ msg: "Server error" });

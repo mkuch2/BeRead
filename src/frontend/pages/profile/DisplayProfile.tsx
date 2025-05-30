@@ -22,6 +22,7 @@ interface UserProfile {
   bio?: string;
   email?: string;
   favoriteBooks?: Book[];
+  currentlyReading?: Book;
 }
 
 function DisplayProfile() {
@@ -31,6 +32,7 @@ function DisplayProfile() {
   const [error, setError] = useState<boolean>(false);
 
   const [showPopup, setShowPopup] = useState<boolean>(false);
+  const [popupType, setPopupType] = useState<'favorite' | 'reading'>('favorite');
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchResults, setSearchResults] = useState<Book[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
@@ -78,7 +80,6 @@ function DisplayProfile() {
       setProfile(response.data.profile);
     } catch (e) {
       console.error("Error in fetchProfile:", e);
-      // debugging stuff
       if (axios.isAxiosError(e)) {
         console.error("Axios Error Details:");
         console.error("- Status:", e.response?.status);
@@ -142,7 +143,8 @@ function DisplayProfile() {
     }
   };
 
-  const openPopup = () => {
+  const openPopup = (type: 'favorite' | 'reading') => {
+    setPopupType(type);
     setShowPopup(true);
     setSearchQuery("");
     setSearchResults([]);
@@ -186,6 +188,36 @@ function DisplayProfile() {
     }
   };
 
+  const handleAddCurrentlyReading = async (book: Book) => {
+    try {
+      const token = await getToken();
+      await axios.post(
+        "/api/currently-reading",
+        { 
+          bookId: book.id,
+          title: book.title,
+          authors: book.authors,
+          thumbnail: book.thumbnail
+        },
+        {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      closePopup();
+      fetchProfile();
+    } catch (e) {
+      console.error("Error setting currently reading book:", e);
+      if (axios.isAxiosError(e) && e.response?.data?.msg) {
+        setErrorMessage(e.response.data.msg);
+      } else {
+        setErrorMessage("Failed to set currently reading book. Please try again.");
+      }
+    }
+  };
+
   const handleRemoveFavoriteBook = async (bookId: string) => {
     try {
       const token = await getToken();
@@ -202,6 +234,26 @@ function DisplayProfile() {
         setErrorMessage(e.response.data.msg);
       } else {
         setErrorMessage("Failed to remove book from favorites. Please try again.");
+      }
+    }
+  };
+
+  const handleRemoveCurrentlyReading = async () => {
+    try {
+      const token = await getToken();
+      await axios.delete("/api/currently-reading", {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      fetchProfile();
+    } catch (e) {
+      console.error("Error removing currently reading book:", e);
+      if (axios.isAxiosError(e) && e.response?.data?.msg) {
+        setErrorMessage(e.response.data.msg);
+      } else {
+        setErrorMessage("Failed to remove currently reading book. Please try again.");
       }
     }
   };
@@ -253,14 +305,57 @@ function DisplayProfile() {
       )}
 
       <main className="space-y-4 px-4">
-        <section className="border border-zinc-600 flex flex-col text-left px-4 py-4">
-          <h2 className="font-semibold mb-2 text-lg">Profile</h2>
-          <p><span className="font-medium">Name:</span> {profile.name || "Not set"}</p>
-          <p><span className="font-medium">Username:</span> {profile.username}</p>
-          <p><span className="font-medium">Bio:</span> {profile.bio || "No bio yet"}</p>
-        </section>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <section className="border border-zinc-600 flex flex-col text-center px-4 py-4">
+            <h2 className="font-semibold mb-2 text-lg">{profile.name || "Not set"}</h2>
+            <p className="text-zinc-400 text-sm mb-2">{profile.username}</p>
+            <p className="text-sm">{profile.bio || "No bio yet"}</p>
+          </section>
+          <section className="border border-zinc-600 flex flex-col text-center px-4 py-4">
+            <h2 className="font-semibold mb-4 text-lg">Currently Reading</h2>
+            
+            <div className="flex justify-center">
+              {profile.currentlyReading ? (
+                <div className="relative flex flex-col items-center p-4 border border-zinc-700 rounded-lg bg-zinc-900 min-h-[200px] w-64">
+                  <button
+                    onClick={handleRemoveCurrentlyReading}
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-600 hover:bg-red-700 text-white rounded-sm flex items-center justify-center text-xs font-bold"
+                    title="Remove currently reading"
+                  >
+                    ×
+                  </button>
+                  
+                  {profile.currentlyReading.thumbnail ? (
+                    <img 
+                      src={profile.currentlyReading.thumbnail} 
+                      alt={profile.currentlyReading.title} 
+                      className="w-16 h-20 object-cover rounded mb-3" 
+                    />
+                  ) : (
+                    <div className="w-16 h-20 bg-gray-600 rounded mb-3 flex items-center justify-center text-xs">
+                      No Cover
+                    </div>
+                  )}
+                  
+                  <h3 className="font-medium text-sm text-center mb-1 line-clamp-2">{profile.currentlyReading.title}</h3>
+                  <p className="text-zinc-400 text-xs text-center line-clamp-2">
+                    by {profile.currentlyReading.authors.join(", ")}
+                  </p>
+                </div>
+              ) : (
+                <button
+                  onClick={() => openPopup('reading')}
+                  className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-zinc-600 rounded-lg bg-zinc-900 hover:bg-zinc-800 hover:border-zinc-500 transition-colors min-h-[200px] w-64"
+                >
+                  <div className="text-4xl text-zinc-500 mb-2">+</div>
+                  <span className="text-zinc-400 text-sm">Add Book</span>
+                </button>
+              )}
+            </div>
+          </section>
+        </div>
 
-        <section className="border border-zinc-600 flex flex-col text-left px-4 py-4">
+        <section className="border border-zinc-600 flex flex-col text-center px-4 py-4">
           <h2 className="font-semibold mb-4 text-lg">Favorite Books</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -295,7 +390,7 @@ function DisplayProfile() {
                   </div>
                 ) : (
                   <button
-                    onClick={openPopup}
+                    onClick={() => openPopup('favorite')}
                     className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-zinc-600 rounded-lg bg-zinc-900 hover:bg-zinc-800 hover:border-zinc-500 transition-colors min-h-[200px] w-full"
                   >
                     <div className="text-4xl text-zinc-500 mb-2">+</div>
@@ -312,7 +407,9 @@ function DisplayProfile() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-zinc-900 rounded-lg p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Add Favorite Book</h3>
+              <h3 className="text-lg font-semibold">
+                {popupType === 'favorite' ? 'Add Favorite Book' : 'Set Currently Reading'}
+              </h3>
               <button
                 onClick={closePopup}
                 className="text-zinc-400 hover:text-white text-xl"
@@ -354,10 +451,10 @@ function DisplayProfile() {
                       </div>
                     </div>
                     <button
-                      onClick={() => handleAddFavoriteBook(book)}
+                      onClick={() => popupType === 'favorite' ? handleAddFavoriteBook(book) : handleAddCurrentlyReading(book)}
                       className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm ml-2"
                     >
-                      Add
+                      {popupType === 'favorite' ? 'Add' : 'Set'}
                     </button>
                   </div>
                 ))}
