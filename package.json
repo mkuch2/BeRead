@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
-    "@prisma/client": "^6.8.2",
+    "@prisma/client": "^6.7.0",
     "@radix-ui/react-label": "^2.1.6",
     "@radix-ui/react-slot": "^1.2.2",
     "@tailwindcss/vite": "^4.1.7",
@@ -58,5 +58,8 @@
     "typescript-eslint": "^8.30.1",
     "vite": "^6.3.5"
   },
-  "proxy": "http://localhost:5004"
+  "proxy": "http://localhost:5004",
+   "prisma": {
+    "schema": "src/backend/prisma/schema.prisma"
+  }
 }

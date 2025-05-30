@@ -8,6 +8,8 @@ export interface AuthContextType {
   signUp: (email: string, password: string) => Promise<UserCredential>;
   getUser: () => User | null;
   isLoading: boolean;
+  getFirebaseId: () => string;
+  getToken: () => Promise<string> | null;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);

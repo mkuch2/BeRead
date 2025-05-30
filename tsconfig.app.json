@@ -30,6 +30,7 @@
     "noUncheckedSideEffectImports": true
   },
   "include": ["src"],
+
   "exclude": ["src/backend/generated/**/*", "dist/**", "node_modules/**", "src/backend/generated/prisma"],
   "noUnusedLocals": false
 }

@@ -37,6 +37,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return auth.currentUser || null;
   }
 
+  function getToken() {
+    return auth.currentUser?.getIdToken(true) || null;
+  }
+
+  function getFirebaseId() {
+    try {
+      const user = auth.currentUser;
+      //Throw error if no user
+      if (!user) {
+        throw new Error("User not found");
+      }
+      return user.uid;
+    } catch (e) {
+      console.log("Error getting user id: ", e);
+      throw e;
+    }
+  }
+
   const value = {
     currentUser,
     login,
@@ -44,6 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signUp,
     getUser,
     isLoading,
+    getFirebaseId,
+    getToken,
   };
 
   return (

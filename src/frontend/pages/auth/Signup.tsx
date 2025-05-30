@@ -45,8 +45,7 @@ const User = z.object({
     .min(8, { message: "Password must be at least 8 characters" })
     .max(50, { message: "Password must be less than 50 characters" })
     .regex(/^[a-zA-Z0-9!@#$%^&*]+$/, {
-      message:
-        "Password must contain only letters, numbers, and !@#$%^&*",
+      message: "Password must contain only letters, numbers, and !@#$%^&*",
     }),
 });
 
@@ -63,37 +62,52 @@ function Signup() {
     },
   });
 
-  const { signUp } = useAuthContext() as AuthContextType;
+  const { signUp, getFirebaseId, getUser } =
+    useAuthContext() as AuthContextType;
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     setIsSubmitting(true);
     try {
-      const backendPromise = axios.post("/api/signup", {
+      //Add user to Firebase
+      await signUp(data.email, data.password);
+
+      //Get auth token
+      const firebase_uid: string = getFirebaseId();
+
+      //Add user to database
+      await axios.post("/api/signup", {
         username: data.username,
         email: data.email,
         password: data.password,
+        firebase_uid: firebase_uid,
       });
 
-      const firebasePromise = signUp(data.email, data.password);
-      await Promise.all([backendPromise, firebasePromise]);
-
-      navigate("/");
+      navigate("/home");
     } catch (e) {
       if (isAxiosError(e)) {
-        if (e.response?.data?.errors) {
-          e.response.data.errors.forEach((err: any) => {
-            if (err.meta.target[0]) {
-              form.setError(err.meta.target[0] as keyof FormFields, {
-                type: "server",
-                message: err.msg,
-              });
-            }
-          });
-        } else {
+        //Delete Firebase entry
+        const user = getUser();
+        if (user) {
+          try {
+            await user.delete();
+            console.log("Deleting User");
+          } catch (deleteError) {
+            console.log("Error deleting Firebase user:", deleteError);
+          }
+        }
+
+        if (e.response) {
+          //Server responded with error
           form.setError("root", {
             type: "server",
-            message: "Server error. Please try again.",
+            message: "Unexpected server error",
+          });
+        } else if (e.request) {
+          form.setError("root", {
+            type: "server",
+            message: "No response received from server",
           });
         }
       } else {
@@ -130,7 +144,11 @@ function Signup() {
                 <FormItem>
                   <FormLabel className="text-white">Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="username" {...field} className="bg-neutral-800 text-white" />
+                    <Input
+                      placeholder="username"
+                      {...field}
+                      className="bg-neutral-800 text-white"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -143,7 +161,11 @@ function Signup() {
                 <FormItem>
                   <FormLabel className="text-white">Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="email" {...field} className="bg-neutral-800 text-white" />
+                    <Input
+                      placeholder="email"
+                      {...field}
+                      className="bg-neutral-800 text-white"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -168,7 +190,11 @@ function Signup() {
               )}
             />
 
-            <Button type="submit" disabled={isSubmitting} className="w-full mt-2">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full mt-2"
+            >
               {isSubmitting ? "Submitting..." : "Sign up"}
             </Button>
           </form>

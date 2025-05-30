@@ -8,6 +8,10 @@ import express, {
 import path from "path";
 import { fileURLToPath } from "url";
 import authRoutes from "./routes/authRoutes";
+import userRoutes from "./routes/userRoutes";
+import postRoutes from "./routes/postRoutes";
+import dotenv from "dotenv";
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -49,13 +53,17 @@ app.use(express.static(path.join(__dirname, "..", "..", "dist")));
 async function handleBookSearch(req: Request, res: Response): Promise<void> {
   const query = req.query.query as string; // gets user search input
 
+  console.log(query);
   if (!query) {
     res.status(400).json({ error: "Query parameter required" });
     return;
   }
 
-  try { // makes api url to get book results (10 results max)
-    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=10&key=${process.env.API_KEY}`;
+  try {
+    // makes api url to get book results (10 results max)
+    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
+      query
+    )}&maxResults=10&key=${process.env.API_KEY}`;
     const response = await fetch(url);
     const data = await response.json();
 
@@ -64,9 +72,11 @@ async function handleBookSearch(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const books = data.items.map((item: any) => { // uses books api "items" property to get array of books, stores in books variable
+    const books = data.items.map((item: any) => {
+      // uses books api "items" property to get array of books, stores in books variable
       const volumeInfo = item.volumeInfo || {}; // uses empty object in case book has no info
-      return { // go to google books api website to see other info returned if we need more
+      return {
+        // go to google books api website to see other info returned if we need more
         id: item.id,
         title: volumeInfo.title || "No title",
         authors: volumeInfo.authors || ["Unknown"],
@@ -76,16 +86,16 @@ async function handleBookSearch(req: Request, res: Response): Promise<void> {
       };
     });
 
-    res.json({ totalItems: data.totalItems || 0, books }); // api returns totalItems 
+    res.json({ totalItems: data.totalItems || 0, books }); // api returns totalItems
   } catch (error) {
     console.error("Error with book fetch: ", error);
-    res.status(500).json({ error: "Error with book fetch"});
+    res.status(500).json({ error: "Error with book fetch" });
   }
 }
 
 // set up express routes
 app.get("/api/books", handleBookSearch);
-app.use("/api", authRoutes);
+app.use("/api", authRoutes, userRoutes, postRoutes);
 
 //Non-API Routes
 app.all("/{*splat}", (_req: Request, res: Response): void => {

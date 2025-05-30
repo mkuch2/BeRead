@@ -8,7 +8,7 @@ import {
 } from "express-validator";
 import prismaClient from "../prismaClient";
 import bcrypt from "bcryptjs";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library.js";
 
 const router: Router = Router();
 const prisma = prismaClient;
@@ -33,6 +33,7 @@ router.post(
       max: 50,
     })
     .matches(/^[a-zA-Z0-9!@#$%^&*]+$/),
+  body("firebase_uid").notEmpty().isString(),
   async (req, res) => {
     const result: Result<ValidationError> = validationResult(req);
 
@@ -52,11 +53,12 @@ router.post(
 
     try {
       //Add user to database
-      const user = await prisma.user.create({
+      const user = await prisma.users.create({
         data: {
           username: data.username,
           email: data.email,
           password_hash: hash,
+          firebase_uid: data.firebase_uid,
         },
       });
 
@@ -68,7 +70,11 @@ router.post(
         },
       });
     } catch (e) {
+      console.error("Unexpected signup error:", e);
       if (e instanceof PrismaClientKnownRequestError) {
+
+          
+
         if (e.code === "P2002") {
           //User with same username or email already exists in database
           const target = (e.meta?.target as string[]) || [];
