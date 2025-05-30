@@ -27,3 +27,5 @@ dist-ssr
 
 #Prisma
 src/backend/generated/prisma/
+
+src/backend/service-account-file.json
