@@ -1,6 +1,9 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
+}
+
+generator db {
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -18,6 +21,7 @@ model users {
   name          String?    @db.VarChar(255)
   comments      comments[]
   posts         posts[]
+  favoriteBooks FavoriteBook[]
 
   @@index([email], map: "idx_users_email")
   @@index([username], map: "idx_users_username")
@@ -53,4 +57,19 @@ model comments {
 
   @@index([post_id], map: "idx_comments_post_id")
   @@index([user_id], map: "idx_comments_user_id")
+}
+
+
+model FavoriteBook {
+  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  bookId       String   @db.VarChar(255)
+  title        String   @db.VarChar(255)
+  authors      String   @db.VarChar(500)
+  thumbnail    String?  @db.VarChar(500)
+  userId       String   @map("user_id") @db.VarChar(128) 
+  user         users    @relation(fields: [userId], references: [firebase_uid], onDelete: Cascade, onUpdate: NoAction, map: "fk_favorite_user")
+
+  @@unique([userId, bookId], map: "unique_user_book")
+  @@index([userId], map: "idx_favorite_books_user_id")
+  @@map("favorite_books")
 }
