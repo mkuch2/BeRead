@@ -30,6 +30,7 @@ function DisplayProfile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState<boolean>(false);
 
+  const [showPopup, setShowPopup] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchResults, setSearchResults] = useState<Book[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
@@ -77,7 +78,6 @@ function DisplayProfile() {
       setProfile(response.data.profile);
     } catch (e) {
       console.error("Error in fetchProfile:", e);
-      
       // debugging stuff
       if (axios.isAxiosError(e)) {
         console.error("Axios Error Details:");
@@ -111,10 +111,10 @@ function DisplayProfile() {
     }
   }, [errorMessage]);
 
-  // shows book results once user stops typing instead of pressing search button
+  // makes the book results show up after user stops typing instead of using search button
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      if (searchQuery.trim()) {
+      if (searchQuery.trim() && showPopup) {
         handleSearchBooks();
       } else {
         setSearchResults([]);
@@ -122,7 +122,7 @@ function DisplayProfile() {
     }, 300);
 
     return () => clearTimeout(delayDebounce);
-  }, [searchQuery]);
+  }, [searchQuery, showPopup]);
 
   const handleSearchBooks = async () => {
     if (!searchQuery.trim()) return;
@@ -142,12 +142,21 @@ function DisplayProfile() {
     }
   };
 
-  const handleAddFavoriteBook = async (book: Book) => { // 3 fav books max
-    if (profile?.favoriteBooks && profile.favoriteBooks.length >= MAX_FAVORITE_BOOKS) {
-      setErrorMessage(`You can only have ${MAX_FAVORITE_BOOKS} favorite books maximum. Remove one to add another.`);
-      return;
-    }
+  const openPopup = () => {
+    setShowPopup(true);
+    setSearchQuery("");
+    setSearchResults([]);
+    setErrorMessage("");
+  };
 
+  const closePopup = () => {
+    setShowPopup(false);
+    setSearchQuery("");
+    setSearchResults([]);
+    setErrorMessage("");
+  };
+
+  const handleAddFavoriteBook = async (book: Book) => {
     try {
       const token = await getToken();
       await axios.post(
@@ -165,9 +174,7 @@ function DisplayProfile() {
         }
       );
       
-      setSearchQuery("");
-      setSearchResults([]);
-      
+      closePopup();
       fetchProfile();
     } catch (e) {
       console.error("Error adding favorite book:", e);
@@ -198,6 +205,11 @@ function DisplayProfile() {
       }
     }
   };
+
+  const favoriteBookSlots = Array.from({ length: MAX_FAVORITE_BOOKS }, (_, index) => {
+    const book = profile?.favoriteBooks?.[index];
+    return { book, index };
+  });
 
   if (isLoading) {
     return (
@@ -234,7 +246,6 @@ function DisplayProfile() {
         <button type="button" onClick={handleSignOut} className="text-sm font-light text-zinc-400 ml-2">Logout</button>
       </header>
 
-      {/* Error Message Banner */}
       {errorMessage && (
         <div className="mx-4 mb-4 bg-red-600 text-white p-3 rounded-md text-sm">
           {errorMessage}
@@ -242,7 +253,6 @@ function DisplayProfile() {
       )}
 
       <main className="space-y-4 px-4">
-        {/* Profile info */}
         <section className="border border-zinc-600 flex flex-col text-left px-4 py-4">
           <h2 className="font-semibold mb-2 text-lg">Profile</h2>
           <p><span className="font-medium">Name:</span> {profile.name || "Not set"}</p>
@@ -250,105 +260,122 @@ function DisplayProfile() {
           <p><span className="font-medium">Bio:</span> {profile.bio || "No bio yet"}</p>
         </section>
 
-        {/* Favorite books */}
         <section className="border border-zinc-600 flex flex-col text-left px-4 py-4">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="font-semibold text-lg">Favorite Books</h2>
-            <span className="text-sm text-zinc-400">
-              {profile.favoriteBooks?.length || 0}/{MAX_FAVORITE_BOOKS}
-            </span>
-          </div>
-          {profile.favoriteBooks && profile.favoriteBooks.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {profile.favoriteBooks.map((book) => (
-                <div key={book.id} className="relative flex items-center space-x-3 p-2 border border-zinc-700 rounded">
-                  {/* Remove button */}
-                  <button
-                    onClick={() => handleRemoveFavoriteBook(book.id)}
-                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-600 hover:bg-red-700 text-white rounded-sm flex items-center justify-center text-xs font-bold"
-                    title="Remove from favorites"
-                  >
-                    ×
-                  </button>
-                  
-                  {book.thumbnail ? (
-                    <img src={book.thumbnail} alt={book.title} className="w-12 h-16 object-cover rounded flex-shrink-0" />
-                  ) : (
-                    <div className="w-12 h-16 bg-gray-600 rounded flex items-center justify-center text-xs">No Cover</div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-sm truncate">{book.title}</h3>
-                    <p className="text-zinc-400 text-xs truncate">by {book.authors.join(", ")}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-zinc-400">No favorite books yet.</p>
-          )}
-        </section>
-
-        {/* Add favorite book with live search */}
-        <section className="border border-zinc-600 flex flex-col text-left px-4 py-4">
-          <h2 className="font-semibold mb-2 text-lg">Add Favorite Book</h2>
+          <h2 className="font-semibold mb-4 text-lg">Favorite Books</h2>
           
-          {/* Show message if at limit */}
-          {profile.favoriteBooks && profile.favoriteBooks.length >= MAX_FAVORITE_BOOKS ? (
-            <div className="bg-yellow-800 text-yellow-200 p-3 rounded-md text-sm mb-4">
-              You have reached the maximum of {MAX_FAVORITE_BOOKS} favorite books. Remove a book to add a new one.
-            </div>
-          ) : (
-            <>
-              <div className="flex mb-4">
-                <input
-                  type="text"
-                  placeholder="Search for books..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="border border-zinc-600 bg-black text-white p-2 rounded-l flex-1"
-                />
-                <button
-                  onClick={handleSearchBooks}
-                  disabled={!searchQuery.trim() || isSearching}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 px-4 py-2 rounded-r"
-                >
-                  {isSearching ? "..." : "Search"}
-                </button>
-              </div>
-              
-              {searchResults.length > 0 && (
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {searchResults.map((book) => (
-                    <div key={book.id} className="flex items-center justify-between p-2 border border-zinc-700 rounded">
-                      <div className="flex items-center space-x-3 flex-1">
-                        {book.thumbnail ? (
-                          <img src={book.thumbnail} alt={book.title} className="w-8 h-10 object-cover rounded flex-shrink-0" />
-                        ) : (
-                          <div className="w-8 h-10 bg-gray-600 rounded flex items-center justify-center text-xs">No Cover</div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-sm truncate">{book.title}</h3>
-                          <p className="text-zinc-400 text-xs truncate">by {book.authors.join(", ")}</p>
-                        </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {favoriteBookSlots.map(({ book, index }) => (
+              <div key={index} className="relative">
+                {book ? (
+                  <div className="relative flex flex-col items-center p-4 border border-zinc-700 rounded-lg bg-zinc-900 min-h-[200px]">
+                    <button
+                      onClick={() => handleRemoveFavoriteBook(book.id)}
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-600 hover:bg-red-700 text-white rounded-sm flex items-center justify-center text-xs font-bold"
+                      title="Remove from favorites"
+                    >
+                      ×
+                    </button>
+                    
+                    {book.thumbnail ? (
+                      <img 
+                        src={book.thumbnail} 
+                        alt={book.title} 
+                        className="w-16 h-20 object-cover rounded mb-3" 
+                      />
+                    ) : (
+                      <div className="w-16 h-20 bg-gray-600 rounded mb-3 flex items-center justify-center text-xs">
+                        No Cover
                       </div>
-                      <button
-                        onClick={() => handleAddFavoriteBook(book)}
-                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm ml-2"
-                      >
-                        Add
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              {searchQuery && searchResults.length === 0 && !isSearching && (
-                <p className="text-zinc-400 text-sm">No books found for "{searchQuery}"</p>
-              )}
-            </>
-          )}
+                    )}
+                    
+                    <h3 className="font-medium text-sm text-center mb-1 line-clamp-2">{book.title}</h3>
+                    <p className="text-zinc-400 text-xs text-center line-clamp-2">
+                      by {book.authors.join(", ")}
+                    </p>
+                  </div>
+                ) : (
+                  <button
+                    onClick={openPopup}
+                    className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-zinc-600 rounded-lg bg-zinc-900 hover:bg-zinc-800 hover:border-zinc-500 transition-colors min-h-[200px] w-full"
+                  >
+                    <div className="text-4xl text-zinc-500 mb-2">+</div>
+                    <span className="text-zinc-400 text-sm">Add Book</span>
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
         </section>
       </main>
+
+      {showPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-zinc-900 rounded-lg p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Add Favorite Book</h3>
+              <button
+                onClick={closePopup}
+                className="text-zinc-400 hover:text-white text-xl"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Search for books..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full border border-zinc-600 bg-black text-white p-2 rounded"
+                autoFocus
+              />
+            </div>
+
+            {isSearching && (
+              <div className="text-center text-zinc-400 py-4">
+                Searching...
+              </div>
+            )}
+
+            {searchResults.length > 0 && (
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {searchResults.map((book) => (
+                  <div key={book.id} className="flex items-center justify-between p-2 border border-zinc-700 rounded">
+                    <div className="flex items-center space-x-3 flex-1">
+                      {book.thumbnail ? (
+                        <img src={book.thumbnail} alt={book.title} className="w-8 h-10 object-cover rounded flex-shrink-0" />
+                      ) : (
+                        <div className="w-8 h-10 bg-gray-600 rounded flex items-center justify-center text-xs">No Cover</div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-sm truncate">{book.title}</h3>
+                        <p className="text-zinc-400 text-xs truncate">by {book.authors.join(", ")}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleAddFavoriteBook(book)}
+                      className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm ml-2"
+                    >
+                      Add
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {searchQuery && searchResults.length === 0 && !isSearching && (
+              <p className="text-zinc-400 text-sm text-center py-4">No books found for "{searchQuery}"</p>
+            )}
+
+            {errorMessage && (
+              <div className="bg-red-600 text-white p-3 rounded-md text-sm mt-4">
+                {errorMessage}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
