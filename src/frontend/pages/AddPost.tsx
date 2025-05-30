@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type SubmitHandler } from "react-hook-form";
 import { Button } from "@/frontend/components/ui/button";
 import { Input } from "@/frontend/components/ui/input";
 import { Textarea } from "@/frontend/components/ui/textarea";
@@ -15,6 +15,8 @@ import { Post } from "@/frontend/components/Post";
 import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import BookSearch from "../components/BookSearch";
 import axios from "axios";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface Book {
   id: string;
@@ -25,18 +27,40 @@ interface Book {
   publishedDate: string;
 }
 
-interface PostFormValues {
+interface Post {
   book_title: string;
   pages: string;
   content: string;
   quote: string;
-}
-
-interface Post extends PostFormValues {
   username: string;
   published_at: string;
   post_id: string;
 }
+
+const PostSchema = z.object({
+  content: z
+    .string()
+    .trim()
+    .nonempty({ message: "Post requires at least 1 character" })
+    .max(328, { message: "Posts cannot be longer than 328 characters" }),
+  book_title: z
+    .string()
+    .trim()
+    .nonempty({ message: "Please enter a book title" })
+    .max(255, {
+      message: "Titles can not be more than 64 characters long",
+    }),
+  quote: z
+    .string()
+    .trim()
+    .max(128, { message: "Quotes can not be longer than 128 characters" }),
+  pages: z
+    .string()
+    .trim()
+    .max(10, { message: "Pages can not be longer than 10 characters long" }),
+});
+
+type FormFields = z.infer<typeof PostSchema>;
 
 export default function AddPost() {
   const { currentUser, getToken } = useAuthContext() as AuthContextType;
@@ -44,6 +68,7 @@ export default function AddPost() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [uid, setUid] = useState<string | null>(null);
   const [username, setUsername] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
   //Get user's (Firebase) uid
   useEffect(() => {
@@ -71,7 +96,8 @@ export default function AddPost() {
     getUsername();
   }, [uid]);
 
-  const form = useForm<PostFormValues>({
+  const form = useForm<FormFields>({
+    resolver: zodResolver(PostSchema),
     defaultValues: {
       book_title: "",
       pages: "",
@@ -89,12 +115,14 @@ export default function AddPost() {
     form.setValue("book_title", book.title);
   };
 
-  async function onSubmit(data: PostFormValues) {
+  const onSubmit: SubmitHandler<FormFields> = async (data: FormFields) => {
     console.log("Submitted post:", data);
 
     console.log(username);
 
     const token = await getToken();
+
+    setLoading(true);
 
     //Send post to database
     try {
@@ -119,7 +147,10 @@ export default function AddPost() {
       setPosts((prev) => [
         ...prev,
         {
-          ...data,
+          book_title: createdPost.data.book_title,
+          pages: createdPost.data.pages,
+          quote: createdPost.data.quote,
+          content: createdPost.data.content,
           username: createdPost.data.username,
           published_at: createdPost.data.published_at,
           post_id: createdPost.data.id,
@@ -135,8 +166,10 @@ export default function AddPost() {
         type: "server",
         message: "Could not upload post, please try again.",
       });
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <>
@@ -154,7 +187,6 @@ export default function AddPost() {
               <FormField
                 control={form.control}
                 name="book_title"
-                rules={{ required: "Book title is required" }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Book Title</FormLabel>
@@ -211,10 +243,18 @@ export default function AddPost() {
                 )}
               />
 
-              <Button type="submit" disabled={!isValid}>
+              <Button
+                type="submit"
+                disabled={loading || !isValid}
+                className="hover:cursor-pointer"
+              >
                 Submit
               </Button>
-              <Button type="button" onClick={() => setSelectedBook(null)}>
+              <Button
+                type="button"
+                onClick={() => setSelectedBook(null)}
+                className="hover: cursor-pointer"
+              >
                 Change book
               </Button>
             </form>

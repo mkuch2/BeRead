@@ -1,7 +1,7 @@
 import { type Request, type Response, Router } from "express";
 import prismaClient from "../prismaClient";
 import verifyToken from "../middleware/authMiddleware";
-import { query, matchedData, validationResult } from "express-validator";
+import { body, query, matchedData, validationResult } from "express-validator";
 
 const router: Router = Router();
 const prisma = prismaClient;
@@ -9,15 +9,46 @@ const prisma = prismaClient;
 router.post(
   "/post",
   verifyToken,
+  body("book_title")
+    .trim()
+    .notEmpty()
+    .isLength({
+      min: 1,
+      max: 64,
+    })
+    .escape(),
+  body("content")
+    .trim()
+    .notEmpty()
+    .isLength({
+      min: 1,
+      max: 328,
+    })
+    .escape(),
+  body("quote").trim().isLength({
+    max: 128,
+  }),
   async (req: Request, res: Response): Promise<void> => {
-    const data = req.body;
+    const result = validationResult(req);
 
+    //Result object has validation errors
+    if (!result.isEmpty()) {
+      //Send back array of all errors
+      console.log("Errors occurred!");
+      res.status(400).json({ errors: result.array() });
+      return;
+    }
+
+    //Get data as an object
+    const data = { ...req.body, ...matchedData(req) };
+
+    console.log("Raw body", req.body);
+
+    console.log("Data :", data);
     if (!data) {
       res.status(400).json({ error: "Request body not found" });
       return;
     }
-
-    console.log("Post data: ", data);
 
     try {
       const post = await prisma.posts.create({
@@ -80,41 +111,46 @@ router.get(
   }
 );
 
-router.post("/comment", async (req: Request, res: Response): Promise<void> => {
-  const data = req.body;
+router.post(
+  "/comment",
+  body("content").trim().notEmpty().isLength({ max: 350 }).escape(),
+  verifyToken,
+  async (req: Request, res: Response): Promise<void> => {
+    const data = req.body;
 
-  if (!data) {
-    res.status(400).json({ error: "Request body not found" });
-    return;
-  }
-
-  console.log("Comment data: ", data);
-
-  try {
-    const comment = await prisma.comments.create({
-      data: {
-        username: data.username,
-        content: data.content,
-        user_id: data.user_id,
-        post_id: data.post_id,
-        replies: [],
-      },
-    });
-
-    res.status(200).json(comment);
-    return;
-  } catch (e) {
-    console.log("Server error sending comment", e);
-
-    if (e instanceof Error) {
-      res.status(500).json({ error: e.message });
-      return;
-    } else {
-      res.status(500).json({ error: "Unknown error occurred" });
+    if (!data) {
+      res.status(400).json({ error: "Request body not found" });
       return;
     }
+
+    console.log("Comment data: ", data);
+
+    try {
+      const comment = await prisma.comments.create({
+        data: {
+          username: data.username,
+          content: data.content,
+          user_id: data.user_id,
+          post_id: data.post_id,
+          replies: [],
+        },
+      });
+
+      res.status(200).json(comment);
+      return;
+    } catch (e) {
+      console.log("Server error sending comment", e);
+
+      if (e instanceof Error) {
+        res.status(500).json({ error: e.message });
+        return;
+      } else {
+        res.status(500).json({ error: "Unknown error occurred" });
+        return;
+      }
+    }
   }
-});
+);
 
 router.get("/comments", async (req: Request, res: Response): Promise<void> => {
   const query = req.query.query as string;
