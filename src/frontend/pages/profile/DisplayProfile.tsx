@@ -306,7 +306,7 @@ function DisplayProfile() {
       <main className="space-y-4 px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <section className="border border-zinc-600 flex flex-col text-center px-4 py-4">
-            <h2 className="font-semibold mb-2 text-lg">{profile.name || "Not set"}</h2>
+            <h2 className="font-semibold mb-2 text-lg">{profile.name || "Name not set"}</h2>
             <p className="text-zinc-400 text-sm mb-2">{profile.username}</p>
             <p className="text-sm">{profile.bio || "No bio yet"}</p>
           </section>
