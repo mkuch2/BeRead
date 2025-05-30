@@ -294,7 +294,7 @@ function DisplayProfile() {
           <h1 className="font-bold text-xl text-white">BeRead</h1>
           <Link to="/home" className="text-sm font-light text-zinc-400">Home</Link>
         </div>
-        <button type="button" onClick={handleSignOut} className="text-sm font-light text-zinc-400 ml-2">Logout</button>
+        <button type="button" onClick={handleSignOut} className="text-sm font-light text-zinc-400 ml-2">Sign Out</button>
       </header>
 
       {errorMessage && (

@@ -8,7 +8,7 @@ function Landing() {
         <div className="flex items-center space-x-4">
           <h1 className="font-bold text-xl text-white">BeRead</h1>
         </div>
-        <Link to="/login" className="text-sm font-light text-zinc-400">Login</Link>
+        <Link to="/login" className="text-sm font-light text-zinc-400">Sign In</Link>
       </header>
         <main>
           <div className="border border-zinc-600 ml-2 mr-2 mb-2">

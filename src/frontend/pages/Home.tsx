@@ -39,7 +39,7 @@ function Home() {
           onClick={handleSignOut}
           className="text-sm font-light text-zinc-400 ml-2"
         >
-          Logout
+          Sign Out
         </button>
       </header>
       <main>
