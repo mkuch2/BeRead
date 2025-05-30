@@ -35,7 +35,6 @@ function DisplayProfile() {
 
   useEffect(() => {
     async function fetchProfile() {
-      //User not logged in
       if (!currentUser) {
         navigate("/login");
         return;
@@ -43,20 +42,25 @@ function DisplayProfile() {
 
       try {
         const token = await getToken();
+        console.log("Token received:", token ? "Token exists" : "No token");
 
         if (!token) {
           setError(true);
           throw new Error("No authentication token available");
         }
 
+        console.log("Making request to /api/display-profile with Authorization header");
+
         const response = await axios.get("/api/display-profile", {
           headers: {
-            auth: token,
+            Authorization: `Bearer ${token}`,
           },
         });
 
+        console.log("Response received:", response.data);
         setProfile(response.data.profile);
       } catch (e) {
+        console.error("Error in fetchProfile:", e);
         if (e instanceof Error) {
           setError(true);
         }
