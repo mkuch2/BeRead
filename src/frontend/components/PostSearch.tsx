@@ -13,6 +13,7 @@ export interface PostInterface {
   published_at: string;
   likes: number;
   dislikes: number;
+  author: string[];
 }
 
 const PostSearch = () => {
@@ -29,6 +30,8 @@ const PostSearch = () => {
       const response = await axios.get(
         `/api/posts?query=${encodeURIComponent(query)}`
       );
+
+      console.log("searchposts response: ", response);
 
       setPosts([...response.data]);
       setHasSearched(true);
@@ -79,8 +82,9 @@ const PostSearch = () => {
               <div>
                 {" "}
                 {/* this part shows all the post info */}
+                <p className="font-bold">{post.username}</p>
                 <h3>{post.book_title}</h3>
-                <p>{post.username}</p>
+                <h4 className="italic">{post.author.join(" ")}</h4>
                 <p>Posted: {formatDate(post.published_at)}</p>
                 <p>{post.content};</p>
                 <p>

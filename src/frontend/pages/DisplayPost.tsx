@@ -54,6 +54,7 @@ const DisplayPost = () => {
   }, [post.id]);
 
   console.log("Comments: ", comments);
+  console.log("Authors in DisplayPost:", post.author);
 
   return (
     <>
@@ -70,6 +71,7 @@ const DisplayPost = () => {
             likes={post.likes}
             dislikes={post.dislikes}
             post_id={post.id}
+            author={post.author}
           ></Post>
           <CommentForm post_id={post.id} />
           <div>

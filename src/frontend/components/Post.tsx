@@ -20,6 +20,7 @@ interface PostProps {
   likes: number;
   dislikes: number;
   post_id: string;
+  author: string[];
 }
 
 export function Post({
@@ -31,6 +32,7 @@ export function Post({
   likes: initialLikes,
   dislikes: initialDislikes,
   post_id,
+  author,
 }: PostProps) {
   const [userReaction, setUserReaction] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -110,7 +112,8 @@ export function Post({
           <span className="text-xs">posted</span>
           <span className="text-xs">{formattedDate}</span>
         </div>
-        <CardTitle className="mt-2 text-lg">{title}</CardTitle>
+        <CardTitle className="mt-2 text-xl">{title}</CardTitle>
+        <CardTitle className="italic text-sm">{author.join(", ")}</CardTitle>
       </CardHeader>
       <CardContent className="mt-1">
         <p className="whitespace-pre-wrap text-base text-foreground">
@@ -121,7 +124,7 @@ export function Post({
         <blockquote className="italic text-sm text-muted-foreground">
           “{quote}”
         </blockquote>
-        <div>
+        <div className="flex space-x-4 justify-end">
           <button onClick={() => handleReaction("like")} disabled={loading}>
             <p
               className={`${
