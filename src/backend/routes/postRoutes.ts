@@ -6,6 +6,41 @@ import { body, query, matchedData, validationResult } from "express-validator";
 const router: Router = Router();
 const prisma = prismaClient;
 
+router.get("/post/:id", async (req: Request, res: Response): Promise<void> => {
+  try {
+    const post_id = req.params.id;
+
+    const post = await prisma.posts.findUnique({
+      where: {
+        id: post_id,
+      },
+      select: {
+        id: true,
+        book_title: true,
+        pages: true,
+        content: true,
+        published_at: true,
+        quote: true,
+        author: true,
+        username: true,
+        user_id: true,
+        likes: true,
+        dislikes: true,
+      },
+    });
+
+    if (!post) {
+      res.status(404).json({ error: "Post not found " });
+      return;
+    }
+
+    res.status(200).json(post);
+  } catch (e) {
+    console.log("Error getting post: ", e);
+    res.status(500).json({ error: "Error getting post" });
+  }
+});
+
 router.post(
   "/post",
   verifyToken,

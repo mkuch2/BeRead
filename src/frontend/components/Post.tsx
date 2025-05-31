@@ -123,13 +123,27 @@ export function Post({
         </blockquote>
         <div>
           <button onClick={() => handleReaction("like")} disabled={loading}>
-            Like
+            <p
+              className={`${
+                userReaction === "like"
+                  ? "text-gray-400 font-bold"
+                  : "text-gray-600"
+              }`}
+            >
+              Like {likes}
+            </p>
           </button>
-          {likes}
           <button onClick={() => handleReaction("dislike")} disabled={loading}>
-            Dislikes
+            <p
+              className={`${
+                userReaction === "dislike"
+                  ? "text-gray-400 font-bold"
+                  : "text-gray-600"
+              }`}
+            >
+              Dislike {dislikes}
+            </p>
           </button>
-          {dislikes}
         </div>
       </CardFooter>
     </Card>
