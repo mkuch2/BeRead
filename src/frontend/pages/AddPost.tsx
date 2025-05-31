@@ -37,6 +37,7 @@ interface Post {
   post_id: string;
   likes: number;
   dislikes: number;
+  authors: string[];
 }
 
 const PostSchema = z.object({
@@ -146,20 +147,21 @@ export default function AddPost() {
         }
       );
 
-      setPosts((prev) => [
-        ...prev,
-        {
-          book_title: createdPost.data.book_title,
-          pages: createdPost.data.pages,
-          quote: createdPost.data.quote,
-          content: createdPost.data.content,
-          username: createdPost.data.username,
-          published_at: createdPost.data.published_at,
-          post_id: createdPost.data.id,
-          likes: createdPost.data.likes,
-          dislikes: createdPost.data.dislikes,
-        },
-      ]);
+setPosts((prev) => [
+  ...prev,
+  {
+    book_title: createdPost.data.book_title,
+    pages: createdPost.data.pages,
+    quote: createdPost.data.quote,
+    content: createdPost.data.content,
+    username: createdPost.data.username,
+    published_at: createdPost.data.published_at,
+    post_id: createdPost.data.id,
+    likes: createdPost.data.likes,
+    dislikes: createdPost.data.dislikes,
+    authors: selectedBook?.authors || [],
+  },
+]);
       setSelectedBook(null);
 
       form.reset();
@@ -269,18 +271,19 @@ export default function AddPost() {
       {/* Render new posts immediately below the form */}
       <div className="mt-8 space-y-6">
         {posts.map((p) => (
-          <Post
-            key={p.post_id}
-            username={p.username}
-            published_at={p.published_at}
-            title={p.book_title}
-            content={p.content}
-            quote={p.quote}
-            likes={0}
-            dislikes={0}
-            post_id={p.post_id}
-          />
-        ))}
+  <Post
+    key={p.post_id}
+    username={p.username}
+    published_at={p.published_at}
+    title={p.book_title}
+    content={p.content}
+    quote={p.quote}
+    author={p.authors}
+    likes={0}
+    dislikes={0}
+    post_id={p.post_id}
+  />
+))}
       </div>
     </>
   );
