@@ -5,7 +5,6 @@ import Login from "./pages/auth/Login";
 import Home from "./pages/Home";
 import ProtectedRoute from "./ProtectedRoute";
 import DisplayProfile from "./pages/profile/DisplayProfile.tsx";
-import BookSearch from "./components/BookSearch.tsx";
 import AddPost from "./pages/AddPost";
 import EditProfile from "./pages/profile/EditProfile.tsx";
 import DisplayPost from "./pages/DisplayPost.tsx";
@@ -49,7 +48,6 @@ const router = createBrowserRouter([
     ),
   },
 
-  { path: "/books", Component: BookSearch }, // book search page
 ]);
 
 export default router;

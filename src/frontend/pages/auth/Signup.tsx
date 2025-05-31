@@ -22,6 +22,7 @@ import { useState } from "react";
 
 // Validation schema
 const User = z.object({
+  
   username: z
     .string()
     .trim()
@@ -33,6 +34,12 @@ const User = z.object({
     .regex(/^[a-zA-Z0-9_]+$/, {
       message: "Username can only consist of letters, numbers, and underscores",
     }),
+  name: z
+    .string()
+    .trim()
+    .nonempty({ message: "Please provide a name" })
+    .min(1, { message: "Name is required" })
+    .max(100, { message: "Name must be less than 100 characters" }),
   email: z
     .string()
     .trim()
@@ -57,6 +64,7 @@ function Signup() {
     resolver: zodResolver(User),
     defaultValues: {
       username: "",
+      name: "",
       email: "",
       password: "",
     },
@@ -68,58 +76,71 @@ function Signup() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
-    setIsSubmitting(true);
-    try {
-      //Add user to Firebase
-      await signUp(data.email, data.password);
+  setIsSubmitting(true);
+  try {
+    // create firebase user
+    await signUp(data.email, data.password);
+    const firebase_uid: string = getFirebaseId();
 
-      //Get auth token
-      const firebase_uid: string = getFirebaseId();
+    // create user in backend
+    await axios.post("/api/signup", {
+      username: data.username,
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      firebase_uid: firebase_uid,
+    });
 
-      //Add user to database
-      await axios.post("/api/signup", {
-        username: data.username,
-        email: data.email,
-        password: data.password,
-        firebase_uid: firebase_uid,
+    navigate("/");
+  } catch (e: any) {
+    console.error("Signup error:", e);
+
+    if (e.code && e.message) {
+      form.setError("root", {
+        type: "firebase",
+        message: `Firebase error: ${e.message}`,
       });
+      return;
+    }
 
-      navigate("/home");
-    } catch (e) {
-      if (isAxiosError(e)) {
-        //Delete Firebase entry
-        const user = getUser();
-        if (user) {
-          try {
-            await user.delete();
-            console.log("Deleting User");
-          } catch (deleteError) {
-            console.log("Error deleting Firebase user:", deleteError);
-          }
+    if (isAxiosError(e)) {
+      const user = getUser();
+      if (user) {
+        try {
+          await user.delete();
+          console.log("Deleted Firebase user due to backend error");
+        } catch (deleteError) {
+          console.log("Error deleting Firebase user:", deleteError);
         }
+      }
 
-        if (e.response) {
-          //Server responded with error
-          form.setError("root", {
-            type: "server",
-            message: "Unexpected server error",
-          });
-        } else if (e.request) {
-          form.setError("root", {
-            type: "server",
-            message: "No response received from server",
-          });
-        }
+      if (e.response) {
+        const errorMessage = e.response.data?.errors?.[0]?.msg || e.response.data?.message || "Server error occurred";
+        form.setError("root", {
+          type: "server",
+          message: errorMessage,
+        });
+      } else if (e.request) {
+        form.setError("root", {
+          type: "server",
+          message: "No response received from server",
+        });
       } else {
         form.setError("root", {
           type: "server",
-          message: "An unknown error occurred",
+          message: "Network error occurred",
         });
       }
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      form.setError("root", {
+        type: "server",
+        message: "An unknown error occurred",
+      });
     }
-  };
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center text-white font-sans">
@@ -146,6 +167,23 @@ function Signup() {
                   <FormControl>
                     <Input
                       placeholder="username"
+                      {...field}
+                      className="bg-neutral-800 text-white"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white">Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="full name"
                       {...field}
                       className="bg-neutral-800 text-white"
                     />
