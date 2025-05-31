@@ -52,7 +52,6 @@ const BookSearch = ({ onSelectBook }: BookSearchProps) => {
       <header className="flex justify-between items-center border border-zinc-700 px-4 py-3 rounded-md mb-6">
         <div className="flex items-center space-x-6">
           <h1 className="font-bold text-2xl"> <Link to="/">BeRead</Link> </h1>
-          <Link to="/books" className="text-sm text-zinc-400 hover:text-white transition">Search Books</Link>
           <Link to="/friends" className="text-sm text-zinc-400 hover:text-white transition">Friends</Link>
           <Link to="/profile" className="text-sm text-zinc-400 hover:text-white transition">Profile</Link>
         </div>
