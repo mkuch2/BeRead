@@ -21,6 +21,7 @@ const BookSearch = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
 
   const searchBooks = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,8 +31,11 @@ const BookSearch = () => {
     setError(null);
 
     try {
-      const response = await axios.get<BookSearchResponse>(`/api/books?query=${encodeURIComponent(query)}`);
-      setBooks(response.data.books);
+      const response = await axios.get<BookSearchResponse>(
+        `/api/books?query=${encodeURIComponent(query)}`
+      );
+      setBooks(response.data.books); // used axios to make HTTP request from browser (/api/books handled by server.ts in backend)
+      console.log("Response:", response.data.books);
     } catch (err) {
       setError('Failed to fetch books. Please try again.');
     } finally {
@@ -94,7 +98,7 @@ const BookSearch = () => {
       </div>
 
       {books.length === 0 && !loading && query && (
-        <p className="text-center mt-6 text-zinc-400">No books found. Try a different search term.</p>
+        <p>Click 'search' to find your book!</p>
       )}
     </div>
   );
