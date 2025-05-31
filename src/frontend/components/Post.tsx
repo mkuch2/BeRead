@@ -53,7 +53,9 @@ export function Post({
         const reactions = await axios.get(
           `/api/reaction?query=${encodeURIComponent(post_id)}`,
           {
-            headers: { auth: token },
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
         );
 
@@ -84,7 +86,9 @@ export function Post({
           type: newType,
         },
         {
-          headers: { auth: token },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
@@ -124,7 +128,11 @@ export function Post({
           “{quote}”
         </blockquote>
         <div className="flex space-x-4 justify-end">
-          <button onClick={() => handleReaction("like")} disabled={loading}>
+          <button
+            onClick={() => handleReaction("like")}
+            disabled={loading}
+            className="cursor-pointer"
+          >
             <p
               className={`${
                 userReaction === "like"
@@ -135,7 +143,11 @@ export function Post({
               Like {likes}
             </p>
           </button>
-          <button onClick={() => handleReaction("dislike")} disabled={loading}>
+          <button
+            onClick={() => handleReaction("dislike")}
+            disabled={loading}
+            className="cursor-pointer"
+          >
             <p
               className={`${
                 userReaction === "dislike"

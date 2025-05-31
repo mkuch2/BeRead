@@ -37,6 +37,7 @@ interface Post {
   post_id: string;
   likes: number;
   dislikes: number;
+  author: string[];
 }
 
 const PostSchema = z.object({
@@ -141,7 +142,7 @@ export default function AddPost() {
         },
         {
           headers: {
-            auth: token,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -158,6 +159,7 @@ export default function AddPost() {
           post_id: createdPost.data.id,
           likes: createdPost.data.likes,
           dislikes: createdPost.data.dislikes,
+          author: createdPost.data.author || [],
         },
       ]);
       setSelectedBook(null);
@@ -279,6 +281,7 @@ export default function AddPost() {
             likes={0}
             dislikes={0}
             post_id={p.post_id}
+            author={p.author}
           />
         ))}
       </div>

@@ -14,7 +14,7 @@ export interface CommentProps {
   username: string;
   published_at: string;
   content: string;
-  replies: CommentProps[];
+  replies: CommentInterface[];
   likes: number;
   dislikes: number;
   comment_id: string;
@@ -59,7 +59,9 @@ export function Comment({
         const reactions = await axios.get(
           `/api/comment-reaction?query=${encodeURIComponent(comment_id)}`,
           {
-            headers: { auth: token },
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
         );
 
@@ -91,7 +93,9 @@ export function Comment({
           type: newType,
         },
         {
-          headers: { auth: token },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
@@ -116,7 +120,11 @@ export function Comment({
       <CardContent>
         <div>{content}</div>
         <div className="flex space-x-4 justify-end">
-          <button onClick={() => handleReaction("like")} disabled={loading}>
+          <button
+            onClick={() => handleReaction("like")}
+            disabled={loading}
+            className="cursor-pointer"
+          >
             <p
               className={`${
                 userReaction === "like"
@@ -127,7 +135,11 @@ export function Comment({
               Like {likes}
             </p>
           </button>
-          <button onClick={() => handleReaction("dislike")} disabled={loading}>
+          <button
+            onClick={() => handleReaction("dislike")}
+            disabled={loading}
+            className="cursor-pointer"
+          >
             <p
               className={`${
                 userReaction === "dislike"

@@ -90,7 +90,7 @@ export default function CommentForm({ post_id }: CommentFormProps) {
         },
         {
           headers: {
-            auth: token,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
