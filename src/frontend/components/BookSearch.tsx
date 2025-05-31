@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 interface Book {
   id: string;
@@ -16,7 +16,11 @@ interface BookSearchResponse {
   books: Book[];
 }
 
-const BookSearch = () => {
+interface BookSearchProps {
+  onSelectBook?: (book: Book) => void;
+}
+
+const BookSearch = ({ onSelectBook }: BookSearchProps) => {
   const [query, setQuery] = useState<string>('');
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(false);
@@ -76,7 +80,11 @@ const BookSearch = () => {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 justify-center">
         {books.map(book => (
-          <div key={book.id} className="bg-zinc-900 p-4 rounded-md shadow-md text-center">
+          <div 
+            key={book.id} 
+            className="bg-zinc-900 p-4 rounded-md shadow-md text-center cursor-pointer hover:bg-zinc-800 transition-colors"
+            onClick={() => onSelectBook?.(book)}
+          >
             {book.thumbnail ? (
               <img
                 src={book.thumbnail}

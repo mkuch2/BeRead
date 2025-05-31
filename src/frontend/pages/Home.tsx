@@ -1,3 +1,9 @@
+import { useNavigate, Link } from "react-router";
+import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
+import { FirebaseError } from "firebase/app";
+import PostSearch from "../components/PostSearch";
+
+
 function Home() {
   const navigate = useNavigate();
   const { currentUser, signOut } = useAuthContext() as AuthContextType;

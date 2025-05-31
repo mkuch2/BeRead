@@ -19,7 +19,7 @@ function Landing() {
           <section className="bg-zinc-900 border border-zinc-700 rounded-lg p-4">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-lg font-semibold">Today’s Prompt</h2>
+                <h2 className="text-lg font-semibold">Today's Prompt</h2>
                 <p className="text-sm text-zinc-400 mt-1">Admin Generated Prompt</p>
               </div>
               <Link
@@ -51,7 +51,7 @@ function Landing() {
           </div>
         </aside>
       </div>
-    </div>
+    </>
   );
 }
 

@@ -160,13 +160,13 @@ function Signup() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="name"
+              name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Name</FormLabel>
+                  <FormLabel className="text-white">Username</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="full name"
+                      placeholder="username"
                       {...field}
                       className="bg-neutral-800 text-white"
                     />
@@ -177,13 +177,13 @@ function Signup() {
             />
             <FormField
               control={form.control}
-              name="username"
+              name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Username</FormLabel>
+                  <FormLabel className="text-white">Name</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="username"
+                      placeholder="full name"
                       {...field}
                       className="bg-neutral-800 text-white"
                     />
