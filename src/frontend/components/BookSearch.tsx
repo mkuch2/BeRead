@@ -1,8 +1,7 @@
-import React, { useState } from "react";
-import axios from "axios";
-import "./BookSearch.css";
+import React, { useState } from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
 
-// book properties defined
 interface Book {
   id: string;
   title: string;
@@ -12,111 +11,95 @@ interface Book {
   publishedDate: string;
 }
 
-// api response properties defined
 interface BookSearchResponse {
   totalItems: number;
   books: Book[];
 }
 
-interface BookSearchProps {
-  onSelectBook?: (book: Book) => void;
-}
-
-// react component w/ query input, book list, loading state, errors
-const BookSearch = ({ onSelectBook }: BookSearchProps) => {
-  const [query, setQuery] = useState<string>("");
+const BookSearch = () => {
+  const [query, setQuery] = useState<string>('');
   const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
 
-  // if input given, sends to /api/books (server.ts), server.ts response goes to books variable
   const searchBooks = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
 
     setLoading(true);
     setError(null);
+
     try {
       const response = await axios.get<BookSearchResponse>(
         `/api/books?query=${encodeURIComponent(query)}`
       );
       setBooks(response.data.books); // used axios to make HTTP request from browser (/api/books handled by server.ts in backend)
       console.log("Response:", response.data.books);
-
-      setHasSearched(true);
     } catch (err) {
-      setError("Failed to fetch books. Please try again.");
+      setError('Failed to fetch books. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleBookSelect = (book: Book) => {
-    if (onSelectBook) {
-      onSelectBook(book);
-    }
-    console.log(book);
-  };
-
-  // visual stuff
   return (
-    <div className="book-search-container">
-      <h1>book search test page</h1>
+    <div className="min-h-screen bg-black text-white px-8 py-4">
+      <header className="flex justify-between items-center border border-zinc-700 px-4 py-3 rounded-md mb-6">
+        <div className="flex items-center space-x-6">
+          <h1 className="font-bold text-2xl"> <Link to="/">BeRead</Link> </h1>
+          <Link to="/books" className="text-sm text-zinc-400 hover:text-white transition">Search Books</Link>
+          <Link to="/friends" className="text-sm text-zinc-400 hover:text-white transition">Friends</Link>
+          <Link to="/profile" className="text-sm text-zinc-400 hover:text-white transition">Profile</Link>
+        </div>
+        <Link to="/login" className="text-sm text-zinc-400 hover:text-white transition">Logout</Link>
+      </header>
 
-      <form onSubmit={searchBooks} className="search-form">
-        <input // search box and button
+      <form onSubmit={searchBooks} className="flex gap-2 justify-center mb-8">
+        <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search for books..."
-          className="search-input"
+          className="w-full max-w-xl px-4 py-2 rounded-md bg-zinc-900 text-white border border-zinc-700"
         />
-        <button type="submit" className="search-button">
+        <button
+          type="submit"
+          className="px-6 py-2 bg-white text-black font-medium rounded-md hover:bg-zinc-200"
+        >
           Search
         </button>
       </form>
 
-      {loading && <div className="loading">Loading...</div>}
-      {error && <div className="error">{error}</div>}
+      {loading && <div className="text-center text-sm">Loading...</div>}
+      {error && <div className="text-center text-red-500 text-sm">{error}</div>}
 
-      {/* makes grid for book display (can change later) */}
-      <div className="books-grid">
-        {" "}
-        {/* makes grid from CSS file */}
-        {books.map((book) => (
-          <div
-            key={book.id}
-            className="book-card"
-            style={{ cursor: "pointer" }}
-            onClick={() => handleBookSelect(book)}
-          >
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 justify-center">
+        {books.map(book => (
+          <div key={book.id} className="bg-zinc-900 p-4 rounded-md shadow-md text-center">
             {book.thumbnail ? (
               <img
                 src={book.thumbnail}
                 alt={book.title}
-                className="book-cover"
+                className="w-24 h-36 object-cover mx-auto mb-2 rounded-sm"
               />
             ) : (
-              <div className="no-cover">No Cover</div>
+              <div className="w-24 h-36 bg-zinc-700 mx-auto mb-2 rounded-sm"></div>
             )}
-            <div className="book-details">
-              {" "}
-              {/* this part shows all the book info */}
-              <h3 className="book-title">{book.title}</h3>
-              <p className="book-authors">{book.authors.join(", ")}</p>
-              <p className="book-published">Published: {book.publishedDate}</p>
-              <p className="book-description">
-                {book.description && book.description.length > 100
-                  ? `${book.description.substring(0, 100)}...`
-                  : book.description}
-              </p>
-            </div>
+            <h3 className="font-semibold text-sm mb-1">{book.title}</h3>
+            <p className="text-xs text-zinc-400 mb-1">{book.authors.join(', ')}</p>
+            <p className="text-xs text-zinc-500">
+              {book.description && book.description.length > 80
+                ? `${book.description.substring(0, 80)}...`
+                : book.description}
+            </p>
           </div>
         ))}
       </div>
 
-      {books.length === 0 && !loading && hasSearched && <p>No books found!</p>}
+      {books.length === 0 && !loading && query && (
+        <p>Click 'search' to find your book!</p>
+      )}
     </div>
   );
 };
