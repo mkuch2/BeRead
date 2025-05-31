@@ -317,20 +317,145 @@ router.post(
           where: {
             user_post_reaction: {
               user_id: uid,
-              post_id,
+              post_id: post_id,
             },
           },
           update: {
-            type,
+            type: type,
           },
           create: {
             user_id: uid,
-            post_id,
-            type,
+            post_id: post_id,
+            type: type,
           },
         });
 
         return { reaction, post: updatedPost };
+      });
+
+      res.status(200).json(result);
+    } catch (e) {
+      console.log("Error updating reaction: ", e);
+      res.status(500).json({ error: "Error updating reaction" });
+    }
+  }
+);
+
+router.get(
+  "/comment-reaction",
+  verifyToken,
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const uid = req.user?.uid;
+      const comment_id = req.query.query as string;
+
+      if (!uid || !comment_id) {
+        res.status(400).json({ error: "Missing either userid or comment_id" });
+      }
+
+      const reaction = await prisma.comment_reactions.findUnique({
+        where: {
+          user_comment_reaction: {
+            user_id: uid as string,
+            comment_id: comment_id,
+          },
+        },
+      });
+
+      console.log("Comment reaction server: ", reaction);
+
+      res.status(200).json(reaction);
+    } catch (e) {
+      console.log("Error getting user reaction: ", e);
+      res.status(500).json({ error: "Could not get user reaction" });
+    }
+  }
+);
+
+router.post(
+  "/comment-reaction",
+  verifyToken,
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const uid = req.user?.uid as string;
+      const { comment_id, type } = req.body;
+
+      if (!uid) {
+        res.status(400).json({ error: "User id not found" });
+      }
+
+      const comment = await prisma.comments.findUnique({
+        where: { id: comment_id },
+        select: { likes: true, dislikes: true },
+      });
+
+      if (!comment) {
+        res.status(404).json({ error: "Comm not found" });
+        return;
+      }
+
+      const lastReaction = await prisma.comment_reactions.findUnique({
+        where: {
+          user_comment_reaction: {
+            user_id: uid,
+            comment_id: comment_id,
+          },
+        },
+      });
+
+      const result = await prisma.$transaction(async (tx) => {
+        let likes = comment.likes;
+        let dislikes = comment.dislikes;
+
+        if (lastReaction) {
+          if (lastReaction.type === "like") likes--;
+          if (lastReaction.type === "dislike") dislikes--;
+        }
+
+        if (type === "like") likes++;
+        if (type === "dislike") dislikes++;
+
+        const updatedComment = await tx.comments.update({
+          where: { id: comment_id },
+          data: {
+            likes: likes,
+            dislikes: dislikes,
+          },
+        });
+
+        if (type === "none") {
+          if (lastReaction) {
+            await tx.comment_reactions.delete({
+              where: {
+                user_comment_reaction: {
+                  user_id: uid,
+                  comment_id: comment_id,
+                },
+              },
+            });
+          }
+
+          return { reaction: null, comment: updatedComment };
+        }
+
+        const reaction = await tx.comment_reactions.upsert({
+          where: {
+            user_comment_reaction: {
+              user_id: uid,
+              comment_id: comment_id,
+            },
+          },
+          update: {
+            type: type,
+          },
+          create: {
+            user_id: uid,
+            comment_id: comment_id,
+            type: type,
+          },
+        });
+
+        return { reaction, comment: updatedComment };
       });
 
       res.status(200).json(result);

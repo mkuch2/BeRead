@@ -9,16 +9,17 @@ datasource db {
 }
 
 model users {
-  id            String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  username      String      @unique @db.VarChar(50)
-  email         String      @unique @db.VarChar(255)
-  password_hash String      @db.VarChar(255)
-  firebase_uid  String      @unique @db.VarChar(128)
-  bio           String?
-  name          String?     @db.VarChar(255)
-  comments      comments[]
-  posts         posts[]
-  reactions     reactions[]
+  id                String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  username          String              @unique @db.VarChar(50)
+  email             String              @unique @db.VarChar(255)
+  password_hash     String              @db.VarChar(255)
+  firebase_uid      String              @unique @db.VarChar(128)
+  bio               String?
+  name              String?             @db.VarChar(255)
+  comments          comments[]
+  posts             posts[]
+  reactions         reactions[]
+  comment_reactions comment_reactions[]
 
   @@index([email], map: "idx_users_email")
   @@index([username], map: "idx_users_username")
@@ -45,17 +46,18 @@ model posts {
 }
 
 model comments {
-  id           String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  user_id      String    @db.VarChar(128)
-  post_id      String    @db.Uuid
-  content      String
-  published_at DateTime? @default(now()) @db.Timestamptz(6)
-  username     String    @db.VarChar(255)
-  replies      String[]  @db.Uuid
-  likes        Int       @default(0)
-  dislikes     Int       @default(0)
-  users        users     @relation(fields: [user_id], references: [firebase_uid], onDelete: Cascade, onUpdate: NoAction, map: "fk_comment_author")
-  posts        posts     @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_comment_post")
+  id                String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id           String              @db.VarChar(128)
+  post_id           String              @db.Uuid
+  content           String
+  published_at      DateTime?           @default(now()) @db.Timestamptz(6)
+  username          String              @db.VarChar(255)
+  replies           String[]            @db.Uuid
+  likes             Int                 @default(0)
+  dislikes          Int                 @default(0)
+  users             users               @relation(fields: [user_id], references: [firebase_uid], onDelete: Cascade, onUpdate: NoAction, map: "fk_comment_author")
+  posts             posts               @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_comment_post")
+  comment_reactions comment_reactions[]
 
   @@index([post_id], map: "idx_comments_post_id")
   @@index([user_id], map: "idx_comments_user_id")
@@ -65,7 +67,7 @@ model reactions {
   id      String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   user_id String @db.VarChar(128)
   post_id String @db.Uuid
-  type    String 
+  type    String
 
   users users @relation(fields: [user_id], references: [firebase_uid], onDelete: Cascade, map: "fk_reaction_author")
   posts posts @relation(fields: [post_id], references: [id], onDelete: Cascade, map: "fk_reaction_post")
@@ -73,4 +75,18 @@ model reactions {
   @@unique([user_id, post_id], name: "user_post_reaction")
   @@index([post_id], map: "idx_reactions_post_id")
   @@index([user_id], map: "idx_reactions_user_id")
+}
+
+model comment_reactions {
+  id         String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id    String @db.VarChar(128)
+  comment_id String @db.Uuid
+  type       String
+
+  users    users    @relation(fields: [user_id], references: [firebase_uid], onDelete: Cascade, map: "fk_comment_reaction_author")
+  comments comments @relation(fields: [comment_id], references: [id], onDelete: Cascade, map: "fk_comment_reaction_comment")
+
+  @@unique([user_id, comment_id], name: "user_comment_reaction")
+  @@index([comment_id], map: "idx_comment_reactions_comment_id")
+  @@index([user_id], map: "idx_comment_reactions_user_id")
 }

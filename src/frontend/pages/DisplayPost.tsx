@@ -82,6 +82,9 @@ const DisplayPost = () => {
                 published_at={comment.published_at}
                 content={comment.content}
                 replies={comment.replies}
+                comment_id={comment.id}
+                likes={comment.likes}
+                dislikes={comment.dislikes}
               />
             ))}
           </div>

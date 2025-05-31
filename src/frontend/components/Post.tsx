@@ -74,7 +74,6 @@ export function Post({
     setLoading(true);
 
     try {
-      //
       const newType = userReaction === type ? "none" : type;
 
       const token = await getToken();
