@@ -11,6 +11,8 @@ export interface PostInterface {
   quote: string;
   username: string;
   published_at: string;
+  likes: number;
+  dislikes: number;
 }
 
 const PostSearch = () => {
@@ -81,6 +83,9 @@ const PostSearch = () => {
                 <p>{post.username}</p>
                 <p>Posted: {formatDate(post.published_at)}</p>
                 <p>{post.content};</p>
+                <p>
+                  Likes: {post.likes} Dislikes {post.dislikes}
+                </p>
               </div>
             </Link>
           ))}

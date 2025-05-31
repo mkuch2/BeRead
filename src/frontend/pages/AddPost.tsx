@@ -35,6 +35,8 @@ interface Post {
   username: string;
   published_at: string;
   post_id: string;
+  likes: number;
+  dislikes: number;
 }
 
 const PostSchema = z.object({
@@ -154,6 +156,8 @@ export default function AddPost() {
           username: createdPost.data.username,
           published_at: createdPost.data.published_at,
           post_id: createdPost.data.id,
+          likes: createdPost.data.likes,
+          dislikes: createdPost.data.dislikes,
         },
       ]);
       setSelectedBook(null);
@@ -272,6 +276,9 @@ export default function AddPost() {
             title={p.book_title}
             content={p.content}
             quote={p.quote}
+            likes={0}
+            dislikes={0}
+            post_id={p.post_id}
           />
         ))}
       </div>

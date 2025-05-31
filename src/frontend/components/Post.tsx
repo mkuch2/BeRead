@@ -7,6 +7,9 @@ import {
   CardFooter,
 } from "@/frontend/components/ui/card";
 import { formatDate } from "../lib/utils";
+import { useEffect, useState } from "react";
+import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
+import axios from "axios";
 
 interface PostProps {
   username: string;
@@ -14,6 +17,9 @@ interface PostProps {
   title: string;
   content: string;
   quote: string;
+  likes: number;
+  dislikes: number;
+  post_id: string;
 }
 
 export function Post({
@@ -22,8 +28,79 @@ export function Post({
   title,
   content,
   quote,
+  likes: initialLikes,
+  dislikes: initialDislikes,
+  post_id,
 }: PostProps) {
+  const [userReaction, setUserReaction] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [likes, setLikes] = useState<number>(initialLikes);
+  const [dislikes, setDislikes] = useState<number>(initialDislikes);
+  const [reactionError, setReactionError] = useState<string>("");
+  const { currentUser, getToken } = useAuthContext() as AuthContextType;
+
   const formattedDate = formatDate(published_at);
+
+  useEffect(() => {
+    async function getReactions() {
+      if (!currentUser) return;
+
+      try {
+        const token = await getToken();
+
+        const reactions = await axios.get(
+          `/api/reaction?query=${encodeURIComponent(post_id)}`,
+          {
+            headers: { auth: token },
+          }
+        );
+
+        console.log("reactions", reactions);
+        setUserReaction(reactions.data.type);
+      } catch (e) {
+        console.log("Error getting reaction: ", e);
+        setReactionError("Error getting reactions");
+      }
+    }
+
+    getReactions();
+  }, [currentUser, post_id, getToken]);
+
+  const handleReaction = async (type: string) => {
+    if (!currentUser) return;
+
+    setLoading(true);
+
+    try {
+      //
+      const newType = userReaction === type ? "none" : type;
+
+      const token = await getToken();
+      const response = await axios.post(
+        "/api/reaction",
+        {
+          post_id: post_id,
+          type: newType,
+        },
+        {
+          headers: { auth: token },
+        }
+      );
+
+      console.log("response", response);
+
+      setUserReaction(newType === "none" ? null : newType);
+      setLikes(response.data.post.likes);
+      setDislikes(response.data.post.dislikes);
+    } catch (e) {
+      console.log("Error updating reaction: ", e);
+      setReactionError("Error updating reactions");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  console.log("User reaction", userReaction);
 
   return (
     <Card className="max-w-2xl mx-auto mb-6">
@@ -44,6 +121,16 @@ export function Post({
         <blockquote className="italic text-sm text-muted-foreground">
           “{quote}”
         </blockquote>
+        <div>
+          <button onClick={() => handleReaction("like")} disabled={loading}>
+            Like
+          </button>
+          {likes}
+          <button onClick={() => handleReaction("dislike")} disabled={loading}>
+            Dislikes
+          </button>
+          {dislikes}
+        </div>
       </CardFooter>
     </Card>
   );

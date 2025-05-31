@@ -12,6 +12,8 @@ const DisplayPost = () => {
   const [error, setError] = useState<string>("");
   const post: PostInterface = state.post;
 
+  console.log("Post: ", post);
+
   useEffect(() => {
     async function getComments() {
       try {
@@ -40,6 +42,9 @@ const DisplayPost = () => {
         title={post.book_title}
         content={post.content}
         quote={post.quote}
+        likes={post.likes}
+        dislikes={post.dislikes}
+        post_id={post.id}
       ></Post>
       <CommentForm post_id={post.id} />
       <div>

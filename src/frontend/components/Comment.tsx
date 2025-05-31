@@ -29,6 +29,8 @@ export function Comment({
   published_at,
   content,
   replies,
+  likes,
+  dislikes,
 }: CommentProps) {
   const formattedDate = formatDate(published_at);
 
@@ -37,7 +39,12 @@ export function Comment({
       <CardHeader>
         {username} posted at {formattedDate}:
       </CardHeader>
-      <CardContent>{content}</CardContent>
+      <CardContent>
+        <div>{content}</div>
+        <div>
+          Likes: {likes} Dislikes: {dislikes}
+        </div>
+      </CardContent>
     </Card>
   );
 }
