@@ -22,6 +22,7 @@ import { useState } from "react";
 
 // Validation schema
 const User = z.object({
+  
   username: z
     .string()
     .trim()
@@ -33,6 +34,12 @@ const User = z.object({
     .regex(/^[a-zA-Z0-9_]+$/, {
       message: "Username can only consist of letters, numbers, and underscores",
     }),
+  name: z
+    .string()
+    .trim()
+    .nonempty({ message: "Please provide a name" })
+    .min(1, { message: "Name is required" })
+    .max(100, { message: "Name must be less than 100 characters" }),
   email: z
     .string()
     .trim()
@@ -57,6 +64,7 @@ function Signup() {
     resolver: zodResolver(User),
     defaultValues: {
       username: "",
+      name: "",
       email: "",
       password: "",
     },
@@ -77,6 +85,7 @@ function Signup() {
     // create user in backend
     await axios.post("/api/signup", {
       username: data.username,
+      name: data.name,
       email: data.email,
       password: data.password,
       firebase_uid: firebase_uid,
@@ -149,6 +158,23 @@ function Signup() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white">Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="full name"
+                      {...field}
+                      className="bg-neutral-800 text-white"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="username"

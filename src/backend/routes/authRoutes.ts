@@ -24,6 +24,11 @@ router.post(
     .isLength({ min: 5, max: 50 })
     .matches(/^[a-zA-Z0-9_]+$/)
     .escape(),
+  body("name")
+    .trim()
+    .notEmpty()
+    .isLength({ min: 1, max: 100 })
+    .escape(),
   body("email").trim().notEmpty().isEmail(),
   body("password")
     .trim()
@@ -47,6 +52,7 @@ router.post(
       const user = await prisma.users.create({
         data: {
           username: data.username,
+          name: data.name,
           email: data.email,
           password_hash: hash,
           firebase_uid: data.firebase_uid,
@@ -57,6 +63,7 @@ router.post(
         message: "User created successfully",
         user: {
           username: user.username,
+          name: user.name,
           email: user.email,
         },
       });
