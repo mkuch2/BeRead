@@ -60,7 +60,7 @@ export function Post({
         );
 
         console.log("reactions", reactions);
-        setUserReaction(reactions.data.type);
+        setUserReaction(reactions.data?.type || null);
       } catch (e) {
         console.log("Error getting reaction: ", e);
         setReactionError("Error getting reactions");

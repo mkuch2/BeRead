@@ -351,7 +351,11 @@ router.get(
 
       if (!uid || !comment_id) {
         res.status(400).json({ error: "Missing either userid or comment_id" });
+        return;
       }
+
+      console.log("Uid: ", uid);
+      console.log("Server Comment id:", comment_id);
 
       const reaction = await prisma.comment_reactions.findUnique({
         where: {
@@ -379,6 +383,8 @@ router.post(
     try {
       const uid = req.user?.uid as string;
       const { comment_id, type } = req.body;
+
+      console.log("Post comment_id", comment_id);
 
       if (!uid) {
         res.status(400).json({ error: "User id not found" });
