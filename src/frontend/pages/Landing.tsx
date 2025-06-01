@@ -3,16 +3,6 @@ import { Link } from "react-router";
 function Landing() {
   return (
     <>
-      <header className="border border-zinc-600 flex justify-between items-center px-4 py-2 mb-2">
-        <div className="flex items-center space-x-4">
-          <h1 className="font-bold text-xl text-white">BeRead</h1>
-
-          <Link to="/friends" className="text-sm text-zinc-400 hover:text-white transition">Friends</Link>
-          <Link to="/profile" className="text-sm text-zinc-400 hover:text-white transition">Profile</Link>
-        </div>
-        <Link to="/login" className="text-sm font-light text-zinc-400">Login</Link>
-      </header>
-
       {/* Body */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left & center: Prompt + posts */}
@@ -22,7 +12,9 @@ function Landing() {
             <div className="flex justify-between items-center">
               <div>
                 <h2 className="text-lg font-semibold">Today's Prompt</h2>
-                <p className="text-sm text-zinc-400 mt-1">Admin Generated Prompt</p>
+                <p className="text-sm text-zinc-400 mt-1">
+                  Admin Generated Prompt
+                </p>
               </div>
               <Link
                 to="/addpost"
@@ -49,7 +41,9 @@ function Landing() {
           <div className="flex flex-col items-center">
             {/* Replace with real book data later */}
             <div className="w-24 h-36 bg-zinc-700 rounded mb-2"></div>
-            <p className="text-sm text-zinc-300 mt-1 text-center">The Midnight Library</p>
+            <p className="text-sm text-zinc-300 mt-1 text-center">
+              The Midnight Library
+            </p>
           </div>
         </aside>
       </div>
