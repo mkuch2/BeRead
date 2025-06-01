@@ -2,6 +2,8 @@ import { Link } from "react-router";
 import { useEffect, useState } from "react";
 import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import axios from "axios";
+import { type PostInterface } from "./PostSearch";
+import { Post } from "./Post";
 
 export default function HomeDashboard() {
   const { currentUser } = useAuthContext() as AuthContextType;
@@ -11,9 +13,27 @@ export default function HomeDashboard() {
   const [currentlyReadingThumb, setCurrentlyReadingThumb] = useState<
     string | null
   >(null);
+  const [posts, setPosts] = useState<PostInterface[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   console.log(currentUser);
+
+  useEffect(() => {
+    setLoading(true);
+    async function getPosts() {
+      try {
+        const response = await axios.get("/api/posts/recent");
+
+        setPosts(response.data);
+      } catch (e) {
+        console.log("Error getting posts", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    getPosts();
+  }, [currentUser]);
 
   useEffect(() => {
     setLoading(true);
@@ -43,8 +63,6 @@ export default function HomeDashboard() {
     getCurrentlyReading();
   }, [currentUser]);
 
-  console.log(currentlyReadingThumb);
-
   return (
     <>
       {/* Body */}
@@ -71,10 +89,35 @@ export default function HomeDashboard() {
 
           {/* Most Recent Posts */}
           <section>
-            <p className="text-sm italic text-zinc-400 mb-2">Most Recent</p>
+            <p className="text-sm italic text-zinc-400 mb-2">Today's Posts</p>
             {/* Replace with post list later */}
             <div className="text-center text-zinc-500 py-8 border border-zinc-700 rounded-lg">
-              TODO: Display recent posts here
+              {loading ? (
+                <div className="text-center text-zinc-500 py-8">
+                  Loading posts...
+                </div>
+              ) : posts.length === 0 ? (
+                <div className="text-center text-zinc-500 py-8">
+                  No posts today.
+                </div>
+              ) : (
+                <div className="space-y-2 p-2">
+                  {posts.map((post) => (
+                    <Post
+                      key={post.id}
+                      username={post.username}
+                      published_at={post.published_at}
+                      title={post.book_title}
+                      content={post.content}
+                      quote={post.quote}
+                      likes={post.likes}
+                      dislikes={post.dislikes}
+                      post_id={post.id}
+                      author={post.author}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </section>
         </div>
