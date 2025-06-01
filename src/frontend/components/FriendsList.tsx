@@ -1,0 +1,116 @@
+import axios from "axios";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/frontend/components/ui/card";
+
+import { useEffect, useState } from "react";
+import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
+import NavBar from "./NavBar";
+
+interface FriendInterface {
+  uid: string;
+  username: string;
+  name: string;
+  currentlyReadingTitle: string;
+  currentlyReadingThumbnail: string;
+}
+
+export default function FriendsList() {
+  const [loading, setLoading] = useState<boolean>(false);
+  const [friends, setFriends] = useState<FriendInterface[]>([]);
+  const { currentUser, getToken } = useAuthContext() as AuthContextType;
+
+  useEffect(() => {
+    async function getFriends() {
+      if (!currentUser) {
+        console.log("Current user not found");
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const token = await getToken();
+
+        const response = await axios.get("/api/friends", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const friends = response.data.map((relationship) => {
+          if (relationship.requester_id === currentUser?.uid) {
+            return {
+              uid: relationship.addressee_id,
+              username: relationship.addressee.username,
+              name: relationship.addressee.name,
+              currentlyReadingTitle:
+                relationship.addressee.currentlyReadingTitle,
+              currentlyReadingThumbnail:
+                relationship.addressee.currentlyReadingThumbnail,
+            };
+          } else {
+            return {
+              uid: relationship.requester_id,
+              username: relationship.requester.username,
+              name: relationship.requester.name,
+              currentlyReadingTitle:
+                relationship.requester.currentlyReadingTitle,
+              currentlyReadingThumbnail:
+                relationship.requester.currentlyReadingThumbnail,
+            };
+          }
+        });
+
+        setFriends(friends);
+      } catch (e) {
+        console.log("Error getting friends: ", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    getFriends();
+  }, [currentUser, getToken]);
+
+  if (loading) {
+    return <div>Loading friends...</div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      <NavBar />
+      <h2 className="text-xl font-semibold">Friends List</h2>
+      {friends.length === 0 ? (
+        <p className="text-gray-500">
+          No friends yet. Send some friend requests!
+        </p>
+      ) : (
+        <div className="grid gap-4">
+          {friends.map((friend) => (
+            <Card key={friend.uid} className="p-4">
+              <CardHeader>
+                <CardTitle>{friend.name || friend.username}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600">@{friend.username}</p>
+                {friend.currentlyReadingTitle && (
+                  <div className="mt-2">
+                    <p className="text-sm">Currently Reading:</p>
+                    <p className="font-medium">
+                      {friend.currentlyReadingTitle}
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
