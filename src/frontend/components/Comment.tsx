@@ -53,6 +53,8 @@ export function Comment({
     async function getReactions() {
       if (!currentUser) return;
 
+      console.log("Comment id:", comment_id);
+
       try {
         const token = await getToken();
 
@@ -67,7 +69,7 @@ export function Comment({
 
         console.log("Comment reactions", reactions);
 
-        setUserReaction(reactions.data.type);
+        setUserReaction(reactions.data?.type || null);
       } catch (e) {
         console.log("Error getting comment reactions: ", e);
         setReactionError("Error getting comment reactions");

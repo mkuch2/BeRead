@@ -14,13 +14,13 @@ const DisplayPost = () => {
   const [post, setPost] = useState<PostInterface>(state.post);
   const [loading, setLoading] = useState<boolean>(false);
 
-  console.log("Post: ", post);
+  const postId = state.post.id;
 
   useEffect(() => {
     async function getPost() {
       setLoading(true);
       try {
-        const response = await axios.get(`api/post/${post.id}`);
+        const response = await axios.get(`/api/post/${postId}`);
         setPost((post) => ({
           ...post,
           likes: response.data.likes,
@@ -34,13 +34,13 @@ const DisplayPost = () => {
     }
 
     getPost();
-  }, [post.id]);
+  }, [postId]);
 
   useEffect(() => {
     async function getComments() {
       try {
         const response = await axios.get(
-          `/api/comments?query=${encodeURIComponent(post.id)}`
+          `/api/comments?query=${encodeURIComponent(postId)}`
         );
 
         console.log("Comments promise: ", response);
@@ -52,7 +52,19 @@ const DisplayPost = () => {
     }
 
     getComments();
-  }, [post.id, comments]);
+  }, [postId]);
+
+  const refreshComments = async () => {
+    try {
+      const response = await axios.get(
+        `/api/comments?query=${encodeURIComponent(postId)}`
+      );
+      setComments(response.data);
+      console.log("Comments refreshed after new comment");
+    } catch (e) {
+      console.log("Error refreshing comments: ", e);
+    }
+  };
 
   console.log("Comments: ", comments);
   console.log("Authors in DisplayPost:", post.author);
@@ -75,7 +87,7 @@ const DisplayPost = () => {
             post_id={post.id}
             author={post.author}
           ></Post>
-          <CommentForm post_id={post.id} />
+          <CommentForm post_id={post.id} onCommentAdd={refreshComments} />
           <div>
             {comments.map((comment) => (
               <Comment

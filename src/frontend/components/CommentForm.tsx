@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 interface CommentFormProps {
   post_id: string;
+  onCommentAdd?: () => void;
 }
 
 const CommentSchema = z.object({
@@ -31,7 +32,10 @@ const CommentSchema = z.object({
 
 type FormFields = z.infer<typeof CommentSchema>;
 
-export default function CommentForm({ post_id }: CommentFormProps) {
+export default function CommentForm({
+  post_id,
+  onCommentAdd,
+}: CommentFormProps) {
   const [uid, setUid] = useState<string | null>(null);
   const [username, setUsername] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -98,6 +102,10 @@ export default function CommentForm({ post_id }: CommentFormProps) {
       console.log(createdComment);
 
       form.reset();
+
+      if (onCommentAdd) {
+        onCommentAdd();
+      }
     } catch (e) {
       console.log("Error creating post: ", e);
 
