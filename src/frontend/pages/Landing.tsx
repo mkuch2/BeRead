@@ -2,15 +2,15 @@ import { Link } from "react-router";
 
 function Landing() {
   return (
-    <>
-      <header className="border border-zinc-600 flex justify-between items-center px-4 py-2 mb-2">
+    <div className="w-screen">
+      <header className="border border-zinc-600 flex justify-between items-center mb-2 border-l-0 border-r-0 border-t-0">
         <div className="flex items-center space-x-4">
-          <h1 className="font-bold text-xl text-white">BeRead</h1>
+          <h1 className="font-bold text-xl text-white ml-1">BeRead</h1>
 
           <Link to="/friends" className="text-sm text-zinc-400 hover:text-white transition">Friends</Link>
           <Link to="/display-profile" className="text-sm text-zinc-400 hover:text-white transition">Profile</Link>
         </div>
-        <Link to="/login" className="text-sm font-light text-zinc-400">Login</Link>
+        <Link to="/login" className="text-sm font-light text-zinc-400 mr-1">Login</Link>
       </header>
 
       {/* Body */}
@@ -57,7 +57,7 @@ function Landing() {
           </div>
         </aside>
       </div>
-    </>
+    </div>
   );
 }
 
