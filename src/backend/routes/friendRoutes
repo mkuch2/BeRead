@@ -1,0 +1,111 @@
+import { type Request, type Response, Router } from "express";
+import prismaClient from "../prismaClient";
+import verifyToken, { type AuthRequest } from "../middleware/authMiddleware";
+import { body, query, matchedData, validationResult } from "express-validator";
+
+const router: Router = Router();
+const prisma = prismaClient;
+
+router.post(
+  "/friend-request",
+  verifyToken,
+  async (req: AuthRequest, res: Response) => {
+    const { addressee_id } = req.body;
+    const requester_id = req.user?.uid as string;
+
+    try {
+      const relationship = await prisma.relationships.create({
+        data: {
+          requester_id: requester_id,
+          addressee_id: addressee_id,
+          status: "PENDING",
+        },
+      });
+      res.json(relationship);
+    } catch (e) {
+      res.status(400).json({ error: "Friend request failed" });
+    }
+  }
+);
+
+router.put(
+  "/friend-request/:id",
+  verifyToken,
+  async (req: AuthRequest, res: Response) => {
+    const req_id = req.params.id;
+    const { status } = req.body;
+    const uid = req.user?.uid;
+
+    try {
+      const relationship = await prisma.relationships.update({
+        where: {
+          id: req_id,
+          addressee_id: uid,
+        },
+        data: { status },
+      });
+      res.json(relationship);
+    } catch (e) {
+      res.status(400).json({ error: "Update failed" });
+    }
+  }
+);
+
+router.get("/friends", verifyToken, async (req: AuthRequest, res: Response) => {
+  const uid = req.user?.uid;
+
+  try {
+    const friends = await prisma.relationships.findMany({
+      where: {
+        OR: [
+          { requester_id: uid, status: "ACCEPTED" },
+          { addressee_id: uid, status: "ACCEPTED" },
+        ],
+      },
+      include: {
+        requester: {
+          select: {
+            username: true,
+            name: true,
+            currentlyReadingTitle: true,
+            currentlyReadingThumbnail: true,
+          },
+        },
+        addressee: {
+          select: {
+            username: true,
+            name: true,
+            currentlyReadingTitle: true,
+            currentlyReadingThumbnail: true,
+          },
+        },
+      },
+    });
+    res.json(friends);
+  } catch (e) {
+    res.status(500).json({ error: "Failed to get friends" });
+  }
+});
+
+router.get(
+  "/friend-requests",
+  verifyToken,
+  async (req: AuthRequest, res: Response) => {
+    const uid = req.user?.uid;
+
+    try {
+      const requests = await prisma.relationships.findMany({
+        where: {
+          addressee_id: uid,
+          status: "PENDING",
+        },
+        include: {
+          requester: { select: { username: true, name: true } },
+        },
+      });
+      res.json(requests);
+    } catch (e) {
+      res.status(500).json({ error: "Failed to get requests" });
+    }
+  }
+);

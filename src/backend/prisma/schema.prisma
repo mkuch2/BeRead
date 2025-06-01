@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output = "../generated/prisma/client"
 }
 
 datasource db {
@@ -8,26 +9,27 @@ datasource db {
 }
 
 model users {
+  id                                              String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  username                                        String              @unique @db.VarChar(50)
+  email                                           String              @unique @db.VarChar(255)
+  password_hash                                   String              @db.VarChar(255)
+  firebase_uid                                    String              @unique @db.VarChar(128)
+  bio                                             String?
+  name                                            String?             @db.VarChar(255)
+  currentlyReadingAuthors                         String?             @db.VarChar(500)
+  currentlyReadingId                              String?             @db.VarChar(255)
+  currentlyReadingThumbnail                       String?             @db.VarChar(500)
+  currentlyReadingTitle                           String?             @db.VarChar(255)
+  comment_reactions                               comment_reactions[]
+  comments                                        comments[]
+  favoriteBooks                                   FavoriteBook[]
+  posts                                           posts[]
+  reactions                                       reactions[]
 
-  id                        String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  username                  String         @unique @db.VarChar(50)
-  email                     String         @unique @db.VarChar(255)
-  password_hash             String         @db.VarChar(255)
-  firebase_uid              String         @unique @db.VarChar(128)
-  bio                       String?
-  name                      String?        @db.VarChar(255)
+  sentRequests              relationships[] @relation("UserRequests")     // Friend requests this user sent
+  receivedRequests          relationships[] @relation("UserAddressees")
   
-  // Currently Reading fields
-  currentlyReadingId        String?        @db.VarChar(255)
-  currentlyReadingTitle     String?        @db.VarChar(255)
-  currentlyReadingAuthors   String?        @db.VarChar(500)
-  currentlyReadingThumbnail String?        @db.VarChar(500)
   
-  comments                  comments[]
-  posts                     posts[]
-  reactions         reactions[]
-  comment_reactions comment_reactions[]
-  favoriteBooks             FavoriteBook[]
 
   @@index([email], map: "idx_users_email")
   @@index([username], map: "idx_users_username")
@@ -63,9 +65,9 @@ model comments {
   replies           String[]            @db.Uuid
   likes             Int                 @default(0)
   dislikes          Int                 @default(0)
+  comment_reactions comment_reactions[]
   users             users               @relation(fields: [user_id], references: [firebase_uid], onDelete: Cascade, onUpdate: NoAction, map: "fk_comment_author")
   posts             posts               @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_comment_post")
-  comment_reactions comment_reactions[]
 
   @@index([post_id], map: "idx_comments_post_id")
   @@index([user_id], map: "idx_comments_user_id")
@@ -76,9 +78,8 @@ model reactions {
   user_id String @db.VarChar(128)
   post_id String @db.Uuid
   type    String
-
-  users users @relation(fields: [user_id], references: [firebase_uid], onDelete: Cascade, map: "fk_reaction_author")
-  posts posts @relation(fields: [post_id], references: [id], onDelete: Cascade, map: "fk_reaction_post")
+  users   users  @relation(fields: [user_id], references: [firebase_uid], onDelete: Cascade, map: "fk_reaction_author")
+  posts   posts  @relation(fields: [post_id], references: [id], onDelete: Cascade, map: "fk_reaction_post")
 
   @@unique([user_id, post_id], name: "user_post_reaction")
   @@index([post_id], map: "idx_reactions_post_id")
@@ -86,13 +87,12 @@ model reactions {
 }
 
 model comment_reactions {
-  id         String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  user_id    String @db.VarChar(128)
-  comment_id String @db.Uuid
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id    String   @db.VarChar(128)
+  comment_id String   @db.Uuid
   type       String
-
-  users    users    @relation(fields: [user_id], references: [firebase_uid], onDelete: Cascade, map: "fk_comment_reaction_author")
-  comments comments @relation(fields: [comment_id], references: [id], onDelete: Cascade, map: "fk_comment_reaction_comment")
+  users      users    @relation(fields: [user_id], references: [firebase_uid], onDelete: Cascade, map: "fk_comment_reaction_author")
+  comments   comments @relation(fields: [comment_id], references: [id], onDelete: Cascade, map: "fk_comment_reaction_comment")
 
   @@unique([user_id, comment_id], name: "user_comment_reaction")
   @@index([comment_id], map: "idx_comment_reactions_comment_id")
@@ -100,15 +100,31 @@ model comment_reactions {
 }
 
 model FavoriteBook {
-  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  bookId       String   @db.VarChar(255)
-  title        String   @db.VarChar(255)
-  authors      String   @db.VarChar(500)
-  thumbnail    String?  @db.VarChar(500)
-  userId       String   @map("user_id") @db.VarChar(128)
-  user         users    @relation(fields: [userId], references: [firebase_uid], onDelete: Cascade, onUpdate: NoAction, map: "fk_favorite_user")
+  id        String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  bookId    String  @db.VarChar(255)
+  title     String  @db.VarChar(255)
+  authors   String  @db.VarChar(500)
+  thumbnail String? @db.VarChar(500)
+  userId    String  @map("user_id") @db.VarChar(128)
+  user      users   @relation(fields: [userId], references: [firebase_uid], onDelete: Cascade, onUpdate: NoAction, map: "fk_favorite_user")
 
   @@unique([userId, bookId], map: "unique_user_book")
   @@index([userId], map: "idx_favorite_books_user_id")
   @@map("favorite_books")
+}
+
+model relationships {
+  id           String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  requester_id String            @db.VarChar(128)  // User who sent the request
+  addressee_id String            @db.VarChar(128)  // User who received the request
+  status       String @default("PENDING")
+
+
+  requester users @relation("UserRequests", fields: [requester_id], references: [firebase_uid], onDelete: Cascade)
+  addressee users @relation("UserAddressees", fields: [addressee_id], references: [firebase_uid], onDelete: Cascade)
+
+  @@unique([requester_id, addressee_id], name: "unique_relationship")
+  @@index([requester_id], map: "idx_relationships_requester")
+  @@index([addressee_id], map: "idx_relationships_addressee")
+  @@index([status], map: "idx_relationships_status")
 }
