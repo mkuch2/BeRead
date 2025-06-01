@@ -1,4 +1,3 @@
-// src/app/components/Post.tsx
 import {
   Card,
   CardHeader,
@@ -60,10 +59,16 @@ export function Post({
         );
 
         console.log("reactions", reactions);
-        setUserReaction(reactions.data.type);
+        
+        if (reactions.data && reactions.data.type) {
+          setUserReaction(reactions.data.type);
+        } else {
+          setUserReaction(null);
+        }
       } catch (e) {
         console.log("Error getting reaction: ", e);
         setReactionError("Error getting reactions");
+        setUserReaction(null);
       }
     }
 
@@ -125,7 +130,7 @@ export function Post({
       </CardContent>
       <CardFooter className="mt-4 pt-4 border-t">
         <blockquote className="italic text-sm text-muted-foreground">
-          “{quote}”
+          "{quote}"
         </blockquote>
         <div className="flex space-x-4 justify-end">
           <button

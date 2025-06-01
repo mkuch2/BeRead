@@ -13,7 +13,6 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
   console.log("=== Auth Middleware Debug ===");
   console.log("All headers:", Object.keys(req.headers));
   console.log("Authorization header:", req.headers.authorization);
-  console.log("Auth header (custom):", req.headers.auth);
   
   const authHeader = req.headers.authorization;
   

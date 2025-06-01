@@ -63,7 +63,7 @@ const BookSearch = ({ onSelectBook }: BookSearchProps) => {
             Friends
           </Link>
           <Link
-            to="/profile"
+            to="/display-profile"
             className="text-sm text-zinc-400 hover:text-white transition"
           >
             Profile
