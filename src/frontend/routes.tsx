@@ -8,6 +8,7 @@ import DisplayProfile from "./pages/profile/DisplayProfile.tsx";
 import AddPost from "./pages/posts/AddPost.tsx";
 import EditProfile from "./pages/profile/EditProfile.tsx";
 import DisplayPost from "./pages/posts/DisplayPost.tsx";
+import FriendsList from "./components/FriendsList.tsx";
 
 const router = createBrowserRouter([
   { path: "/", Component: Landing },
@@ -39,6 +40,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <EditProfile />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/friends",
+    element: (
+      <ProtectedRoute>
+        <FriendsList />
       </ProtectedRoute>
     ),
   },
