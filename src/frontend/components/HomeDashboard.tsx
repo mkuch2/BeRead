@@ -1,8 +1,49 @@
 import { Link } from "react-router";
+import { useEffect, useState } from "react";
 import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
+import axios from "axios";
 
 export default function HomeDashboard() {
   const { currentUser } = useAuthContext() as AuthContextType;
+  const [currentlyReadingTitle, setCurrentlyReadingTitle] = useState<string>(
+    "Share your current read!"
+  );
+  const [currentlyReadingThumb, setCurrentlyReadingThumb] = useState<
+    string | null
+  >(null);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  console.log(currentUser);
+
+  useEffect(() => {
+    setLoading(true);
+    async function getCurrentlyReading() {
+      if (!currentUser) {
+        console.log("Could not get user");
+        return;
+      }
+
+      try {
+        const response = await axios.get(`/api/user/${currentUser.uid}`);
+
+        const title = response.data.currentlyReadingTitle;
+        const thumbnail = response.data.currentlyReadingThumbnail;
+
+        if (title) {
+          setCurrentlyReadingTitle(title);
+          setCurrentlyReadingThumb(thumbnail);
+        }
+      } catch (e) {
+        console.log("Error getting user's reading information", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    getCurrentlyReading();
+  }, [currentUser]);
+
+  console.log(currentlyReadingThumb);
 
   return (
     <>
@@ -43,7 +84,6 @@ export default function HomeDashboard() {
           <aside className="bg-zinc-900 border border-zinc-700 rounded-lg p-4">
             <h2 className="text-lg font-semibold mb-4">Currently Reading</h2>
             <div className="flex flex-col items-center">
-              {/* Replace with real book data later */}
               <div className="w-24 h-36 bg-zinc-700 rounded mb-2"></div>
               <p className="text-sm text-zinc-300 mt-1 text-center">
                 <Link to="/signup" className="font-bold underline">
@@ -57,10 +97,23 @@ export default function HomeDashboard() {
           <aside className="bg-zinc-900 border border-zinc-700 rounded-lg p-4">
             <h2 className="text-lg font-semibold mb-4">Currently Reading</h2>
             <div className="flex flex-col items-center">
-              {/* Replace with real book data later */}
-              <div className="w-24 h-36 bg-zinc-700 rounded mb-2"></div>
+              {currentlyReadingTitle === "Share your current read!" &&
+              !loading ? (
+                <Link to="/display-profile">
+                  <div className="w-24 h-36 bg-zinc-700 rounded mb-2 flex items-center justify-center">
+                    <span className="text-zinc-400 text-3xl">+</span>
+                  </div>
+                </Link>
+              ) : (
+                <div className="w-24 h-36 bg-zinc-700 rounded mb-2">
+                  <img
+                    src={currentlyReadingThumb as string}
+                    alt="Cover of user's currently reading book"
+                  />
+                </div>
+              )}
               <p className="text-sm text-zinc-300 mt-1 text-center">
-                The Midnight Library
+                {currentlyReadingTitle}
               </p>
             </div>
           </aside>
