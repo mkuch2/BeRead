@@ -116,8 +116,30 @@ router.post(
   }
 );
 
+router.get("/posts/recent", async (req: Request, res: Response) => {
+  const timeCutoff = new Date();
+  timeCutoff.setHours(timeCutoff.getHours() - 24);
+
+  try {
+    const posts = await prisma.posts.findMany({
+      where: {
+        published_at: {
+          gte: timeCutoff,
+        },
+      },
+      orderBy: { published_at: "desc" },
+      take: 20,
+    });
+
+    res.status(200).json(posts);
+  } catch (e) {
+    console.log("Error getting recent posts, ", e);
+    res.status(500).json({ error: "Server failed to get recent posts" });
+  }
+});
+
 router.get(
-  "/posts",
+  "/posts/search",
   query("query").isString().trim().isLength({ max: 100 }).escape(),
   async (req: Request, res: Response): Promise<void> => {
     const errors = validationResult(req);

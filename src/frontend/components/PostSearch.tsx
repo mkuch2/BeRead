@@ -28,7 +28,7 @@ const PostSearch = () => {
 
     try {
       const response = await axios.get(
-        `/api/posts?query=${encodeURIComponent(query)}`
+        `/api/posts/search?query=${encodeURIComponent(query)}`
       );
 
       console.log("searchposts response: ", response);
