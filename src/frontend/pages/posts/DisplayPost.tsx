@@ -1,10 +1,11 @@
 import { useLocation } from "react-router";
 import { useState, useEffect } from "react";
-import { type PostInterface } from "../components/PostSearch";
-import { Post } from "../components/Post";
-import CommentForm from "../components/CommentForm";
-import Comment, { type CommentInterface } from "../components/Comment";
+import { type PostInterface } from "../../components/PostSearch";
+import { Post } from "../../components/Post";
+import CommentForm from "../../components/CommentForm";
+import Comment, { type CommentInterface } from "../../components/Comment";
 import axios from "axios";
+import NavBar from "../../components/NavBar";
 
 const DisplayPost = () => {
   const { state } = useLocation();
@@ -51,13 +52,14 @@ const DisplayPost = () => {
     }
 
     getComments();
-  }, [post.id]);
+  }, [post.id, comments]);
 
   console.log("Comments: ", comments);
   console.log("Authors in DisplayPost:", post.author);
 
   return (
     <>
+      <NavBar />
       {loading ? (
         <div>Loading...</div>
       ) : (

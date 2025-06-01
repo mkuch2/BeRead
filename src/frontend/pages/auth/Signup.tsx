@@ -22,7 +22,6 @@ import { useState } from "react";
 
 // Validation schema
 const User = z.object({
-  
   username: z
     .string()
     .trim()
@@ -76,71 +75,74 @@ function Signup() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
-  setIsSubmitting(true);
-  try {
-    // create firebase user
-    await signUp(data.email, data.password);
-    const firebase_uid: string = getFirebaseId();
+    setIsSubmitting(true);
+    try {
+      // create firebase user
+      await signUp(data.email, data.password);
+      const firebase_uid: string = getFirebaseId();
 
-    // create user in backend
-    await axios.post("/api/signup", {
-      username: data.username,
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      firebase_uid: firebase_uid,
-    });
-
-    navigate("/");
-  } catch (e: any) {
-    console.error("Signup error:", e);
-
-    if (e.code && e.message) {
-      form.setError("root", {
-        type: "firebase",
-        message: `Firebase error: ${e.message}`,
+      // create user in backend
+      await axios.post("/api/signup", {
+        username: data.username,
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        firebase_uid: firebase_uid,
       });
-      return;
-    }
 
-    if (isAxiosError(e)) {
-      const user = getUser();
-      if (user) {
-        try {
-          await user.delete();
-          console.log("Deleted Firebase user due to backend error");
-        } catch (deleteError) {
-          console.log("Error deleting Firebase user:", deleteError);
-        }
+      navigate("/home");
+    } catch (e: any) {
+      console.error("Signup error:", e);
+
+      if (e.code && e.message) {
+        form.setError("root", {
+          type: "firebase",
+          message: `Firebase error: ${e.message}`,
+        });
+        return;
       }
 
-      if (e.response) {
-        const errorMessage = e.response.data?.errors?.[0]?.msg || e.response.data?.message || "Server error occurred";
-        form.setError("root", {
-          type: "server",
-          message: errorMessage,
-        });
-      } else if (e.request) {
-        form.setError("root", {
-          type: "server",
-          message: "No response received from server",
-        });
+      if (isAxiosError(e)) {
+        const user = getUser();
+        if (user) {
+          try {
+            await user.delete();
+            console.log("Deleted Firebase user due to backend error");
+          } catch (deleteError) {
+            console.log("Error deleting Firebase user:", deleteError);
+          }
+        }
+
+        if (e.response) {
+          const errorMessage =
+            e.response.data?.errors?.[0]?.msg ||
+            e.response.data?.message ||
+            "Server error occurred";
+          form.setError("root", {
+            type: "server",
+            message: errorMessage,
+          });
+        } else if (e.request) {
+          form.setError("root", {
+            type: "server",
+            message: "No response received from server",
+          });
+        } else {
+          form.setError("root", {
+            type: "server",
+            message: "Network error occurred",
+          });
+        }
       } else {
         form.setError("root", {
           type: "server",
-          message: "Network error occurred",
+          message: "An unknown error occurred",
         });
       }
-    } else {
-      form.setError("root", {
-        type: "server",
-        message: "An unknown error occurred",
-      });
+    } finally {
+      setIsSubmitting(false);
     }
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center text-white font-sans">

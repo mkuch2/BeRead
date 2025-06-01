@@ -22,7 +22,9 @@ function Landing() {
             <div className="flex justify-between items-center">
               <div>
                 <h2 className="text-lg font-semibold">Today's Prompt</h2>
-                <p className="text-sm text-zinc-400 mt-1">Admin Generated Prompt</p>
+                <p className="text-sm text-zinc-400 mt-1">
+                  Admin Generated Prompt
+                </p>
               </div>
               <Link
                 to="/addpost"
@@ -49,7 +51,9 @@ function Landing() {
           <div className="flex flex-col items-center">
             {/* Replace with real book data later */}
             <div className="w-24 h-36 bg-zinc-700 rounded mb-2"></div>
-            <p className="text-sm text-zinc-300 mt-1 text-center">The Midnight Library</p>
+            <p className="text-sm text-zinc-300 mt-1 text-center">
+              The Midnight Library
+            </p>
           </div>
         </aside>
       </div>
