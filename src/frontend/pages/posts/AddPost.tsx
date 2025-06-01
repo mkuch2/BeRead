@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
+import { useNavigate } from "react-router";
 import { Button } from "@/frontend/components/ui/button";
 import { Input } from "@/frontend/components/ui/input";
 import { Textarea } from "@/frontend/components/ui/textarea";
@@ -11,12 +12,15 @@ import {
   FormControl,
   FormMessage,
 } from "@/frontend/components/ui/form";
-import { Post } from "@/frontend/components/Post";
-import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
-import BookSearch from "../components/BookSearch";
+import {
+  useAuthContext,
+  type AuthContextType,
+} from "../../hooks/useAuthContext";
+import BookSearch from "../../components/BookSearch";
 import axios from "axios";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import NavBar from "../../components/NavBar";
 
 interface Book {
   id: string;
@@ -38,6 +42,8 @@ interface Post {
   likes: number;
   dislikes: number;
   author: string[];
+  user_id: string;
+  id: string;
 }
 
 const PostSchema = z.object({
@@ -67,11 +73,12 @@ type FormFields = z.infer<typeof PostSchema>;
 
 export default function AddPost() {
   const { currentUser, getToken } = useAuthContext() as AuthContextType;
-  const [posts, setPosts] = useState<Post[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [uid, setUid] = useState<string | null>(null);
   const [username, setUsername] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+
+  const navigate = useNavigate();
 
   //Get user's (Firebase) uid
   useEffect(() => {
@@ -121,15 +128,13 @@ export default function AddPost() {
   const onSubmit: SubmitHandler<FormFields> = async (data: FormFields) => {
     console.log("Submitted post:", data);
 
-    console.log(username);
-
     const token = await getToken();
 
     setLoading(true);
 
     //Send post to database
     try {
-      const createdPost = await axios.post(
+      const response = await axios.post(
         "/api/post",
         {
           user_id: uid,
@@ -147,24 +152,10 @@ export default function AddPost() {
         }
       );
 
-      setPosts((prev) => [
-        ...prev,
-        {
-          book_title: createdPost.data.book_title,
-          pages: createdPost.data.pages,
-          quote: createdPost.data.quote,
-          content: createdPost.data.content,
-          username: createdPost.data.username,
-          published_at: createdPost.data.published_at,
-          post_id: createdPost.data.id,
-          likes: createdPost.data.likes,
-          dislikes: createdPost.data.dislikes,
-          author: createdPost.data.author || [],
-        },
-      ]);
       setSelectedBook(null);
 
       form.reset();
+      navigate("/display-post", { state: { post: response.data } });
     } catch (e) {
       console.log("Error creating post: ", e);
 
@@ -179,6 +170,7 @@ export default function AddPost() {
 
   return (
     <>
+      <NavBar />
       {!selectedBook ? (
         <BookSearch onSelectBook={handleBookSelect} />
       ) : (
@@ -267,24 +259,6 @@ export default function AddPost() {
           </Form>
         </>
       )}
-
-      {/* Render new posts immediately below the form */}
-      <div className="mt-8 space-y-6">
-        {posts.map((p) => (
-          <Post
-            key={p.post_id}
-            username={p.username}
-            published_at={p.published_at}
-            title={p.book_title}
-            content={p.content}
-            quote={p.quote}
-            likes={0}
-            dislikes={0}
-            post_id={p.post_id}
-            author={p.author}
-          />
-        ))}
-      </div>
     </>
   );
 }
