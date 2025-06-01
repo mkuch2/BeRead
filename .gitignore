@@ -27,3 +27,6 @@ dist-ssr
 
 #Prisma
 src/backend/generated/prisma/
+
+src/backend/service-account-file.json
+src/backend/cs-35l-9a5f0-firebase-adminsdk-fbsvc-2f3919cb5a.json

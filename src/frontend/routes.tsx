@@ -5,10 +5,9 @@ import Login from "./pages/auth/Login";
 import Home from "./pages/Home";
 import ProtectedRoute from "./ProtectedRoute";
 import DisplayProfile from "./pages/profile/DisplayProfile.tsx";
-import BookSearch from "./components/BookSearch.tsx";
-import AddPost from "./pages/AddPost";
+import AddPost from "./pages/posts/AddPost.tsx";
 import EditProfile from "./pages/profile/EditProfile.tsx";
-import DisplayPost from "./pages/DisplayPost.tsx";
+import DisplayPost from "./pages/posts/DisplayPost.tsx";
 
 const router = createBrowserRouter([
   { path: "/", Component: Landing },
@@ -23,14 +22,9 @@ const router = createBrowserRouter([
     ),
   },
   { path: "/display-post", Component: DisplayPost },
-
   {
     path: "/home",
-    element: (
-      <ProtectedRoute>
-        <Home />
-      </ProtectedRoute>
-    ),
+    Component: Home,
   },
   {
     path: "/display-profile",
@@ -48,8 +42,6 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
-
-  { path: "/books", Component: BookSearch }, // book search page
 ]);
 
 export default router;

@@ -6,51 +6,60 @@ import {
   CardFooter,
 } from "@/frontend/components/ui/card";
 import { formatDate } from "../lib/utils";
-import { useEffect, useState } from "react";
 import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import axios from "axios";
+import { useEffect, useState } from "react";
 
-interface PostProps {
+export interface CommentProps {
   username: string;
   published_at: string;
-  title: string;
   content: string;
-  quote: string;
+  replies: CommentInterface[];
   likes: number;
   dislikes: number;
-  post_id: string;
-  author: string[];
+  comment_id: string;
 }
 
-export function Post({
+export interface CommentInterface {
+  id: string;
+  user_id: string;
+  post_id: string;
+  content: string;
+  published_at: string;
+  username: string;
+  replies: CommentInterface[];
+  likes: number;
+  dislikes: number;
+}
+
+export function Comment({
   username,
   published_at,
-  title,
   content,
-  quote,
+  replies,
   likes: initialLikes,
   dislikes: initialDislikes,
-  post_id,
-  author,
-}: PostProps) {
-  const [userReaction, setUserReaction] = useState<string | null>(null);
+  comment_id,
+}: CommentProps) {
+  const formattedDate = formatDate(published_at);
   const [loading, setLoading] = useState<boolean>(false);
   const [likes, setLikes] = useState<number>(initialLikes);
   const [dislikes, setDislikes] = useState<number>(initialDislikes);
   const [reactionError, setReactionError] = useState<string>("");
   const { currentUser, getToken } = useAuthContext() as AuthContextType;
-
-  const formattedDate = formatDate(published_at);
+  const [userReaction, setUserReaction] = useState<string | null>(null);
 
   useEffect(() => {
     async function getReactions() {
       if (!currentUser) return;
 
+      console.log("Comment id:", comment_id);
+
       try {
         const token = await getToken();
 
         const reactions = await axios.get(
-          `/api/reaction?query=${encodeURIComponent(post_id)}`,
+          `/api/comment-reaction?query=${encodeURIComponent(comment_id)}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -58,17 +67,17 @@ export function Post({
           }
         );
 
-        console.log("reactions", reactions);
+        console.log("Comment reactions", reactions);
+
         setUserReaction(reactions.data?.type || null);
       } catch (e) {
-        console.log("Error getting reaction: ", e);
-        setReactionError("Error getting reactions");
-        setUserReaction(null);
+        console.log("Error getting comment reactions: ", e);
+        setReactionError("Error getting comment reactions");
       }
     }
 
     getReactions();
-  }, [currentUser, post_id, getToken]);
+  }, [currentUser, comment_id, getToken]);
 
   const handleReaction = async (type: string) => {
     if (!currentUser) return;
@@ -80,9 +89,9 @@ export function Post({
 
       const token = await getToken();
       const response = await axios.post(
-        "/api/reaction",
+        "/api/comment-reaction",
         {
-          post_id: post_id,
+          comment_id: comment_id,
           type: newType,
         },
         {
@@ -92,41 +101,26 @@ export function Post({
         }
       );
 
-      console.log("response", response);
+      console.log("comment reaction response", response);
 
       setUserReaction(newType === "none" ? null : newType);
-      setLikes(response.data.post.likes);
-      setDislikes(response.data.post.dislikes);
+      setLikes(response.data.comment.likes);
+      setDislikes(response.data.comment.dislikes);
     } catch (e) {
-      console.log("Error updating reaction: ", e);
-      setReactionError("Error updating reactions");
+      console.log("Error updating comment reaction: ", e);
+      setReactionError("Error updating comment reaction");
     } finally {
       setLoading(false);
     }
   };
 
-  console.log("User reaction", userReaction);
-
   return (
-    <Card className="max-w-2xl mx-auto mb-6">
+    <Card>
       <CardHeader>
-        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-          <span className="font-medium">{username}</span>
-          <span className="text-xs">posted</span>
-          <span className="text-xs">{formattedDate}</span>
-        </div>
-        <CardTitle className="mt-2 text-xl">{title}</CardTitle>
-        <CardTitle className="italic text-sm">{author.join(", ")}</CardTitle>
+        {username} posted at {formattedDate}:
       </CardHeader>
-      <CardContent className="mt-1">
-        <p className="whitespace-pre-wrap text-base text-foreground">
-          {content}
-        </p>
-      </CardContent>
-      <CardFooter className="mt-4 pt-4 border-t">
-        <blockquote className="italic text-sm text-muted-foreground">
-          "{quote}"
-        </blockquote>
+      <CardContent>
+        <div>{content}</div>
         <div className="flex space-x-4 justify-end">
           <button
             onClick={() => handleReaction("like")}
@@ -159,7 +153,9 @@ export function Post({
             </p>
           </button>
         </div>
-      </CardFooter>
+      </CardContent>
     </Card>
   );
 }
+
+export default Comment;

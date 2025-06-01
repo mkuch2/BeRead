@@ -33,6 +33,12 @@ const User = z.object({
     .regex(/^[a-zA-Z0-9_]+$/, {
       message: "Username can only consist of letters, numbers, and underscores",
     }),
+  name: z
+    .string()
+    .trim()
+    .nonempty({ message: "Please provide a name" })
+    .min(1, { message: "Name is required" })
+    .max(100, { message: "Name must be less than 100 characters" }),
   email: z
     .string()
     .trim()
@@ -45,8 +51,7 @@ const User = z.object({
     .min(8, { message: "Password must be at least 8 characters" })
     .max(50, { message: "Password must be less than 50 characters" })
     .regex(/^[a-zA-Z0-9!@#$%^&*]+$/, {
-      message:
-        "Password must contain only letters, numbers, and !@#$%^&*",
+      message: "Password must contain only letters, numbers, and !@#$%^&*",
     }),
 });
 
@@ -58,6 +63,7 @@ function Signup() {
     resolver: zodResolver(User),
     defaultValues: {
       username: "",
+      name: "",
       email: "",
       password: "",
     },
@@ -71,45 +77,60 @@ function Signup() {
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     setIsSubmitting(true);
     try {
-      //Add user to Firebase
+      // create firebase user
       await signUp(data.email, data.password);
-
-      //Get auth token
       const firebase_uid: string = getFirebaseId();
 
-      //Add user to database
+      // create user in backend
       await axios.post("/api/signup", {
         username: data.username,
+        name: data.name,
         email: data.email,
         password: data.password,
         firebase_uid: firebase_uid,
       });
 
-      navigate("/");
-    } catch (e) {
+      navigate("/home");
+    } catch (e: any) {
+      console.error("Signup error:", e);
+
+      if (e.code && e.message) {
+        form.setError("root", {
+          type: "firebase",
+          message: `Firebase error: ${e.message}`,
+        });
+        return;
+      }
+
       if (isAxiosError(e)) {
-        //Delete Firebase entry
         const user = getUser();
         if (user) {
-          try{
+          try {
             await user.delete();
-            console.log("Deleting User");
-          }
-          catch(deleteError){
+            console.log("Deleted Firebase user due to backend error");
+          } catch (deleteError) {
             console.log("Error deleting Firebase user:", deleteError);
           }
-        } 
-        
+        }
+
         if (e.response) {
-          //Server responded with error
+          const errorMessage =
+            e.response.data?.errors?.[0]?.msg ||
+            e.response.data?.message ||
+            "Server error occurred";
           form.setError("root", {
             type: "server",
-            message: "Unexpected server error",
+            message: errorMessage,
           });
         } else if (e.request) {
           form.setError("root", {
             type: "server",
             message: "No response received from server",
+          });
+        } else {
+          form.setError("root", {
+            type: "server",
+            message: "Network error occurred",
           });
         }
       } else {
@@ -146,7 +167,28 @@ function Signup() {
                 <FormItem>
                   <FormLabel className="text-white">Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="username" {...field} className="bg-neutral-800 text-white" />
+                    <Input
+                      placeholder="username"
+                      {...field}
+                      className="bg-neutral-800 text-white"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white">Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="full name"
+                      {...field}
+                      className="bg-neutral-800 text-white"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -159,7 +201,11 @@ function Signup() {
                 <FormItem>
                   <FormLabel className="text-white">Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="email" {...field} className="bg-neutral-800 text-white" />
+                    <Input
+                      placeholder="email"
+                      {...field}
+                      className="bg-neutral-800 text-white"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -184,7 +230,11 @@ function Signup() {
               )}
             />
 
-            <Button type="submit" disabled={isSubmitting} className="w-full mt-2">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full mt-2"
+            >
               {isSubmitting ? "Submitting..." : "Sign up"}
             </Button>
           </form>
