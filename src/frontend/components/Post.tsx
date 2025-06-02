@@ -9,6 +9,7 @@ import { formatDate } from "../lib/utils";
 import { useEffect, useState } from "react";
 import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import axios from "axios";
+import { decode } from "html-entities";
 
 interface PostProps {
   username: string;
@@ -41,6 +42,7 @@ export function Post({
   const { currentUser, getToken } = useAuthContext() as AuthContextType;
 
   const formattedDate = formatDate(published_at);
+  const decodedTitle = decode(title);
 
   useEffect(() => {
     async function getReactions() {
@@ -115,7 +117,7 @@ export function Post({
           <span className="text-xs">posted</span>
           <span className="text-xs">{formattedDate}</span>
         </div>
-        <CardTitle className="mt-2 text-xl">{title}</CardTitle>
+        <CardTitle className="mt-2 text-xl">{decodedTitle}</CardTitle>
         <CardTitle className="italic text-sm">{author.join(", ")}</CardTitle>
       </CardHeader>
       <CardContent className="mt-1">

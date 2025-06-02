@@ -55,8 +55,8 @@ const PostSearch = () => {
   const totalPages = Math.ceil(posts.length / postsPerPage);
 
   return (
-    <div className="space-y-3 mt-6">
-      <h1 className="text-xl font-semibold">My Posts</h1>
+    <div className="space-y-3 mt-6 border border-gray-700 rounded-lg">
+      <h1 className="text-xl font-semibold mt-6">My Posts</h1>
 
       <form onSubmit={searchPosts} className={cn("flex w-full max-w-xl mx-auto items-center gap-2")}>
         <Input
@@ -111,7 +111,7 @@ const PostSearch = () => {
 
           {/* ── PAGINATION CONTROLS ── */}
           {hasSearched && posts.length >= 0 && (
-            <div className="flex justify-center items-center space-x-4 mt-6">
+            <div className="flex justify-center items-center space-x-4 mt-6 mb-6">
               <Button
                 variant="outline"
                 size="sm"
