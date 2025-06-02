@@ -25,8 +25,13 @@ const PostSearch = () => {
   const [posts, setPosts] = useState<PostInterface[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+
   const [currentPage, setCurrentPage] = useState(1);
-  const postsPerPage = 5;
+  const postsPerPage = 3;
+  const [sortOrder, setSortOrder] = useState<
+    "newest" | "oldest" | "most-liked"
+  >("newest");
+  const [filter, setFilter] = useState<string>("");
 
   const searchPosts = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +45,8 @@ const PostSearch = () => {
       setHasSearched(true);
       setError(null);
       setCurrentPage(1);
+      setSortOrder("newest");
+      setFilter("");
     } catch (e) {
       if (e instanceof Error) {
         setError(e.message);
@@ -54,9 +61,33 @@ const PostSearch = () => {
   const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
   const totalPages = Math.ceil(posts.length / postsPerPage);
 
+  const filtered = posts.filter((p) => {
+    const term = filter.toLowerCase();
+    return (
+      p.book_title.toLowerCase().includes(term) ||
+      p.username.toLowerCase().includes(term)
+    );
+  });
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortOrder === "newest") {
+      return (
+        new Date(b.published_at).getTime() -
+        new Date(a.published_at).getTime()
+      );
+    } else if (sortOrder === "oldest") {
+      return (
+        new Date(a.published_at).getTime() -
+        new Date(b.published_at).getTime()
+      );
+    } else if (sortOrder === "most-liked") {
+      return b.likes - a.likes;
+    }
+    return 0;
+  });
+
   return (
     <div className="space-y-3 mt-6 border border-gray-700 rounded-lg">
-      <h1 className="text-xl font-semibold mt-6">My Posts</h1>
+      <h1 className="text-xl font-semibold mt-6">Search My Posts</h1>
 
       <form onSubmit={searchPosts} className={cn("flex w-full max-w-xl mx-auto items-center gap-2")}>
         <Input
@@ -79,14 +110,44 @@ const PostSearch = () => {
         )}
       </form>
 
-      {!posts.length && hasSearched ? (
+      {hasSearched && posts.length > 0 && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between max-w-xl mx-auto gap-4">
+          {/* 1) FILTER KEYWORD */}
+          <div className="flex-1">
+            <Input
+              placeholder="Filter by key-words"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="w-full"
+            />
+          </div>
+
+          {/* 2) SORT BY SELECT */}
+          <div>
+            <select
+              value={sortOrder}
+              onChange={(e) =>
+                setSortOrder(e.target.value as "newest" | "oldest" | "most-liked")
+              }
+              className="px-3 py-2 bg-gray-900 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="most-liked">Most Liked</option>
+            </select>
+          </div>
+        </div>
+      )}
+
+      {hasSearched && sorted.length === 0 ? (
         <div className="text-center">
-          <p className="text-lg font-medium">No posts found</p>
+          {filter ? ( <p className="text-lg font-medium">No posts match "{filter}"</p> )
+            : ( <p className="text-lg font-medium">No posts found</p> )}
         </div>
       ) : (
         <>
           <div className="books-grid mt-6">
-            {currentPosts.map((post) => (
+            {sorted.map((post) => (
               <Link
                 to="/display-post"
                 state={{ post: post }}
