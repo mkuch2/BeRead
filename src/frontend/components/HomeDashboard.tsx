@@ -83,7 +83,7 @@ export default function HomeDashboard() {
                 to="/add-post"
                 className="bg-white text-black px-4 py-1 text-sm rounded-full font-medium hover:opacity-90"
               >
-                Post
+                Add Post
               </Link>
             </div>
           </section>
