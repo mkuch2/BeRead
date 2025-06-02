@@ -9,15 +9,18 @@ import { formatDate } from "../lib/utils";
 import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import ReplyForm from "./ReplyForm";
+import { useCallback } from "react";
 
 export interface CommentProps {
   username: string;
   published_at: string;
   content: string;
-  replies: CommentInterface[];
   likes: number;
   dislikes: number;
   comment_id: string;
+  post_id: string;
+  onReplyAdd?: () => void;
 }
 
 export interface CommentInterface {
@@ -27,19 +30,21 @@ export interface CommentInterface {
   content: string;
   published_at: string;
   username: string;
-  replies: CommentInterface[];
+  replies?: CommentInterface[];
   likes: number;
   dislikes: number;
+  parent_comment_id?: string | null;
 }
 
 export function Comment({
   username,
   published_at,
   content,
-  replies,
   likes: initialLikes,
   dislikes: initialDislikes,
   comment_id,
+  post_id,
+  onReplyAdd,
 }: CommentProps) {
   const formattedDate = formatDate(published_at);
   const [loading, setLoading] = useState<boolean>(false);
@@ -48,6 +53,21 @@ export function Comment({
   const [reactionError, setReactionError] = useState<string>("");
   const { currentUser, getToken } = useAuthContext() as AuthContextType;
   const [userReaction, setUserReaction] = useState<string | null>(null);
+  const [replies, setReplies] = useState<CommentInterface[]>([]);
+  const [showReplyForm, setShowReplyForm] = useState<boolean>(false);
+
+  useEffect(() => {
+    async function getReplies() {
+      try {
+        const response = await axios.get(`/api/comments/replies/${comment_id}`);
+        setReplies(response.data);
+      } catch (e) {
+        console.log("Error getting replies: ", e);
+      }
+    }
+
+    getReplies();
+  }, [comment_id]);
 
   useEffect(() => {
     async function getReactions() {
@@ -114,47 +134,97 @@ export function Comment({
     }
   };
 
+  const handleReply = useCallback(async () => {
+    setShowReplyForm(false);
+
+    try {
+      const response = await axios.get(`/api/comments/replies/${comment_id}`);
+      setReplies(response.data);
+    } catch (e) {
+      console.log("Error getting replies in handleReply: ", e);
+    }
+
+    if (onReplyAdd) {
+      onReplyAdd();
+    }
+  }, [comment_id, onReplyAdd]);
+
   return (
-    <Card>
-      <CardHeader>
-        {username} posted at {formattedDate}:
-      </CardHeader>
-      <CardContent>
-        <div>{content}</div>
-        <div className="flex space-x-4 justify-end">
-          <button
-            onClick={() => handleReaction("like")}
-            disabled={loading}
-            className="cursor-pointer"
-          >
-            <p
-              className={`${
-                userReaction === "like"
-                  ? "text-gray-400 font-bold"
-                  : "text-gray-600"
-              }`}
+    <>
+      <Card>
+        <CardHeader>
+          {username} posted at {formattedDate}:
+        </CardHeader>
+        <CardContent>
+          <div>{content}</div>
+          <div className="flex space-x-4 justify-end">
+            <button
+              onClick={() => handleReaction("like")}
+              disabled={loading}
+              className="cursor-pointer"
             >
-              Like {likes}
-            </p>
-          </button>
-          <button
-            onClick={() => handleReaction("dislike")}
-            disabled={loading}
-            className="cursor-pointer"
-          >
-            <p
-              className={`${
-                userReaction === "dislike"
-                  ? "text-gray-400 font-bold"
-                  : "text-gray-600"
-              }`}
+              <p
+                className={`${
+                  userReaction === "like"
+                    ? "text-gray-400 font-bold"
+                    : "text-gray-600"
+                }`}
+              >
+                Like {likes}
+              </p>
+            </button>
+            <button
+              onClick={() => handleReaction("dislike")}
+              disabled={loading}
+              className="cursor-pointer"
             >
-              Dislike {dislikes}
-            </p>
-          </button>
+              <p
+                className={`${
+                  userReaction === "dislike"
+                    ? "text-gray-400 font-bold"
+                    : "text-gray-600"
+                }`}
+              >
+                Dislike {dislikes}
+              </p>
+            </button>
+            <button
+              onClick={() => setShowReplyForm(!showReplyForm)}
+              disabled={!currentUser}
+            >
+              Reply
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {showReplyForm && (
+        <ReplyForm
+          post_id={post_id}
+          parent_comment_id={comment_id}
+          onReplyAdd={handleReply}
+          onCancel={() => setShowReplyForm(false)}
+        />
+      )}
+
+      {replies.length > 0 && (
+        <div className="replies">
+          {replies.map((reply) => (
+            <Comment
+              key={reply.id}
+              username={reply.username}
+              published_at={reply.published_at}
+              content={reply.content}
+              likes={reply.likes}
+              dislikes={reply.dislikes}
+              comment_id={reply.id}
+              post_id={post_id}
+              onReplyAdd={handleReply}
+            />
+          ))}
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </>
   );
 }
 

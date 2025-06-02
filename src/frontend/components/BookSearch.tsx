@@ -50,33 +50,6 @@ const BookSearch = ({ onSelectBook }: BookSearchProps) => {
 
   return (
     <div className="min-h-screen bg-black text-white px-8 py-4">
-      <header className="flex justify-between items-center border border-zinc-700 px-4 py-3 rounded-md mb-6">
-        <div className="flex items-center space-x-6">
-          <h1 className="font-bold text-2xl">
-            {" "}
-            <Link to="/">BeRead</Link>{" "}
-          </h1>
-          <Link
-            to="/friends"
-            className="text-sm text-zinc-400 hover:text-white transition"
-          >
-            Friends
-          </Link>
-          <Link
-            to="/display-profile"
-            className="text-sm text-zinc-400 hover:text-white transition"
-          >
-            Profile
-          </Link>
-        </div>
-        <Link
-          to="/login"
-          className="text-sm text-zinc-400 hover:text-white transition"
-        >
-          Logout
-        </Link>
-      </header>
-
       <form onSubmit={searchBooks} className="flex gap-2 justify-center mb-8">
         <input
           type="text"

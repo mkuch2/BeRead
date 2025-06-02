@@ -14,12 +14,13 @@ export default function HomeDashboard() {
     string | null
   >(null);
   const [posts, setPosts] = useState<PostInterface[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [userLoading, setUserLoading] = useState<boolean>(false);
+  const [postsLoading, setPostsLoading] = useState<boolean>(false);
 
   console.log(currentUser);
 
   useEffect(() => {
-    setLoading(true);
+    setPostsLoading(true);
     async function getPosts() {
       try {
         const response = await axios.get("/api/posts/recent");
@@ -28,15 +29,15 @@ export default function HomeDashboard() {
       } catch (e) {
         console.log("Error getting posts", e);
       } finally {
-        setLoading(false);
+        setPostsLoading(false);
       }
     }
 
     getPosts();
-  }, [currentUser]);
+  }, []);
 
   useEffect(() => {
-    setLoading(true);
+    setUserLoading(true);
     async function getCurrentlyReading() {
       if (!currentUser) {
         console.log("Could not get user");
@@ -56,7 +57,7 @@ export default function HomeDashboard() {
       } catch (e) {
         console.log("Error getting user's reading information", e);
       } finally {
-        setLoading(false);
+        setUserLoading(false);
       }
     }
 
@@ -92,7 +93,7 @@ export default function HomeDashboard() {
             <p className="text-sm italic text-zinc-400 mb-2">Today's Posts</p>
             {/* Replace with post list later */}
             <div className="text-center text-zinc-500 py-8 border border-zinc-700 rounded-lg">
-              {loading ? (
+              {postsLoading ? (
                 <div className="text-center text-zinc-500 py-8">
                   Loading posts...
                 </div>
@@ -103,18 +104,25 @@ export default function HomeDashboard() {
               ) : (
                 <div className="space-y-2 p-2">
                   {posts.map((post) => (
-                    <Post
+                    <Link
+                      to="/display-post"
+                      state={{ post: post }}
                       key={post.id}
-                      username={post.username}
-                      published_at={post.published_at}
-                      title={post.book_title}
-                      content={post.content}
-                      quote={post.quote}
-                      likes={post.likes}
-                      dislikes={post.dislikes}
-                      post_id={post.id}
-                      author={post.author}
-                    />
+                      className="book-card"
+                      style={{ cursor: "pointer" }}
+                    >
+                      <Post
+                        username={post.username}
+                        published_at={post.published_at}
+                        title={post.book_title}
+                        content={post.content}
+                        quote={post.quote}
+                        likes={post.likes}
+                        dislikes={post.dislikes}
+                        post_id={post.id}
+                        author={post.author}
+                      />
+                    </Link>
                   ))}
                 </div>
               )}
@@ -141,7 +149,7 @@ export default function HomeDashboard() {
             <h2 className="text-lg font-semibold mb-4">Currently Reading</h2>
             <div className="flex flex-col items-center">
               {currentlyReadingTitle === "Share your current read!" &&
-              !loading ? (
+              !userLoading ? (
                 <Link to="/display-profile">
                   <div className="w-24 h-36 bg-zinc-700 rounded mb-2 flex items-center justify-center">
                     <span className="text-zinc-400 text-3xl">+</span>

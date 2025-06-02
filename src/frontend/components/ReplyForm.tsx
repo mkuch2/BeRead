@@ -15,33 +15,37 @@ import { Button } from "./ui/button";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-interface CommentFormProps {
+interface ReplyFormProps {
   post_id: string;
-  onCommentAdd?: () => void;
+  parent_comment_id: string;
+  onReplyAdd?: () => void;
+  onCancel?: () => void;
 }
 
-const CommentSchema = z.object({
+const ReplySchema = z.object({
   content: z
     .string()
     .trim()
-    .nonempty({ message: "Comments can not be empty" })
+    .nonempty({ message: "Reply can not be empty" })
     .max(350, {
-      message: "Comment can not be longer than 350 characters!",
+      message: "Reply can not be longer than 350 characters!",
     }),
 });
 
-type FormFields = z.infer<typeof CommentSchema>;
+type FormFields = z.infer<typeof ReplySchema>;
 
-export default function CommentForm({
+export default function ReplyForm({
   post_id,
-  onCommentAdd,
-}: CommentFormProps) {
+  parent_comment_id,
+  onReplyAdd,
+  onCancel,
+}: ReplyFormProps) {
   const [uid, setUid] = useState<string | null>(null);
   const [username, setUsername] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
   const form = useForm<FormFields>({
-    resolver: zodResolver(CommentSchema),
+    resolver: zodResolver(ReplySchema),
     defaultValues: {
       content: "",
     },
@@ -77,19 +81,20 @@ export default function CommentForm({
   }, [uid]);
 
   async function onSubmit(data: FormFields) {
-    console.log("Submitted comment:", data);
+    console.log("Submitted reply:", data);
 
     setLoading(true);
     const token = await getToken();
 
     try {
-      const createdComment = await axios.post(
+      const createdReply = await axios.post(
         "/api/comment",
         {
           username: username,
           content: data.content,
           user_id: uid,
           post_id: post_id,
+          parent_comment_id: parent_comment_id,
         },
         {
           headers: {
@@ -98,19 +103,19 @@ export default function CommentForm({
         }
       );
 
-      console.log(createdComment);
+      console.log(createdReply);
 
       form.reset();
 
-      if (onCommentAdd) {
-        onCommentAdd();
+      if (onReplyAdd) {
+        onReplyAdd();
       }
     } catch (e) {
       console.log("Error creating post: ", e);
 
       form.setError("root", {
         type: "server",
-        message: "Could not upload comment, please try again.",
+        message: "Could not upload reply, please try again.",
       });
     } finally {
       setLoading(false);
@@ -126,7 +131,7 @@ export default function CommentForm({
           rules={{ required: "At least one character is required" }}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Comment</FormLabel>
+              <FormLabel>Reply</FormLabel>
               <FormControl>
                 <Textarea {...field} />
               </FormControl>
@@ -137,6 +142,9 @@ export default function CommentForm({
 
         <Button type="submit" disabled={loading}>
           Post
+        </Button>
+        <Button type="button" onClick={onCancel}>
+          Cancel
         </Button>
       </form>
     </Form>

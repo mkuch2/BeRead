@@ -191,7 +191,7 @@ router.post(
           content: data.content,
           user_id: data.user_id,
           post_id: data.post_id,
-          replies: [],
+          parent_comment_id: data.parent_comment_id || null,
           likes: 0,
           dislikes: 0,
         },
@@ -220,6 +220,7 @@ router.get("/comments", async (req: Request, res: Response): Promise<void> => {
     const comments = await prisma.comments.findMany({
       where: {
         post_id: query,
+        parent_comment_id: null,
       },
       take: 10,
       orderBy: {
@@ -231,6 +232,26 @@ router.get("/comments", async (req: Request, res: Response): Promise<void> => {
   } catch (e) {
     console.log("Error getting posts: ", e);
     res.status(500).json({ error: "Failed to get posts" });
+  }
+});
+
+router.get("/comments/replies/:id", async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const replies = await prisma.comments.findMany({
+      where: {
+        parent_comment_id: id,
+      },
+      orderBy: {
+        published_at: "asc",
+      },
+    });
+
+    res.status(200).json(replies);
+  } catch (e) {
+    console.log("Error getting replies", e);
+    res.status(500).json({ error: "Could not get replies" });
   }
 });
 

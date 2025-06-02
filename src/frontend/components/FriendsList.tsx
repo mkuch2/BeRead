@@ -11,6 +11,27 @@ import { useEffect, useState } from "react";
 import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import NavBar from "./NavBar";
 
+interface RelationshipResponse {
+  id: string;
+  requester_id: string;
+  addressee_id: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  requester: {
+    username: string;
+    name: string;
+    currentlyReadingTitle: string;
+    currentlyReadingThumbnail: string;
+  };
+  addressee: {
+    username: string;
+    name: string;
+    currentlyReadingTitle: string;
+    currentlyReadingThumbnail: string;
+  };
+}
+
 interface FriendInterface {
   uid: string;
   username: string;
@@ -42,29 +63,31 @@ export default function FriendsList() {
           },
         });
 
-        const friends = response.data.map((relationship) => {
-          if (relationship.requester_id === currentUser?.uid) {
-            return {
-              uid: relationship.addressee_id,
-              username: relationship.addressee.username,
-              name: relationship.addressee.name,
-              currentlyReadingTitle:
-                relationship.addressee.currentlyReadingTitle,
-              currentlyReadingThumbnail:
-                relationship.addressee.currentlyReadingThumbnail,
-            };
-          } else {
-            return {
-              uid: relationship.requester_id,
-              username: relationship.requester.username,
-              name: relationship.requester.name,
-              currentlyReadingTitle:
-                relationship.requester.currentlyReadingTitle,
-              currentlyReadingThumbnail:
-                relationship.requester.currentlyReadingThumbnail,
-            };
+        const friends = response.data.map(
+          (relationship: RelationshipResponse) => {
+            if (relationship.requester_id === currentUser?.uid) {
+              return {
+                uid: relationship.addressee_id,
+                username: relationship.addressee.username,
+                name: relationship.addressee.name,
+                currentlyReadingTitle:
+                  relationship.addressee.currentlyReadingTitle,
+                currentlyReadingThumbnail:
+                  relationship.addressee.currentlyReadingThumbnail,
+              };
+            } else {
+              return {
+                uid: relationship.requester_id,
+                username: relationship.requester.username,
+                name: relationship.requester.name,
+                currentlyReadingTitle:
+                  relationship.requester.currentlyReadingTitle,
+                currentlyReadingThumbnail:
+                  relationship.requester.currentlyReadingThumbnail,
+              };
+            }
           }
-        });
+        );
 
         setFriends(friends);
       } catch (e) {

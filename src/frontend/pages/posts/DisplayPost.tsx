@@ -95,10 +95,11 @@ const DisplayPost = () => {
                 username={comment.username}
                 published_at={comment.published_at}
                 content={comment.content}
-                replies={comment.replies}
                 comment_id={comment.id}
                 likes={comment.likes}
                 dislikes={comment.dislikes}
+                post_id={post.id}
+                onReplyAdd={refreshComments}
               />
             ))}
           </div>
