@@ -75,7 +75,7 @@ const DisplayPost = () => {
       {loading ? (
         <div>Loading...</div>
       ) : (
-        <>
+        <div className="space-y-3 mt-6">
           <Post
             username={post.username}
             published_at={post.published_at}
@@ -87,6 +87,7 @@ const DisplayPost = () => {
             post_id={post.id}
             author={post.author}
           ></Post>
+
           <CommentForm post_id={post.id} onCommentAdd={refreshComments} />
           <div>
             {comments.map((comment) => (
@@ -103,7 +104,7 @@ const DisplayPost = () => {
               />
             ))}
           </div>
-        </>
+        </div>
       )}
     </>
   );

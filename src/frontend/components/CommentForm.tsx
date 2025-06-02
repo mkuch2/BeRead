@@ -119,16 +119,22 @@ export default function CommentForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form 
+        onSubmit={form.handleSubmit(onSubmit)} 
+        className="flex w-full max-w-xl mx-auto items-center gap-2 mt-8"
+      >
         <FormField
           control={form.control}
           name="content"
           rules={{ required: "At least one character is required" }}
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Comment</FormLabel>
+            <FormItem className="flex-1">
+              <FormLabel className="sr-only">Comment</FormLabel>
               <FormControl>
-                <Textarea {...field} />
+                <Textarea 
+                  {...field} 
+                  placeholder="Add a comment..."
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -136,7 +142,7 @@ export default function CommentForm({
         />
 
         <Button type="submit" disabled={loading}>
-          Post
+          Submit
         </Button>
       </form>
     </Form>
