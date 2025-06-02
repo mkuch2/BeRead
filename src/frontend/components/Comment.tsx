@@ -150,7 +150,7 @@ export function Comment({
   }, [comment_id, onReplyAdd]);
 
   return (
-    <>
+    <div className="space-y-3 mt-6 w-full">
       <Card>
         <CardHeader>
           {username} posted at {formattedDate}:
@@ -208,7 +208,7 @@ export function Comment({
       )}
 
       {replies.length > 0 && (
-        <div className="replies">
+        <div className="replies mt-6 w-[95%] ml-auto">
           {replies.map((reply) => (
             <Comment
               key={reply.id}
@@ -224,7 +224,7 @@ export function Comment({
           ))}
         </div>
       )}
-    </>
+    </div>
   );
 }
 

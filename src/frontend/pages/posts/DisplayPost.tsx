@@ -89,7 +89,8 @@ const DisplayPost = () => {
           ></Post>
 
           <CommentForm post_id={post.id} onCommentAdd={refreshComments} />
-          <div>
+
+          <div className="w-full">
             {comments.map((comment) => (
               <Comment
                 key={comment.id}

@@ -121,7 +121,7 @@ export default function CommentForm({
     <Form {...form}>
       <form 
         onSubmit={form.handleSubmit(onSubmit)} 
-        className="flex w-full max-w-xl mx-auto items-center gap-2 mt-8"
+        className="flex w-full max-w-2xl mx-auto items-center gap-2 mt-8"
       >
         <FormField
           control={form.control}
