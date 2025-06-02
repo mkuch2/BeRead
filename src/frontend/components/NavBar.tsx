@@ -47,14 +47,14 @@ export default function NavBar() {
         </div>
 
         {!currentUser ? (
-          <Link to="/login" className="text-sm font-light text-zinc-400">
+          <Link to="/login" className="text-sm font-light text-zinc-400 hover:text-white">
             Login
           </Link>
         ) : (
           <button
             type="button"
             onClick={handleSignOut}
-            className="text-sm font-light text-zinc-400 ml-2"
+            className="text-sm font-light text-zinc-400 ml-2 hover:text-white"
           >
             Logout
           </button>

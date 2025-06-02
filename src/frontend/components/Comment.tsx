@@ -5,6 +5,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/frontend/components/ui/card";
+import { Button } from "@/frontend/components/ui/button";
 import { formatDate } from "../lib/utils";
 import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import axios from "axios";
@@ -164,7 +165,7 @@ export function Comment({
               className="cursor-pointer"
             >
               <p
-                className={`${
+                className={`hover:text-white ${
                   userReaction === "like"
                     ? "text-gray-400 font-bold"
                     : "text-gray-600"
@@ -179,7 +180,7 @@ export function Comment({
               className="cursor-pointer"
             >
               <p
-                className={`${
+                className={`hover:text-white ${
                   userReaction === "dislike"
                     ? "text-gray-400 font-bold"
                     : "text-gray-600"
@@ -188,12 +189,12 @@ export function Comment({
                 Dislike {dislikes}
               </p>
             </button>
-            <button
+            <Button
               onClick={() => setShowReplyForm(!showReplyForm)}
               disabled={!currentUser}
             >
               Reply
-            </button>
+            </Button>
           </div>
         </CardContent>
       </Card>
