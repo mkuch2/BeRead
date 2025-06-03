@@ -19,6 +19,7 @@ import {
   type AuthContextType,
 } from "../../hooks/useAuthContext";
 import { useState } from "react";
+import { updateProfile } from "firebase/auth";
 
 // Validation schema
 const User = z.object({
@@ -79,6 +80,13 @@ function Signup() {
     try {
       // create firebase user
       await signUp(data.email, data.password);
+      //set firebase display name to username
+      const user = getUser();
+      if (!user) {
+        throw new Error("Could not get user after signup");
+      }
+      await updateProfile(user, { displayName: data.username });
+
       const firebase_uid: string = getFirebaseId();
 
       // create user in backend
