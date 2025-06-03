@@ -7,6 +7,7 @@ import {
 import { useNavigate, Link } from "react-router";
 import { FirebaseError } from "firebase/app";
 import NavBar from "@/frontend/components/NavBar";
+import BioForm from "@/frontend/components/BioForm";
 
 interface Book {
   id: string;
@@ -40,6 +41,7 @@ function DisplayProfile() {
   const [searchResults, setSearchResults] = useState<Book[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [showBioForm, setShowBioForm] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
@@ -258,6 +260,17 @@ function DisplayProfile() {
     }
   };
 
+  const onBioUpdate = (updatedBio: string) => {
+    if (profile) {
+      setProfile({ ...profile, bio: updatedBio });
+    }
+    setShowBioForm(false);
+  };
+
+  const onCancel = () => {
+    setShowBioForm(false);
+  };
+
   const favoriteBookSlots = Array.from(
     { length: MAX_FAVORITE_BOOKS },
     (_, index) => {
@@ -307,7 +320,25 @@ function DisplayProfile() {
                 {profile.name || "Name not set"}
               </h2>
               <p className="text-zinc-400 text-sm mb-2">{profile.username}</p>
-              <p className="text-sm">{profile.bio || "No bio yet"}</p>
+              {showBioForm ? (
+                <BioForm
+                  oldBio={profile.bio || ""}
+                  onBioUpdate={onBioUpdate}
+                  onCancel={onCancel}
+                />
+              ) : (
+                <>
+                  <p className="text-sm mb-2">{profile.bio || "No bio yet"}</p>
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => setShowBioForm(true)}
+                      className="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm cursor-pointer"
+                    >
+                      {profile.bio ? "Edit bio" : "Add bio"}
+                    </button>
+                  </div>
+                </>
+              )}
             </section>
             <section className="border border-zinc-600 flex flex-col text-center px-4 py-4">
               <h2 className="font-semibold mb-4 text-lg">Currently Reading</h2>
