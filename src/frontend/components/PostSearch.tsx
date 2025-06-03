@@ -71,13 +71,11 @@ const PostSearch = () => {
   const sorted = [...filtered].sort((a, b) => {
     if (sortOrder === "newest") {
       return (
-        new Date(b.published_at).getTime() -
-        new Date(a.published_at).getTime()
+        new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
       );
     } else if (sortOrder === "oldest") {
       return (
-        new Date(a.published_at).getTime() -
-        new Date(b.published_at).getTime()
+        new Date(a.published_at).getTime() - new Date(b.published_at).getTime()
       );
     } else if (sortOrder === "most-liked") {
       return b.likes - a.likes;
@@ -89,7 +87,10 @@ const PostSearch = () => {
     <div className="space-y-3 mt-6 border border-gray-700 rounded-lg">
       <h1 className="text-xl font-semibold mt-6">Search My Posts</h1>
 
-      <form onSubmit={searchPosts} className={cn("flex w-full max-w-xl mx-auto items-center gap-2")}>
+      <form
+        onSubmit={searchPosts}
+        className={cn("flex w-full max-w-xl mx-auto items-center gap-2")}
+      >
         <Input
           type="text"
           value={query}
@@ -102,9 +103,11 @@ const PostSearch = () => {
         </Button>
 
         {error && (
-          <div className={cn(
-            "max-w-xl mx-auto px-4 py-2 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm"
-          )}>
+          <div
+            className={cn(
+              "max-w-xl mx-auto px-4 py-2 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm"
+            )}
+          >
             {error}
           </div>
         )}
@@ -127,7 +130,9 @@ const PostSearch = () => {
             <select
               value={sortOrder}
               onChange={(e) =>
-                setSortOrder(e.target.value as "newest" | "oldest" | "most-liked")
+                setSortOrder(
+                  e.target.value as "newest" | "oldest" | "most-liked"
+                )
               }
               className="px-3 py-2 bg-gray-900 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
             >
@@ -141,8 +146,11 @@ const PostSearch = () => {
 
       {hasSearched && sorted.length === 0 ? (
         <div className="text-center">
-          {filter ? ( <p className="text-lg font-medium">No posts match "{filter}"</p> )
-            : ( <p className="text-lg font-medium">No posts found</p> )}
+          {filter ? (
+            <p className="text-lg font-medium">No posts match "{filter}"</p>
+          ) : (
+            <p className="text-lg font-medium">No posts found</p>
+          )}
         </div>
       ) : (
         <>
@@ -165,6 +173,8 @@ const PostSearch = () => {
                   dislikes={post.dislikes}
                   post_id={post.id}
                   author={post.author}
+                  post={post}
+                  preview={true}
                 />
               </Link>
             ))}
