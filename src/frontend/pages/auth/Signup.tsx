@@ -94,15 +94,13 @@ function Signup() {
     } catch (e: any) {
       console.error("Signup error:", e);
 
-      if (e.code && e.message) {
-        form.setError("root", {
-          type: "firebase",
-          message: `Firebase error: ${e.message}`,
-        });
-        return;
-      }
-
       if (isAxiosError(e)) {
+        if (e.response) {
+          form.setError("root", {
+            message: e.response.data.errors[0].msg,
+          });
+        }
+
         const user = getUser();
         if (user) {
           try {
@@ -111,6 +109,7 @@ function Signup() {
           } catch (deleteError) {
             console.log("Error deleting Firebase user:", deleteError);
           }
+          return;
         }
 
         if (e.response) {
@@ -134,10 +133,17 @@ function Signup() {
           });
         }
       } else {
-        form.setError("root", {
-          type: "server",
-          message: "An unknown error occurred",
-        });
+        if (e.code) {
+          form.setError("root", {
+            type: "firebase",
+            message: `Firebase error: ${e.message}`,
+          });
+        } else {
+          form.setError("root", {
+            type: "server",
+            message: "An unknown error occurred",
+          });
+        }
       }
     } finally {
       setIsSubmitting(false);
