@@ -26,8 +26,11 @@ const PostSearch = () => {
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
 
+  // ── Pagination State ──
   const [currentPage, setCurrentPage] = useState(1);
-  const postsPerPage = 3;
+  const postsPerPage = 5;
+
+  // ── Sorting & Filtering State ──
   const [sortOrder, setSortOrder] = useState<
     "newest" | "oldest" | "most-liked"
   >("newest");
@@ -56,11 +59,7 @@ const PostSearch = () => {
     }
   };
 
-  const indexOfLastPost = currentPage * postsPerPage;
-  const indexOfFirstPost = indexOfLastPost - postsPerPage;
-  const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
-  const totalPages = Math.ceil(posts.length / postsPerPage);
-
+  // ── 1) Filter by keyword ──
   const filtered = posts.filter((p) => {
     const term = filter.toLowerCase();
     return (
@@ -68,14 +67,18 @@ const PostSearch = () => {
       p.username.toLowerCase().includes(term)
     );
   });
+  
+  // ── 2) Sort the filtered array ──
   const sorted = [...filtered].sort((a, b) => {
     if (sortOrder === "newest") {
       return (
-        new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+        new Date(b.published_at).getTime() -
+        new Date(a.published_at).getTime()
       );
     } else if (sortOrder === "oldest") {
       return (
-        new Date(a.published_at).getTime() - new Date(b.published_at).getTime()
+        new Date(a.published_at).getTime() -
+        new Date(b.published_at).getTime()
       );
     } else if (sortOrder === "most-liked") {
       return b.likes - a.likes;
@@ -83,10 +86,17 @@ const PostSearch = () => {
     return 0;
   });
 
+  // ── 3) Pagination: slice the sorted array ──
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const paginated = sorted.slice(indexOfFirstPost, indexOfLastPost);
+  const totalPages = Math.ceil(sorted.length / postsPerPage);
+
   return (
     <div className="space-y-3 mt-6 border border-gray-700 rounded-lg">
       <h1 className="text-xl font-semibold mt-6">Search My Posts</h1>
-
+      
+      {/* ── SEARCH FORM ── */}
       <form
         onSubmit={searchPosts}
         className={cn("flex w-full max-w-xl mx-auto items-center gap-2")}
@@ -113,14 +123,18 @@ const PostSearch = () => {
         )}
       </form>
 
+      {/* ── FILTER & SORT CONTROLS ── */}
       {hasSearched && posts.length > 0 && (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between max-w-xl mx-auto gap-4">
           {/* 1) FILTER KEYWORD */}
           <div className="flex-1">
             <Input
-              placeholder="Filter by key-words"
+              placeholder="Filter by keyword"
               value={filter}
-              onChange={(e) => setFilter(e.target.value)}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setCurrentPage(1); // reset back to page 1 when filter changes
+              }}
               className="w-full"
             />
           </div>
@@ -129,11 +143,12 @@ const PostSearch = () => {
           <div>
             <select
               value={sortOrder}
-              onChange={(e) =>
+              onChange={(e) => {
                 setSortOrder(
                   e.target.value as "newest" | "oldest" | "most-liked"
-                )
-              }
+                );
+                setCurrentPage(1); // reset to page 1 whenever sort changes
+              }}
               className="px-3 py-2 bg-gray-900 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
             >
               <option value="newest">Newest First</option>
@@ -144,6 +159,7 @@ const PostSearch = () => {
         </div>
       )}
 
+      {/* ── NO RESULTS OR NO MATCH ── */}
       {hasSearched && sorted.length === 0 ? (
         <div className="text-center">
           {filter ? (
@@ -155,7 +171,7 @@ const PostSearch = () => {
       ) : (
         <>
           <div className="books-grid mt-6">
-            {sorted.map((post) => (
+            {paginated.map((post) => (
               <Link
                 to="/display-post"
                 state={{ post: post }}
@@ -181,13 +197,13 @@ const PostSearch = () => {
           </div>
 
           {/* ── PAGINATION CONTROLS ── */}
-          {hasSearched && posts.length >= 0 && (
+          {hasSearched && sorted.length > 0 && (
             <div className="flex justify-center items-center space-x-4 mt-6 mb-6">
               <Button
                 variant="outline"
                 size="sm"
                 disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               >
                 Previous
               </Button>
@@ -201,7 +217,7 @@ const PostSearch = () => {
                 size="sm"
                 disabled={currentPage === totalPages}
                 onClick={() =>
-                  setCurrentPage((p) => Math.min(p + 1, totalPages))
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
               >
                 Next
