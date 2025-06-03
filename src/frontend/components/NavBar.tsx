@@ -10,7 +10,7 @@ export default function NavBar() {
     try {
       await signOut();
 
-      navigate("/home");
+      navigate("/");
     } catch (e) {
       if (e instanceof FirebaseError) {
         console.log(e.code, e.message);
@@ -22,8 +22,15 @@ export default function NavBar() {
     <>
       <header className="border border-zinc-600 flex justify-between items-center px-4 py-2 mb-2">
         <div className="flex items-center space-x-4">
-          <Link to="/home">
+          <Link to={currentUser ? "/home" : "/"}>
             <h1 className="font-bold text-xl text-white">BeRead</h1>
+          </Link>
+          
+          <Link 
+            to={currentUser ? "/home" : "/"} 
+            className="text-sm text-zinc-400 hover:text-white transition"
+          >
+            Home
           </Link>
 
           {!currentUser ? (
