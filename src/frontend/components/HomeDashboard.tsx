@@ -13,6 +13,9 @@ export default function HomeDashboard() {
   const [currentlyReadingThumb, setCurrentlyReadingThumb] = useState<
     string | null
   >(null);
+  const [currentlyReadingAuthors, setCurrentlyReadingAuthors] = useState<
+    string[]
+  >([]);
   const [posts, setPosts] = useState<PostInterface[]>([]);
   const [userLoading, setUserLoading] = useState<boolean>(false);
   const [postsLoading, setPostsLoading] = useState<boolean>(false);
@@ -49,10 +52,12 @@ export default function HomeDashboard() {
 
         const title = response.data.currentlyReadingTitle;
         const thumbnail = response.data.currentlyReadingThumbnail;
+        const authors = response.data.currentlyReadingAuthors;
 
         if (title) {
           setCurrentlyReadingTitle(title);
           setCurrentlyReadingThumb(thumbnail);
+          setCurrentlyReadingAuthors(authors);
         }
       } catch (e) {
         console.log("Error getting user's reading information", e);
@@ -160,6 +165,9 @@ export default function HomeDashboard() {
               )}
               <p className="text-sm text-zinc-300 mt-1 text-center">
                 {currentlyReadingTitle}
+              </p>
+              <p className="text-sm text-zinc-300 mt-1 text-center italic">
+                {currentlyReadingAuthors}
               </p>
             </div>
           </aside>
