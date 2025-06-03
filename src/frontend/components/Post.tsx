@@ -10,6 +10,8 @@ import { useEffect, useState } from "react";
 import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import axios from "axios";
 import { decode } from "html-entities";
+import { Link } from "react-router";
+import { type PostInterface } from "./PostSearch";
 
 interface PostProps {
   username: string;
@@ -21,6 +23,8 @@ interface PostProps {
   dislikes: number;
   post_id: string;
   author: string[];
+  preview: boolean;
+  post: PostInterface;
 }
 
 export function Post({
@@ -33,6 +37,8 @@ export function Post({
   dislikes: initialDislikes,
   post_id,
   author,
+  preview = false,
+  post,
 }: PostProps) {
   const [userReaction, setUserReaction] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -46,7 +52,10 @@ export function Post({
 
   useEffect(() => {
     async function getReactions() {
-      if (!currentUser) return;
+      if (!currentUser) {
+        setUserReaction(null);
+        return;
+      }
 
       try {
         const token = await getToken();
@@ -109,11 +118,95 @@ export function Post({
 
   console.log("User reaction", userReaction);
 
+  if (preview) {
+    return (
+      <Card className="max-w-2xl mx-auto mb-6">
+        <CardHeader>
+          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+            <Link
+              to={`/display-profile/${username}`}
+              className="hover:underline"
+            >
+              <span className="font-medium">{username}</span>
+            </Link>
+            <span className="text-xs">posted</span>
+            <span className="text-xs">{formattedDate}</span>
+          </div>
+
+          <Link
+            to="/display-post"
+            state={{ post: post }}
+            className="book-card"
+            style={{ cursor: "pointer" }}
+          >
+            <CardTitle className="mt-2 text-xl">{decodedTitle}</CardTitle>
+            <CardTitle className="italic text-sm">
+              {author.join(", ")}
+            </CardTitle>
+          </Link>
+        </CardHeader>
+
+        <Link
+          to="/display-post"
+          state={{ post: post }}
+          className="book-card"
+          style={{ cursor: "pointer" }}
+        >
+          <CardContent className="mt-1">
+            <p className="whitespace-pre-wrap text-base text-foreground">
+              {content}
+            </p>
+          </CardContent>
+        </Link>
+        <CardFooter className="mt-4 pt-4 border-t">
+          <blockquote className="italic text-sm text-muted-foreground">
+            "{quote}"
+          </blockquote>
+
+          <div className="flex space-x-4 justify-end">
+            <button
+              onClick={() => handleReaction("like")}
+              disabled={loading}
+              className="cursor-pointer"
+            >
+              <p
+                className={`${
+                  userReaction === "like"
+                    ? "text-gray-400 font-bold"
+                    : "text-gray-600"
+                }`}
+              >
+                Like {likes}
+              </p>
+            </button>
+            <button
+              onClick={() => handleReaction("dislike")}
+              disabled={loading}
+              className="cursor-pointer"
+            >
+              <p
+                className={`${
+                  userReaction === "dislike"
+                    ? "text-gray-400 font-bold"
+                    : "text-gray-600"
+                }`}
+              >
+                Dislike {dislikes}
+              </p>
+            </button>
+          </div>
+        </CardFooter>
+      </Card>
+    );
+  }
+
   return (
     <Card className="max-w-2xl mx-auto mb-6">
       <CardHeader>
         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-          <span className="font-medium">{username}</span>
+          <Link to={`/display-profile/${username}`} className="hover:underline">
+            <span className="font-medium">{username}</span>
+          </Link>
           <span className="text-xs">posted</span>
           <span className="text-xs">{formattedDate}</span>
         </div>

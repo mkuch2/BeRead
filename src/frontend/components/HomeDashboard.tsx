@@ -104,25 +104,20 @@ export default function HomeDashboard() {
               ) : (
                 <div className="space-y-2 p-2">
                   {posts.map((post) => (
-                    <Link
-                      to="/display-post"
-                      state={{ post: post }}
+                    <Post
+                      username={post.username}
+                      published_at={post.published_at}
+                      title={post.book_title}
+                      content={post.content}
+                      quote={post.quote}
+                      likes={post.likes}
+                      dislikes={post.dislikes}
+                      post_id={post.id}
+                      author={post.author}
+                      preview={true}
+                      post={post}
                       key={post.id}
-                      className="book-card"
-                      style={{ cursor: "pointer" }}
-                    >
-                      <Post
-                        username={post.username}
-                        published_at={post.published_at}
-                        title={post.book_title}
-                        content={post.content}
-                        quote={post.quote}
-                        likes={post.likes}
-                        dislikes={post.dislikes}
-                        post_id={post.id}
-                        author={post.author}
-                      />
-                    </Link>
+                    />
                   ))}
                 </div>
               )}
