@@ -13,6 +13,11 @@ router.post(
     const { addressee_id } = req.body;
     const requester_id = req.user?.uid as string;
 
+    if (addressee_id === requester_id) {
+      res.status(400).json({ error: "Can not send friend request to self" });
+      return;
+    }
+
     try {
       const relationship = await prisma.relationships.create({
         data: {
