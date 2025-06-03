@@ -27,8 +27,7 @@ interface UserProfile {
 }
 
 function DisplayProfile() {
-  const { currentUser, getToken, signOut } =
-    useAuthContext() as AuthContextType;
+  const { currentUser, getToken } = useAuthContext() as AuthContextType;
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState<boolean>(false);
@@ -45,17 +44,6 @@ function DisplayProfile() {
   const navigate = useNavigate();
 
   const MAX_FAVORITE_BOOKS = 3;
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      navigate("/login");
-    } catch (e) {
-      if (e instanceof FirebaseError) {
-        console.log(e.code, e.message);
-      }
-    }
-  };
 
   const fetchProfile = async () => {
     if (!currentUser) {

@@ -9,9 +9,10 @@ import AddPost from "./pages/posts/AddPost.tsx";
 import EditProfile from "./pages/profile/EditProfile.tsx";
 import DisplayPost from "./pages/posts/DisplayPost.tsx";
 import FriendsList from "./components/FriendsList.tsx";
+import OtherUserProfile from "./pages/profile/OtherUserProfile.tsx";
 
 const router = createBrowserRouter([
-  { path: "/", Component: Landing },
+  { path: "/", Component: Home },
   { path: "/signup", Component: Signup },
   { path: "/login", Component: Login },
   {
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
   {
     path: "/home",
     Component: Home,
+  },
+  {
+    path: "/display-profile/:username",
+    Component: OtherUserProfile,
   },
   {
     path: "/display-profile",

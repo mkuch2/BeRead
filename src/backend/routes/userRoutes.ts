@@ -135,4 +135,71 @@ router.get("/user/:id", async (req: Request, res: Response) => {
   }
 });
 
+router.get("/user/profile/:username", async (req: Request, res: Response) => {
+  const username = req.params.username;
+  console.log("Get username request parameters", req.params);
+
+  if (!username) {
+    res.status(400).json({ error: "Missing parameter required" });
+    return;
+  }
+
+  try {
+    const userProfile = await prisma.users.findUnique({
+      where: {
+        username: username,
+      },
+      select: {
+        username: true,
+        name: true,
+        bio: true,
+        email: true,
+        currentlyReadingId: true,
+        currentlyReadingTitle: true,
+        currentlyReadingAuthors: true,
+        currentlyReadingThumbnail: true,
+        favoriteBooks: {
+          select: {
+            id: true,
+            title: true,
+            authors: true,
+            thumbnail: true,
+            bookId: true,
+          },
+        },
+      },
+    });
+
+    if (!userProfile) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    const formattedProfile = {
+      ...userProfile,
+      currentlyReading: userProfile.currentlyReadingId
+        ? {
+            id: userProfile.currentlyReadingId,
+            title: userProfile.currentlyReadingTitle || "",
+            authors: userProfile.currentlyReadingAuthors
+              ? userProfile.currentlyReadingAuthors.split(", ")
+              : [],
+            thumbnail: userProfile.currentlyReadingThumbnail,
+          }
+        : null,
+      favoriteBooks: userProfile.favoriteBooks.map((book) => ({
+        id: book.bookId,
+        title: book.title,
+        authors: book.authors ? book.authors.split(", ") : [],
+        thumbnail: book.thumbnail,
+      })),
+    };
+
+    res.status(200).json(formattedProfile);
+  } catch (e) {
+    console.log("Error getting user: ", e);
+    res.status(500).json({ error: "Error getting user" });
+  }
+});
+
 export default router;
