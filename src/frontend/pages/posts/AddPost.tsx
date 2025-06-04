@@ -44,6 +44,7 @@ interface Post {
   author: string[];
   user_id: string;
   id: string;
+  thumbnail?: string | null;
 }
 
 const PostSchema = z.object({
@@ -71,14 +72,37 @@ const PostSchema = z.object({
 
 type FormFields = z.infer<typeof PostSchema>;
 
+// async function fetchThumbnail(title: string): Promise<string | null> {
+//   try {
+//     if (!title.trim()) return null;
+//     const query = encodeURIComponent(`intitle:${title}`);
+//     const url = `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1`;
+//     const response = await fetch(url);
+//     const data = await response.json();
+//     if (
+//       data &&
+//       Array.isArray(data.items) &&
+//       data.items.length > 0 &&
+//       data.items[0].volumeInfo.imageLinks?.thumbnail
+//     ) {
+//       return data.items[0].volumeInfo.imageLinks.thumbnail as string;
+//     } else {
+//       return null;
+//     }
+//   } catch (err) {
+//     console.error("fetchThumbnail error:", err);
+//     return null;
+//   }
+// };
+
 export default function AddPost() {
   const { currentUser, getToken } = useAuthContext() as AuthContextType;
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [uid, setUid] = useState<string | null>(null);
   const [username, setUsername] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-
   const navigate = useNavigate();
+  const [thumbnail, setThumbnail] = useState<string | null>(null);
 
   //Get user's (Firebase) uid
   useEffect(() => {
@@ -121,48 +145,66 @@ export default function AddPost() {
 
   const handleBookSelect = (book: Book): void => {
     setSelectedBook(book);
-
     form.setValue("book_title", book.title);
+
+    if (book.thumbnail) {
+      let thumbUrl = book.thumbnail;
+      if (thumbUrl.startsWith("http://")) {
+        thumbUrl = thumbUrl.replace(/^http:\/\//, "https://");
+      }
+      setThumbnail(thumbUrl);
+    } else {
+      setThumbnail(null);
+    }
   };
 
   const onSubmit: SubmitHandler<FormFields> = async (data: FormFields) => {
-    console.log("Submitted post:", data);
-
     const token = await getToken();
-
     setLoading(true);
+
+    console.log("selectedBook:", selectedBook);
+    console.log("thumbnail:", thumbnail);
 
     //Send post to database
     try {
-      const response = await axios.post(
-        "/api/post",
-        {
-          user_id: uid,
-          book_title: data.book_title,
-          pages: data.pages,
-          content: data.content,
-          quote: data.quote,
-          author: selectedBook?.authors || [],
-          username: username,
+      const payload: Record<string, any> = {
+        user_id: uid,
+        book_title: data.book_title,
+        pages: data.pages,
+        content: data.content,
+        quote: data.quote,
+        author: selectedBook?.authors || [],
+        username: username,
+      };
+      if (thumbnail) {
+        payload.thumbnail = thumbnail;
+      }
+
+      const response = await axios.post("/api/post", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      });
+
+      console.log("POST /api/post response:", response.data);
 
       setSelectedBook(null);
-
+      setThumbnail(null);
       form.reset();
       navigate("/display-post", { state: { post: response.data } });
-    } catch (e) {
-      console.log("Error creating post: ", e);
 
+    } catch (error: any) {
+      console.log("Error creating post: ", error);
+
+      if (error.response && error.response.data) {
+        console.error("Validation errors from server:", error.response.data);
+      }
+  
       form.setError("root", {
         type: "server",
         message: "Could not upload post, please try again.",
       });
+      
     } finally {
       setLoading(false);
     }
@@ -195,6 +237,16 @@ export default function AddPost() {
                   </FormItem>
                 )}
               />
+
+              {thumbnail && (
+                <div className="mt-2">
+                  <img
+                    src={thumbnail}
+                    alt={selectedBook?.title + " cover"}
+                    className="w-24 h-auto rounded-md"
+                  />
+                </div>
+              )}
 
               <FormField
                 control={form.control}
@@ -250,7 +302,10 @@ export default function AddPost() {
               </Button>
               <Button
                 type="button"
-                onClick={() => setSelectedBook(null)}
+                onClick={() => {
+                  setSelectedBook(null);
+                  setThumbnail(null);
+                }}
                 className="hover: cursor-pointer"
               >
                 Change book

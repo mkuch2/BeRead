@@ -47,6 +47,7 @@ model posts {
   comments     comments[]
   users        users       @relation(fields: [user_id], references: [firebase_uid], onDelete: Cascade, onUpdate: NoAction, map: "fk_post_author")
   reactions    reactions[]
+  thumbnail    String?     @db.VarChar(255)
 
   @@index([book_title], map: "idx_post_book_title")
   @@index([user_id], map: "idx_posts_user_id")

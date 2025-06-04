@@ -127,6 +127,7 @@ export default function HomeDashboard() {
                       preview={true}
                       post={post}
                       key={post.id}
+                      thumbnail={post.thumbnail ?? null}
                     />
                   ))}
                 </div>
