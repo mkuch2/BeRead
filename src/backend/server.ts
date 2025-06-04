@@ -10,7 +10,7 @@ import { fileURLToPath } from "url";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import postRoutes from "./routes/postRoutes";
-import friendRoutes from "./routes/postRoutes";
+import friendRoutes from "./routes/friendRoutes";
 import dotenv from "dotenv";
 dotenv.config();
 

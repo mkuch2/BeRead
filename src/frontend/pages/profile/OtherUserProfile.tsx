@@ -10,7 +10,7 @@ import {
 
 export default function OtherUserProfile() {
   const { username } = useParams<{ username: string }>();
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [profile, setProfile] = useState<UserProfileInterface | null>(null);
   const { currentUser } = useAuthContext() as AuthContextType;
@@ -47,7 +47,7 @@ export default function OtherUserProfile() {
   useEffect(() => {
     async function getProfile() {
       setIsLoading(true);
-      setErrorMessage("");
+      setErrorMessage(null);
 
       if (!username) {
         setErrorMessage("Could not get username of requested user.");

@@ -25,6 +25,7 @@ interface PostProps {
   author: string[];
   preview: boolean;
   post: PostInterface;
+  thumbnail?: string | null;
 }
 
 export function Post({
@@ -39,6 +40,7 @@ export function Post({
   author,
   preview = false,
   post,
+  thumbnail = null,
 }: PostProps) {
   const [userReaction, setUserReaction] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -116,11 +118,31 @@ export function Post({
     }
   };
 
-  console.log("User reaction", userReaction);
+  const renderThumbnail = () => {
+    if (thumbnail) {
+      return (
+        <div className="mb-4 flex justify-center">
+          <img
+            src={thumbnail}
+            alt={`${title} cover`}
+            className="w-32 h-auto rounded-md"
+          />
+        </div>
+      );
+    } else {
+      return (
+        <div className="mb-4 flex justify-center">
+          <div className="w-32 h-48 bg-gray-800 rounded-md flex items-center justify-center text-gray-600">
+            No Image
+          </div>
+        </div>
+      );
+    }
+  };
 
   if (preview) {
     return (
-      <Card className="max-w-2xl mx-auto mb-6">
+      <Card className="w-full h-full mb-6 flex flex-col">
         <CardHeader>
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
             <Link
@@ -132,6 +154,9 @@ export function Post({
             <span className="text-xs">posted</span>
             <span className="text-xs">{formattedDate}</span>
           </div>
+
+          {/* Thumbnail (Preview Mode) */}
+          {renderThumbnail()}
 
           <Link
             to="/display-post"
@@ -158,7 +183,7 @@ export function Post({
             </p>
           </CardContent>
         </Link>
-        <CardFooter className="mt-4 pt-4 border-t">
+        <CardFooter className="mt-auto pt-4 border-t">
           <blockquote className="italic text-sm text-muted-foreground">
             "{quote}"
           </blockquote>
@@ -210,6 +235,7 @@ export function Post({
           <span className="text-xs">posted</span>
           <span className="text-xs">{formattedDate}</span>
         </div>
+        {renderThumbnail()}
         <CardTitle className="mt-2 text-xl">{decodedTitle}</CardTitle>
         <CardTitle className="italic text-sm">{author.join(", ")}</CardTitle>
       </CardHeader>
