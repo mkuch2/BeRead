@@ -19,6 +19,7 @@ export default function HomeDashboard() {
   const [posts, setPosts] = useState<PostInterface[]>([]);
   const [userLoading, setUserLoading] = useState<boolean>(false);
   const [postsLoading, setPostsLoading] = useState<boolean>(false);
+  const MAXPOSTS = 4;
 
   console.log(currentUser);
 
@@ -27,8 +28,11 @@ export default function HomeDashboard() {
     async function getPosts() {
       try {
         const response = await axios.get("/api/posts/recent");
+        const slicedPosts = response.data.slice(0, MAXPOSTS);
 
-        setPosts(response.data);
+        console.log("Get posts slicedPOsts", slicedPosts);
+
+        setPosts(slicedPosts);
       } catch (e) {
         console.log("Error getting posts", e);
       } finally {
@@ -38,6 +42,8 @@ export default function HomeDashboard() {
 
     getPosts();
   }, []);
+
+  console.log("Posts: ", posts);
 
   useEffect(() => {
     setUserLoading(true);
@@ -96,7 +102,6 @@ export default function HomeDashboard() {
           {/* Most Recent Posts */}
           <section>
             <p className="text-sm italic text-zinc-400 mb-2">Today's Posts</p>
-            {/* Replace with post list later */}
             <div className="text-center text-zinc-500 py-8 border border-zinc-700 rounded-lg">
               {postsLoading ? (
                 <div className="text-center text-zinc-500 py-8">
@@ -107,7 +112,7 @@ export default function HomeDashboard() {
                   No posts today.
                 </div>
               ) : (
-                <div className="space-y-2 p-2">
+                <div className="grid grid-cols-2 gap-8 mt-6 mb-6">
                   {posts.map((post) => (
                     <Post
                       username={post.username}
@@ -126,6 +131,11 @@ export default function HomeDashboard() {
                   ))}
                 </div>
               )}
+              <Link to="/post-feed">
+                <span className="cursor-pointer underline text-zinc-300">
+                  View all posts
+                </span>
+              </Link>
             </div>
           </section>
         </div>

@@ -1,5 +1,4 @@
 import { createBrowserRouter } from "react-router";
-import Landing from "./pages/Landing";
 import Signup from "./pages/auth/Signup";
 import Login from "./pages/auth/Login";
 import Home from "./pages/Home";
@@ -10,6 +9,7 @@ import EditProfile from "./pages/profile/EditProfile.tsx";
 import DisplayPost from "./pages/posts/DisplayPost.tsx";
 import FriendsList from "./components/FriendsList.tsx";
 import OtherUserProfile from "./pages/profile/OtherUserProfile.tsx";
+import PostFeed from "./pages/posts/PostFeed.tsx";
 
 const router = createBrowserRouter([
   { path: "/", Component: Home },
@@ -56,6 +56,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+  { path: "/post-feed", Component: PostFeed },
 ]);
 
 export default router;

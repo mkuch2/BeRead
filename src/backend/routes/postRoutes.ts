@@ -116,7 +116,21 @@ router.post(
   }
 );
 
-router.get("/posts/recent", async (req: Request, res: Response) => {
+router.get("/posts", async (_req: Request, res: Response) => {
+  try {
+    const posts = await prisma.posts.findMany({
+      orderBy: { published_at: "desc" },
+      take: 20,
+    });
+
+    res.status(200).json(posts);
+  } catch (e) {
+    console.log("Error getting posts, ", e);
+    res.status(500).json({ error: "Server failed to get posts" });
+  }
+});
+
+router.get("/posts/recent", async (_req: Request, res: Response) => {
   const timeCutoff = new Date();
   timeCutoff.setHours(timeCutoff.getHours() - 24);
 

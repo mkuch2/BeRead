@@ -1,7 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router";
-import { formatDate } from "../lib/utils";
 import { Button } from "@/frontend/components/ui/button";
 import { Input } from "@/frontend/components/ui/input";
 import { cn } from "@/frontend/lib/utils";
@@ -20,14 +19,18 @@ export interface PostInterface {
   author: string[];
 }
 
-const PostSearch = () => {
+interface PostSearchProps {
+  onSearch: () => void;
+  hasSearched: boolean;
+}
+
+const PostSearch = ({ onSearch, hasSearched }: PostSearchProps) => {
   const [query, setQuery] = useState<string>("");
   const [posts, setPosts] = useState<PostInterface[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [hasSearched, setHasSearched] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const postsPerPage = 3;
+  const postsPerPage = 4;
   const [sortOrder, setSortOrder] = useState<
     "newest" | "oldest" | "most-liked"
   >("newest");
@@ -42,7 +45,7 @@ const PostSearch = () => {
         `/api/posts/search?query=${encodeURIComponent(query)}`
       );
       setPosts([...response.data]);
-      setHasSearched(true);
+      onSearch();
       setError(null);
       setCurrentPage(1);
       setSortOrder("newest");
@@ -58,7 +61,6 @@ const PostSearch = () => {
 
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
-  const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
   const totalPages = Math.ceil(posts.length / postsPerPage);
 
   const filtered = posts.filter((p) => {
@@ -83,9 +85,11 @@ const PostSearch = () => {
     return 0;
   });
 
+  const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
+
   return (
     <div className="space-y-3 mt-6 border border-gray-700 rounded-lg">
-      <h1 className="text-xl font-semibold mt-6">Search My Posts</h1>
+      <h1 className="text-xl font-semibold mt-6">Search Posts</h1>
 
       <form
         onSubmit={searchPosts}
@@ -154,29 +158,22 @@ const PostSearch = () => {
         </div>
       ) : (
         <>
-          <div className="books-grid mt-6">
-            {sorted.map((post) => (
-              <Link
-                to="/display-post"
-                state={{ post: post }}
+          <div className="grid grid-cols-2 gap-8 mt-6">
+            {currentPosts.map((post) => (
+              <Post
+                username={post.username}
+                published_at={post.published_at}
+                title={post.book_title}
+                content={post.content}
+                quote={post.quote}
+                likes={post.likes}
+                dislikes={post.dislikes}
+                post_id={post.id}
+                author={post.author}
+                post={post}
+                preview={true}
                 key={post.id}
-                className="book-card"
-                style={{ cursor: "pointer" }}
-              >
-                <Post
-                  username={post.username}
-                  published_at={post.published_at}
-                  title={post.book_title}
-                  content={post.content}
-                  quote={post.quote}
-                  likes={post.likes}
-                  dislikes={post.dislikes}
-                  post_id={post.id}
-                  author={post.author}
-                  post={post}
-                  preview={true}
-                />
-              </Link>
+              />
             ))}
           </div>
 
