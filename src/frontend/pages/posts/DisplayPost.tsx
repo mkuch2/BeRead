@@ -91,12 +91,9 @@ const DisplayPost = () => {
             dislikes={post.dislikes}
             post_id={post.id}
             author={post.author}
-<<<<<<< Updated upstream
-=======
             preview={false}
             post={post}
             thumbnail={post.thumbnail}
->>>>>>> Stashed changes
           ></Post>
 
           <CommentForm post_id={post.id} onCommentAdd={refreshComments} />

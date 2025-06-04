@@ -166,12 +166,9 @@ const PostSearch = () => {
                   dislikes={post.dislikes}
                   post_id={post.id}
                   author={post.author}
-<<<<<<< Updated upstream
-=======
                   post={post}
                   preview={true}
                   thumbnail={post.thumbnail ?? null}
->>>>>>> Stashed changes
                 />
               </Link>
             ))}
