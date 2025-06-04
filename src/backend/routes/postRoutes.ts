@@ -26,6 +26,7 @@ router.get("/post/:id", async (req: Request, res: Response): Promise<void> => {
         user_id: true,
         likes: true,
         dislikes: true,
+        thumbnail: true,
       },
     });
 
@@ -63,6 +64,11 @@ router.post(
   body("quote").trim().isLength({
     max: 128,
   }),
+  body("thumbnail")
+    .optional({ nullable: true }) 
+    .isString()
+    .isLength({ max: 255 })
+    .trim(),
   async (req: Request, res: Response): Promise<void> => {
     const result = validationResult(req);
 
@@ -97,6 +103,7 @@ router.post(
           username: data.username,
           likes: 0,
           dislikes: 0,
+          thumbnail: data.thumbnail || null,
         },
       });
 

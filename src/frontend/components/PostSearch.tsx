@@ -18,6 +18,7 @@ export interface PostInterface {
   likes: number;
   dislikes: number;
   author: string[];
+  thumbnail?: string | null;
 }
 
 const PostSearch = () => {
@@ -165,6 +166,12 @@ const PostSearch = () => {
                   dislikes={post.dislikes}
                   post_id={post.id}
                   author={post.author}
+<<<<<<< Updated upstream
+=======
+                  post={post}
+                  preview={true}
+                  thumbnail={post.thumbnail ?? null}
+>>>>>>> Stashed changes
                 />
               </Link>
             ))}
