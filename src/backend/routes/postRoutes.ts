@@ -120,7 +120,6 @@ router.get("/posts", async (_req: Request, res: Response) => {
   try {
     const posts = await prisma.posts.findMany({
       orderBy: { published_at: "desc" },
-      take: 20,
     });
 
     res.status(200).json(posts);
@@ -142,7 +141,6 @@ router.get("/posts/recent", async (_req: Request, res: Response) => {
         },
       },
       orderBy: { published_at: "desc" },
-      take: 20,
     });
 
     res.status(200).json(posts);
@@ -165,14 +163,17 @@ router.get(
 
     const data = matchedData(req);
 
-    const book_title = data.query;
+    const query = data.query;
 
     try {
       const posts = await prisma.posts.findMany({
         where: {
-          book_title: { contains: book_title, mode: "insensitive" },
+          OR: [
+            { book_title: { contains: query, mode: "insensitive" } },
+            { username: { contains: query, mode: "insensitive" } },
+          ],
         },
-        take: 10,
+        orderBy: { published_at: "desc" },
       });
 
       console.log("Server posts: ", posts);
@@ -236,7 +237,6 @@ router.get("/comments", async (req: Request, res: Response): Promise<void> => {
         post_id: query,
         parent_comment_id: null,
       },
-      take: 10,
       orderBy: {
         published_at: "desc",
       },
