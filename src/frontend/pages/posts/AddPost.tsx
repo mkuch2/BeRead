@@ -250,7 +250,7 @@ export default function AddPost() {
 
               <FormField
                 control={form.control}
-                name="content"
+                name="contentr"
                 // rules={{ required: "Content is required" }}
                 render={({ field }) => (
                   <FormItem>
