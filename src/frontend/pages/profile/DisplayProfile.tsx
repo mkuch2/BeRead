@@ -35,6 +35,7 @@ function DisplayProfile() {
   const [error, setError] = useState(false);
   const [bioInput, setBioInput] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [showBioForm, setShowBioForm] = useState(false);
 
   const [showPopup, setShowPopup] = useState(false);
   const [popupType, setPopupType] = useState<"favorite" | "reading">("favorite");
@@ -80,6 +81,20 @@ function DisplayProfile() {
     }, 300);
     return () => clearTimeout(delay);
   }, [searchQuery, showPopup]);
+
+  const handleRemoveCurrentlyReading = async () => {
+    try {
+      const token = await getToken();
+      await axios.delete("/api/currently-reading", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      fetchProfile(); // refresh after deletion
+    } catch (e) {
+      console.error("Failed to remove currently reading book", e);
+    }
+  };
 
   const handleSearchBooks = async () => {
     setIsSearching(true);
@@ -193,179 +208,150 @@ function DisplayProfile() {
       <NavBar />
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="border border-zinc-700 p-6 rounded-xl bg-zinc-900">
-            <div className="flex items-center gap-6 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Profile Photo and Bio section */}
+          <div className="border border-zinc-700 p-6 rounded-xl bg-zinc-900 flex flex-col md:flex-row md:justify-between gap-6">
+            <div className="flex flex-col items-center md:items-start">
               {profile.photoURL ? (
-                <img src={profile.photoURL} className="w-20 h-20 rounded-full" />
+                <img src={profile.photoURL} className="w-24 h-24 rounded-full mb-2" />
               ) : (
-                <div className="w-20 h-20 rounded-full bg-zinc-700 flex items-center justify-center">No Photo</div>
+                <div className="w-24 h-24 rounded-full bg-zinc-700 flex items-center justify-center mb-2 text-sm">No Photo</div>
               )}
-              <div>
+              <div className="text-center md:text-left">
                 <h2 className="text-xl font-bold">{profile.name || "Name not set"}</h2>
                 <p className="text-zinc-400">{profile.username}</p>
               </div>
+              <div className="mt-4 w-full md:w-auto">
+      <label className="block text-sm text-zinc-400 mb-1">Upload Profile Photo:</label>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
+        className="mb-2"
+      />
+      <button
+        onClick={handlePhotoUpload}
+        className="bg-blue-600 px-4 py-1 rounded text-sm hover:bg-blue-700"
+      >Upload Photo</button>
+    </div>
             </div>
-            <div className="mb-4">
-              <label className="block text-sm text-zinc-400 mb-1">Edit Bio:</label>
-              <textarea
-                value={bioInput}
-                onChange={(e) => setBioInput(e.target.value)}
-                className="w-full bg-black border border-zinc-600 p-2 rounded text-white mb-2"
-                rows={3}
-              />
-              <button
-                onClick={handleBioUpdate}
-                className="bg-green-600 px-4 py-1 rounded text-sm hover:bg-green-700"
-              >Save Bio</button>
-            </div>
-            <div>
-              <label className="block text-sm text-zinc-400 mb-1">Upload Profile Photo:</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
-                className="mb-2"
-              />
-              <button
-                onClick={handlePhotoUpload}
-                className="bg-blue-600 px-4 py-1 rounded text-sm hover:bg-blue-700"
-              >Upload Photo</button>
-            </div>
+            <div className="flex-1">
+    <label className="block text-sm text-zinc-400 mb-1">Edit Bio:</label>
+    <textarea
+      value={bioInput}
+      onChange={(e) => setBioInput(e.target.value)}
+      className="min-w-[150px] w-full md:w-[50px] bg-black border border-zinc-600 p-3 rounded text-white mb-2"
+      rows={6} // increased from 4 to 6
+    />
+    <button
+      onClick={handleBioUpdate}
+      className="bg-green-600 px-4 py-1 rounded text-sm hover:bg-green-700"
+    >Save Bio</button>
+  </div>
           </div>
-        )}
 
-        <main className="space-y-4 px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <section className="border border-zinc-600 flex flex-col text-center px-4 py-4">
-              <h2 className="font-semibold mb-2 text-lg">
-                {profile.name || "Name not set"}
-              </h2>
-              <p className="text-zinc-400 text-sm mb-2">{profile.username}</p>
-              <p className="text-sm">{profile.bio || "No bio yet"}</p>
-            </section>
-            <section className="border border-zinc-600 flex flex-col text-center px-4 py-4">
-              <h2 className="font-semibold mb-4 text-lg">Currently Reading</h2>
+          {/* Currently Reading */}
+          <section className="border border-zinc-700 p-6 rounded-xl bg-zinc-900">
+            <h2 className="text-xl font-bold mb-3">Currently Reading</h2>
+            <div className="flex justify-center">
+              {profile.currentlyReading ? (
+                <div className="relative flex flex-col items-center p-4 border border-zinc-700 rounded-lg bg-zinc-800 w-full">
+                  <button
+                    onClick={handleRemoveCurrentlyReading}
+                    className="absolute top-1 right-1 text-red-500 hover:text-red-600"
+                  >×</button>
+                  <img src={profile.currentlyReading.thumbnail || ""} className="w-20 h-28 mb-2" />
+                  <h3 className="text-sm font-semibold">{profile.currentlyReading.title}</h3>
+                  <p className="text-xs text-zinc-400">by {profile.currentlyReading.authors.join(", ")}</p>
+                </div>
+              ) : (
+                <button
+                  onClick={() => openPopup("reading")}
+                  className="w-full border border-dashed border-zinc-600 p-8 text-zinc-400 text-sm rounded hover:border-zinc-400"
+                >+ Add Book</button>
+              )}
+            </div>
+          </section>
+        </div>
 
-              <div className="flex justify-center">
-                {profile.currentlyReading ? (
-                  <div className="relative flex flex-col items-center p-4 border border-zinc-700 rounded-lg bg-zinc-900 min-h-[200px] w-64">
+        {/* Favorite Books */}
+        <section className="border border-zinc-700 p-6 rounded-xl bg-zinc-900">
+          <h2 className="text-xl font-bold mb-3">Favorite Books</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {favoriteBookSlots.map((book, i) => (
+              <div key={i} className="relative">
+                {book ? (
+                  <div className="relative p-4 border border-zinc-700 rounded bg-zinc-800">
                     <button
-                      onClick={handleRemoveCurrentlyReading}
-                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-600 hover:bg-red-700 text-white rounded-sm flex items-center justify-center text-xs font-bold"
-                      title="Remove currently reading"
-                    >
-                      ×
-                    </button>
-
-                    {profile.currentlyReading.thumbnail ? (
-                      <img
-                        src={profile.currentlyReading.thumbnail}
-                        alt={profile.currentlyReading.title}
-                        className="w-16 h-20 object-cover rounded mb-3"
-                      />
-                    ) : (
-                      <div className="w-16 h-20 bg-gray-600 rounded mb-3 flex items-center justify-center text-xs">
-                        No Cover
-                      </div>
-                    )}
-
-                    <h3 className="font-medium text-sm text-center mb-1 line-clamp-2">
-                      {profile.currentlyReading.title}
-                    </h3>
-                    <p className="text-zinc-400 text-xs text-center line-clamp-2">
-                      by {profile.currentlyReading.authors.join(", ")}
-                    </p>
+                      onClick={() => handleRemoveBook(book.id, "favorite")}
+                      className="absolute top-1 right-1 text-red-500 hover:text-red-600"
+                    >×</button>
+                    <img src={book.thumbnail || ""} className="w-20 h-28 mb-2 mx-auto" />
+                    <h3 className="text-sm font-semibold text-center">{book.title}</h3>
+                    <p className="text-xs text-center text-zinc-400">by {book.authors.join(", ")}</p>
                   </div>
                 ) : (
                   <button
-                    onClick={() => openPopup("reading")}
-                    className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-zinc-600 rounded-lg bg-zinc-900 hover:bg-zinc-800 hover:border-zinc-500 transition-colors min-h-[200px] w-64"
-                  >
-                    <div className="text-4xl text-zinc-500 mb-2">+</div>
-                    <span className="text-zinc-400 text-sm">Add Book</span>
-                  </button>
+                    onClick={() => openPopup("favorite")}
+                    className="w-full border border-dashed border-zinc-600 p-8 text-zinc-400 text-sm rounded hover:border-zinc-400"
+                  >+ Add Book</button>
                 )}
               </div>
-            </section>
-
-            <section className="border border-zinc-700 p-6 rounded-xl bg-zinc-900">
-              <h2 className="text-xl font-bold mb-3">Favorite Books</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {favoriteBookSlots.map((book, i) => (
-                  <div key={i} className="relative">
-                    {book ? (
-                      <div className="relative p-4 border border-zinc-700 rounded bg-zinc-800">
-                        <button
-                          onClick={() => handleRemoveBook(book.id, "favorite")}
-                          className="absolute top-1 right-1 text-red-500 hover:text-red-600"
-                        >×</button>
-                        <img src={book.thumbnail || ""} className="w-20 h-28 mb-2 mx-auto" />
-                        <h3 className="text-sm font-semibold text-center">{book.title}</h3>
-                        <p className="text-xs text-center text-zinc-400">by {book.authors.join(", ")}</p>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => openPopup("favorite")}
-                        className="w-full border border-dashed border-zinc-600 p-8 text-zinc-400 text-sm rounded hover:border-zinc-400"
-                      >+ Add Book</button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
+            ))}
           </div>
-        </div>
+        </section>
 
-        {showPopup && (
-          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-            <div className="bg-zinc-900 p-6 rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between mb-4">
-                <h3 className="text-lg font-semibold">
-                  {popupType === "favorite" ? "Add Favorite Book" : "Set Currently Reading"}
-                </h3>
-                <button onClick={closePopup} className="text-xl">×</button>
-              </div>
-              <input
-                className="w-full mb-4 p-2 rounded bg-black text-white border border-zinc-600"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search for books..."
-              />
-              {isSearching ? <p className="text-center text-zinc-400">Searching...</p> : (
-                searchResults.length > 0 ? (
-                  <div className="space-y-2">
-                    {searchResults.map(book => (
-                      <div
-                        key={book.id}
-                        className="flex items-center justify-between border border-zinc-700 rounded p-2"
-                      >
-                        <div className="flex items-center gap-2">
-                          <img src={book.thumbnail || ""} className="w-8 h-10 object-cover" />
-                          <div>
-                            <h4 className="text-sm font-medium">{book.title}</h4>
-                            <p className="text-xs text-zinc-400">{book.authors.join(", ")}</p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleAddBook(book, popupType)}
-                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-sm rounded"
-                        >{popupType === "favorite" ? "Add" : "Set"}</button>
-                      </div>
-                    ))}
-                  </div>
-                ) : searchQuery ? <p className="text-center text-zinc-400">No books found</p> : null
-              )}
-              {errorMessage && <p className="mt-4 text-red-400 text-sm">{errorMessage}</p>}
-            </div>
-          </div>
-        )}
-        <Link to={`/post-feed/${currentUser?.displayName}`} x>
-          <span className="mt-4 block">View your posts</span>
+        {/* Post Feed Link */}
+        <Link to={`/post-feed/${currentUser?.displayName}`}>
+          <span className="mt-4 block text-center underline text-zinc-400 hover:text-white">View your posts</span>
         </Link>
       </div>
+
+      {/* Popup unchanged */}
+      {showPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+          <div className="bg-zinc-900 p-6 rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between mb-4">
+              <h3 className="text-lg font-semibold">
+                {popupType === "favorite" ? "Add Favorite Book" : "Set Currently Reading"}
+              </h3>
+              <button onClick={closePopup} className="text-xl">×</button>
+            </div>
+            <input
+              className="w-full mb-4 p-2 rounded bg-black text-white border border-zinc-600"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search for books..."
+            />
+            {isSearching ? <p className="text-center text-zinc-400">Searching...</p> : (
+              searchResults.length > 0 ? (
+                <div className="space-y-2">
+                  {searchResults.map(book => (
+                    <div
+                      key={book.id}
+                      className="flex items-center justify-between border border-zinc-700 rounded p-2"
+                    >
+                      <div className="flex items-center gap-2">
+                        <img src={book.thumbnail || ""} className="w-8 h-10 object-cover" />
+                        <div>
+                          <h4 className="text-sm font-medium">{book.title}</h4>
+                          <p className="text-xs text-zinc-400">{book.authors.join(", ")}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleAddBook(book, popupType)}
+                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-sm rounded"
+                      >{popupType === "favorite" ? "Add" : "Set"}</button>
+                    </div>
+                  ))}
+                </div>
+              ) : searchQuery ? <p className="text-center text-zinc-400">No books found</p> : null
+            )}
+            {errorMessage && <p className="mt-4 text-red-400 text-sm">{errorMessage}</p>}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
 export default DisplayProfile;

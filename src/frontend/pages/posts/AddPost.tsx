@@ -1,3 +1,5 @@
+33
+
 import React, { useState, useEffect } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { useNavigate } from "react-router";
@@ -222,98 +224,97 @@ export default function AddPost() {
               {form.formState.errors.root.message}
             </div>
           )}
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="book_title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Book Title</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          
+<Form {...form}>
+  <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-4xl mx-auto mt-8 space-y-6 p-6 bg-black text-white rounded-md">
+    <div className="grid md:grid-cols-3 gap-6">
+      {thumbnail && (
+        <div className="md:col-span-1 flex items-start justify-center">
+          <img
+            src={thumbnail}
+            alt={selectedBook?.title + ' cover'}
+            className="w-36 h-auto rounded-lg shadow-lg"
+          />
+        </div>
+      )}
+      <div className="md:col-span-2 space-y-4">
+        <FormField
+          control={form.control}
+          name="book_title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-white">Book Title</FormLabel>
+              <FormControl>
+                <Input className="bg-zinc-800 text-white" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-              {thumbnail && (
-                <div className="mt-2">
-                  <img
-                    src={thumbnail}
-                    alt={selectedBook?.title + " cover"}
-                    className="w-24 h-auto rounded-md"
-                  />
-                </div>
-              )}
+        <FormField
+          control={form.control}
+          name="quote"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-white">Quote or description</FormLabel>
+              <FormControl>
+                <Textarea className="bg-zinc-800 text-white" rows={2} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-              <FormField
-                control={form.control}
-                name="content"
-                // rules={{ required: "Content is required" }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Content</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+        <FormField
+          control={form.control}
+          name="content"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-white">Content</FormLabel>
+              <FormControl>
+                <Textarea className="bg-zinc-800 text-white" rows={4} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-              <FormField
-                control={form.control}
-                name="quote"
-                //rules={{ required: "Daily Quote is required" }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Daily Quote</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+        <FormField
+          control={form.control}
+          name="pages"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-white">Pages Read</FormLabel>
+              <FormControl>
+                <Input className="bg-zinc-800 text-white" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-              <FormField
-                control={form.control}
-                name="pages"
-                //rules={{ required: "Daily Quote is required" }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Pages read</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+        <div className="flex gap-4 mt-4">
+          <Button type="submit" disabled={loading || !isValid}>Submit</Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              setSelectedBook(null);
+              setThumbnail(null);
+            }}
+          >
+            Change book
+          </Button>
+        </div>
+      </div>
+    </div>
+  </form>
+</Form>
 
-              <Button
-                type="submit"
-                disabled={loading || !isValid}
-                className="hover:cursor-pointer"
-              >
-                Submit
-              </Button>
-              <Button
-                type="button"
-                onClick={() => {
-                  setSelectedBook(null);
-                  setThumbnail(null);
-                }}
-                className="hover: cursor-pointer"
-              >
-                Change book
-              </Button>
-            </form>
-          </Form>
         </>
       )}
     </>
   );
 }
+
