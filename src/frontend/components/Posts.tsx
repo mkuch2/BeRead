@@ -46,6 +46,7 @@ export default function Posts({ posts, error, loading }: PostsProps) {
             author={post.author}
             post={post}
             preview={true}
+            thumbnail={post.thumbnail ?? null}
             key={post.id}
           />
         ))}
