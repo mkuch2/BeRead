@@ -51,6 +51,13 @@ export default function NavBar() {
               </Link>
             </>
           )}
+
+          <Link
+            to="/post-feed"
+            className="text-sm text-zinc-400 hover:text-white transition"
+          >
+            Posts
+          </Link>
         </div>
 
         {!currentUser ? (

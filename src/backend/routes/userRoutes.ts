@@ -1,7 +1,14 @@
 import { type Request, type Response, Router } from "express";
 import prismaClient from "../prismaClient";
 import verifyToken, { type AuthRequest } from "../middleware/authMiddleware";
-import { query, matchedData, validationResult } from "express-validator";
+import {
+  body,
+  query,
+  matchedData,
+  validationResult,
+  type Result,
+  type ValidationError,
+} from "express-validator";
 
 const router: Router = Router();
 const prisma = prismaClient;
@@ -201,5 +208,49 @@ router.get("/user/profile/:username", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Error getting user" });
   }
 });
+
+router.put(
+  "/user/:id/bio",
+  verifyToken,
+  body("bio").trim().notEmpty().isLength({ max: 160 }).escape(),
+  async (req: Request, res: Response) => {
+    const uid = req.params.id;
+
+    const result: Result<ValidationError> = validationResult(req);
+
+    if (!result.isEmpty()) {
+      res.status(400).json({ errors: result.array() });
+      return;
+    }
+
+    const data = matchedData(req);
+
+    console.log("data: ", data);
+
+    try {
+      const updatedBio = await prisma.users.update({
+        where: {
+          firebase_uid: uid,
+        },
+        data: {
+          bio: data.bio,
+        },
+        select: {
+          bio: true,
+        },
+      });
+
+      if (updatedBio) {
+        res.status(200).json(updatedBio);
+        return;
+      } else {
+        res.status(500).json({ error: "Could not update bio" });
+      }
+    } catch (e) {
+      console.log("Error updating bio, ", e);
+      res.status(500).json({ error: "Error updating bio" });
+    }
+  }
+);
 
 export default router;

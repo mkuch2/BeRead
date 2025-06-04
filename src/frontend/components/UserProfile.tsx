@@ -1,6 +1,5 @@
-import axios from "axios";
-import { useState, useEffect } from "react";
-
+import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
+import { Link } from "react-router";
 interface Book {
   id: string;
   title: string;
@@ -20,6 +19,8 @@ interface UserProfileProps {
 }
 
 export default function UserProfile(profile: UserProfileProps) {
+  const { currentUser } = useAuthContext() as AuthContextType;
+
   const MAX_FAVORITE_BOOKS = 3;
 
   const favoriteBookSlots = Array.from(
@@ -41,6 +42,18 @@ export default function UserProfile(profile: UserProfileProps) {
               </h2>
               <p className="text-zinc-400 text-sm mb-2">{profile?.username}</p>
               <p className="text-sm">{profile?.bio || "No bio yet"}</p>
+              {currentUser && (
+                <div className="flex justify-center mt-auto">
+                  <button
+                    onClick={() => {
+                      console.log(`Add ${profile.username} as friend`);
+                    }}
+                    className="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm cursor-pointer"
+                  >
+                    Add Friend
+                  </button>
+                </div>
+              )}
             </section>
 
             <section className="border border-zinc-600 flex flex-col text-center px-4 py-4">
@@ -117,17 +130,11 @@ export default function UserProfile(profile: UserProfileProps) {
               ))}
             </div>
           </section>
-
-          <div className="flex justify-center">
-            <button
-              onClick={() => {
-                console.log(`Add ${profile.username} as friend`);
-              }}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-medium"
-            >
-              Add Friend
-            </button>
-          </div>
+          <Link to={`/post-feed/${profile.username}`}>
+            <span className="mt-4 block">
+              View posts from {profile.username}
+            </span>
+          </Link>
         </main>
       </div>
     </>
