@@ -165,6 +165,8 @@ const PostSearch = () => {
                   dislikes={post.dislikes}
                   post_id={post.id}
                   author={post.author}
+                  preview={false}
+                  post={post}
                 />
               </Link>
             ))}

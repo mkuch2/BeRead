@@ -9,6 +9,7 @@ import AddPost from "./pages/posts/AddPost.tsx";
 import EditProfile from "./pages/profile/EditProfile.tsx";
 import DisplayPost from "./pages/posts/DisplayPost.tsx";
 import FriendsList from "./components/FriendsList.tsx";
+import FriendSearch from "./components/FriendSearch.tsx";
 import OtherUserProfile from "./pages/profile/OtherUserProfile.tsx";
 
 const router = createBrowserRouter([
@@ -56,6 +57,14 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+  {
+    path: "/friend-search",
+    element: (
+      <ProtectedRoute>
+        <FriendSearch />
+      </ProtectedRoute>
+    )
+  }
 ]);
 
 export default router;
