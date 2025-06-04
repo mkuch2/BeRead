@@ -29,6 +29,7 @@ const PostSearch = ({ onSearch, hasSearched }: PostSearchProps) => {
   const [posts, setPosts] = useState<PostInterface[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  // ── Pagination State ──
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 4;
   const [sortOrder, setSortOrder] = useState<
@@ -70,6 +71,8 @@ const PostSearch = ({ onSearch, hasSearched }: PostSearchProps) => {
       p.username.toLowerCase().includes(term)
     );
   });
+
+  // ── 2) Sort the filtered array ──
   const sorted = [...filtered].sort((a, b) => {
     if (sortOrder === "newest") {
       return (
@@ -117,14 +120,18 @@ const PostSearch = ({ onSearch, hasSearched }: PostSearchProps) => {
         )}
       </form>
 
+      {/* ── FILTER & SORT CONTROLS ── */}
       {hasSearched && posts.length > 0 && (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between max-w-xl mx-auto gap-4">
           {/* 1) FILTER KEYWORD */}
           <div className="flex-1">
             <Input
-              placeholder="Filter by key-words"
+              placeholder="Filter by keyword"
               value={filter}
-              onChange={(e) => setFilter(e.target.value)}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setCurrentPage(1); // reset back to page 1 when filter changes
+              }}
               className="w-full"
             />
           </div>
@@ -133,11 +140,12 @@ const PostSearch = ({ onSearch, hasSearched }: PostSearchProps) => {
           <div>
             <select
               value={sortOrder}
-              onChange={(e) =>
+              onChange={(e) => {
                 setSortOrder(
                   e.target.value as "newest" | "oldest" | "most-liked"
-                )
-              }
+                );
+                setCurrentPage(1); // reset to page 1 whenever sort changes
+              }}
               className="px-3 py-2 bg-gray-900 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
             >
               <option value="newest">Newest First</option>
@@ -148,6 +156,7 @@ const PostSearch = ({ onSearch, hasSearched }: PostSearchProps) => {
         </div>
       )}
 
+      {/* ── NO RESULTS OR NO MATCH ── */}
       {hasSearched && sorted.length === 0 ? (
         <div className="text-center">
           {filter ? (
@@ -178,13 +187,13 @@ const PostSearch = ({ onSearch, hasSearched }: PostSearchProps) => {
           </div>
 
           {/* ── PAGINATION CONTROLS ── */}
-          {hasSearched && posts.length >= 0 && (
+          {hasSearched && sorted.length > 0 && (
             <div className="flex justify-center items-center space-x-4 mt-6 mb-6">
               <Button
                 variant="outline"
                 size="sm"
                 disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               >
                 Previous
               </Button>
@@ -198,7 +207,7 @@ const PostSearch = ({ onSearch, hasSearched }: PostSearchProps) => {
                 size="sm"
                 disabled={currentPage === totalPages}
                 onClick={() =>
-                  setCurrentPage((p) => Math.min(p + 1, totalPages))
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
               >
                 Next
