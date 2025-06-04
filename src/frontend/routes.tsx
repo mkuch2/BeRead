@@ -10,6 +10,7 @@ import DisplayPost from "./pages/posts/DisplayPost.tsx";
 import FriendsList from "./components/FriendsList.tsx";
 import OtherUserProfile from "./pages/profile/OtherUserProfile.tsx";
 import PostFeed from "./pages/posts/PostFeed.tsx";
+import UserPosts from "./pages/posts/UserPosts.tsx";
 
 const router = createBrowserRouter([
   { path: "/", Component: Home },
@@ -57,6 +58,7 @@ const router = createBrowserRouter([
     ),
   },
   { path: "/post-feed", Component: PostFeed },
+  { path: "/post-feed/:username", Component: UserPosts },
 ]);
 
 export default router;

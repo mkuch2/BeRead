@@ -1,5 +1,5 @@
 import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
-
+import { Link } from "react-router";
 interface Book {
   id: string;
   title: string;
@@ -130,6 +130,11 @@ export default function UserProfile(profile: UserProfileProps) {
               ))}
             </div>
           </section>
+          <Link to={`/post-feed/${profile.username}`}>
+            <span className="mt-4 block">
+              View posts from {profile.username}
+            </span>
+          </Link>
         </main>
       </div>
     </>
