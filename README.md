@@ -61,7 +61,7 @@ you would need to do the following:
    - a. FIREBASE_PROJECT_ID, this is the value of the key "project_id" in the json file
    - b. FIREBASE_CLIENT_EMAIL, this is the value of the key "client_email" in the json file
    - c. FIREBASE_PRIVATE_KEY, this is the value of the key "private_key" in the json file.
-   - i. IMPORTANT!! Copy the entire value (including the hyphens and BEGIN/END PRIVATE KEY) but when you are pasting it into your .env file, replace the \n's with actual return characters.
+     - i. IMPORTANT!! Copy the entire value (including the hyphens and BEGIN/END PRIVATE KEY) but when you are pasting it into your .env file, replace the \n's with actual return characters.
 8. Return to your project overview and click on the 'Authentication' tab
 9. Enable authentication, and set Email/Password as your method
 
