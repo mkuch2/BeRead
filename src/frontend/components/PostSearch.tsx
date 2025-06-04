@@ -21,14 +21,18 @@ export interface PostInterface {
   thumbnail?: string | null;
 }
 
-const PostSearch = () => {
+interface PostSearchProps {
+  onSearch: () => void;
+  hasSearched: boolean;
+}
+
+const PostSearch = ({ onSearch, hasSearched }: PostSearchProps) => {
   const [query, setQuery] = useState<string>("");
   const [posts, setPosts] = useState<PostInterface[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [hasSearched, setHasSearched] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const postsPerPage = 3;
+  const postsPerPage = 4;
   const [sortOrder, setSortOrder] = useState<
     "newest" | "oldest" | "most-liked"
   >("newest");
@@ -43,7 +47,7 @@ const PostSearch = () => {
         `/api/posts/search?query=${encodeURIComponent(query)}`
       );
       setPosts([...response.data]);
-      setHasSearched(true);
+      onSearch();
       setError(null);
       setCurrentPage(1);
       setSortOrder("newest");
@@ -59,7 +63,6 @@ const PostSearch = () => {
 
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
-  const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
   const totalPages = Math.ceil(posts.length / postsPerPage);
 
   const filtered = posts.filter((p) => {
@@ -72,13 +75,11 @@ const PostSearch = () => {
   const sorted = [...filtered].sort((a, b) => {
     if (sortOrder === "newest") {
       return (
-        new Date(b.published_at).getTime() -
-        new Date(a.published_at).getTime()
+        new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
       );
     } else if (sortOrder === "oldest") {
       return (
-        new Date(a.published_at).getTime() -
-        new Date(b.published_at).getTime()
+        new Date(a.published_at).getTime() - new Date(b.published_at).getTime()
       );
     } else if (sortOrder === "most-liked") {
       return b.likes - a.likes;
@@ -86,11 +87,16 @@ const PostSearch = () => {
     return 0;
   });
 
+  const currentPosts = sorted.slice(indexOfFirstPost, indexOfLastPost);
+
   return (
     <div className="space-y-3 mt-6 border border-gray-700 rounded-lg">
-      <h1 className="text-xl font-semibold mt-6">Search My Posts</h1>
+      <h1 className="text-xl font-semibold mt-6">Search Posts</h1>
 
-      <form onSubmit={searchPosts} className={cn("flex w-full max-w-xl mx-auto items-center gap-2")}>
+      <form
+        onSubmit={searchPosts}
+        className={cn("flex w-full max-w-xl mx-auto items-center gap-2")}
+      >
         <Input
           type="text"
           value={query}
@@ -103,9 +109,11 @@ const PostSearch = () => {
         </Button>
 
         {error && (
-          <div className={cn(
-            "max-w-xl mx-auto px-4 py-2 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm"
-          )}>
+          <div
+            className={cn(
+              "max-w-xl mx-auto px-4 py-2 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm"
+            )}
+          >
             {error}
           </div>
         )}
@@ -128,7 +136,9 @@ const PostSearch = () => {
             <select
               value={sortOrder}
               onChange={(e) =>
-                setSortOrder(e.target.value as "newest" | "oldest" | "most-liked")
+                setSortOrder(
+                  e.target.value as "newest" | "oldest" | "most-liked"
+                )
               }
               className="px-3 py-2 bg-gray-900 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
             >
@@ -142,40 +152,36 @@ const PostSearch = () => {
 
       {hasSearched && sorted.length === 0 ? (
         <div className="text-center">
-          {filter ? ( <p className="text-lg font-medium">No posts match "{filter}"</p> )
-            : ( <p className="text-lg font-medium">No posts found</p> )}
+          {filter ? (
+            <p className="text-lg font-medium">No posts match "{filter}"</p>
+          ) : (
+            <p className="text-lg font-medium">No posts found</p>
+          )}
         </div>
       ) : (
         <>
-          <div className="books-grid mt-6">
-            {sorted.map((post) => (
-              <Link
-                to="/display-post"
-                state={{ post: post }}
+          <div className="grid grid-cols-2 gap-8 mt-6">
+            {currentPosts.map((post) => (
+              <Post
+                username={post.username}
+                published_at={post.published_at}
+                title={post.book_title}
+                content={post.content}
+                quote={post.quote}
+                likes={post.likes}
+                dislikes={post.dislikes}
+                post_id={post.id}
+                author={post.author}
+                post={post}
+                preview={true}
+                thumbnail={post.thumbnail ?? null}
                 key={post.id}
-                className="book-card"
-                style={{ cursor: "pointer" }}
-              >
-                <Post
-                  username={post.username}
-                  published_at={post.published_at}
-                  title={post.book_title}
-                  content={post.content}
-                  quote={post.quote}
-                  likes={post.likes}
-                  dislikes={post.dislikes}
-                  post_id={post.id}
-                  author={post.author}
-                  post={post}
-                  preview={true}
-                  thumbnail={post.thumbnail ?? null}
-                />
-              </Link>
+              />
             ))}
           </div>
 
           {/* ── PAGINATION CONTROLS ── */}
-          {hasSearched && posts.length >= 0 && (
+          {hasSearched && posts.length > 0 && totalPages > 1 && (
             <div className="flex justify-center items-center space-x-4 mt-6 mb-6">
               <Button
                 variant="outline"
