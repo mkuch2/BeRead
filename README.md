@@ -29,10 +29,10 @@ set up a database and get the database url using pgAdmin 4.
    - b. Set this variable to the database url, which will have the following format: postgresql://USER:PASSWORD@HOST:PORT/DATABASE
    - All required information for this can be easily found in pgAdmin 4 by clicking the 2nd tab from the top on the left
      navigation bar, titled 'Query Tool Workspace', and then selecting your server.
-     - i Your USER will be the field in the User tab, most likely postgres.
+     - i Your USER will be the field in the User tab, most likely 'postgres'.
      - ii. Your PASSWORD will be the password you set for the database when launching pgAdmin4 and subsequently used to register the server.
-     - iii. Your HOST is the value you set for Host name/address, which is localhost for our purposes
-     - iv. Your PORT is the port the server is running on, which should be 5432 since this is the default value.
+     - iii. Your HOST is the value you set for Host name/address, which is 'localhost' for our purposes
+     - iv. Your PORT is the port the server is running on, which should be '5432' since this is the default value.
      - v. Your DATABASE is your database name, and the value can be found by going to the tab we previously mentioned. By default, this should just be 'postgres'
    - c. Set your current working directory in our project to src/backend
    - d. Run the command 'npx prisma db push', to sync your database with the prisma schema.
