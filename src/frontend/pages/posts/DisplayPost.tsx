@@ -16,15 +16,20 @@ const DisplayPost = () => {
 
   const postId = state.post.id;
 
+  console.log("DisplayPost initial post object:", post);
+  console.log("DisplayPost initial thumbnail:", post.thumbnail);
+
   useEffect(() => {
     async function getPost() {
       setLoading(true);
       try {
         const response = await axios.get(`/api/post/${postId}`);
+        console.log("GET /api/post/:id response.data:", response.data);
         setPost((post) => ({
           ...post,
           likes: response.data.likes,
           dislikes: response.data.dislikes,
+          thumbnail: response.data.thumbnail ?? post.thumbnail ?? null,
         }));
       } catch (e) {
         console.log("Error getting post: ", e);
@@ -86,6 +91,9 @@ const DisplayPost = () => {
             dislikes={post.dislikes}
             post_id={post.id}
             author={post.author}
+            preview={false}
+            post={post}
+            thumbnail={post.thumbnail}
           ></Post>
 
           <CommentForm post_id={post.id} onCommentAdd={refreshComments} />

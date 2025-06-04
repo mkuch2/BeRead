@@ -1,7 +1,13 @@
 import { type Request, type Response, Router } from "express";
 import prismaClient from "../prismaClient";
 import verifyToken, { type AuthRequest } from "../middleware/authMiddleware";
-import { body, query, matchedData, validationResult } from "express-validator";
+import {
+  param,
+  body,
+  query,
+  matchedData,
+  validationResult,
+} from "express-validator";
 
 const router: Router = Router();
 const prisma = prismaClient;
@@ -26,6 +32,7 @@ router.get("/post/:id", async (req: Request, res: Response): Promise<void> => {
         user_id: true,
         likes: true,
         dislikes: true,
+        thumbnail: true,
       },
     });
 
@@ -63,6 +70,11 @@ router.post(
   body("quote").trim().isLength({
     max: 128,
   }),
+  body("thumbnail")
+    .optional({ nullable: true }) 
+    .isString()
+    .isLength({ max: 255 })
+    .trim(),
   async (req: Request, res: Response): Promise<void> => {
     const result = validationResult(req);
 
@@ -97,6 +109,7 @@ router.post(
           username: data.username,
           likes: 0,
           dislikes: 0,
+          thumbnail: data.thumbnail || null,
         },
       });
 
@@ -116,7 +129,20 @@ router.post(
   }
 );
 
-router.get("/posts/recent", async (req: Request, res: Response) => {
+router.get("/posts", async (_req: Request, res: Response) => {
+  try {
+    const posts = await prisma.posts.findMany({
+      orderBy: { published_at: "desc" },
+    });
+
+    res.status(200).json(posts);
+  } catch (e) {
+    console.log("Error getting posts, ", e);
+    res.status(500).json({ error: "Server failed to get posts" });
+  }
+});
+
+router.get("/posts/recent", async (_req: Request, res: Response) => {
   const timeCutoff = new Date();
   timeCutoff.setHours(timeCutoff.getHours() - 24);
 
@@ -128,7 +154,6 @@ router.get("/posts/recent", async (req: Request, res: Response) => {
         },
       },
       orderBy: { published_at: "desc" },
-      take: 20,
     });
 
     res.status(200).json(posts);
@@ -151,14 +176,17 @@ router.get(
 
     const data = matchedData(req);
 
-    const book_title = data.query;
+    const query = data.query;
 
     try {
       const posts = await prisma.posts.findMany({
         where: {
-          book_title: { contains: book_title, mode: "insensitive" },
+          OR: [
+            { book_title: { contains: query, mode: "insensitive" } },
+            { username: { contains: query, mode: "insensitive" } },
+          ],
         },
-        take: 10,
+        orderBy: { published_at: "desc" },
       });
 
       console.log("Server posts: ", posts);
@@ -166,6 +194,41 @@ router.get(
     } catch (e) {
       console.log("Error getting posts: ", e);
       res.status(500).json({ error: "Failed to get posts" });
+    }
+  }
+);
+
+router.get(
+  "/posts/user/:username",
+  param("username")
+    .isString()
+    .trim()
+    .isLength({ min: 1, max: 50 })
+    .escape()
+    .withMessage("Valid username is required"),
+  async (req: Request, res: Response): Promise<void> => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      res.status(400).json({ errors: errors.array() });
+      return;
+    }
+
+    const data = matchedData(req);
+    const username = data.username;
+
+    try {
+      const posts = await prisma.posts.findMany({
+        where: {
+          username: username,
+        },
+        orderBy: { published_at: "desc" },
+      });
+
+      res.status(200).json(posts);
+    } catch (e) {
+      console.log("Error getting user posts: ", e);
+      res.status(500).json({ error: "Failed to get user posts" });
     }
   }
 );
@@ -222,7 +285,6 @@ router.get("/comments", async (req: Request, res: Response): Promise<void> => {
         post_id: query,
         parent_comment_id: null,
       },
-      take: 10,
       orderBy: {
         published_at: "desc",
       },

@@ -7,6 +7,7 @@ import {
 import { useNavigate, Link } from "react-router";
 import { FirebaseError } from "firebase/app";
 import NavBar from "@/frontend/components/NavBar";
+import BioForm from "@/frontend/components/BioForm";
 
 interface Book {
   id: string;
@@ -39,8 +40,8 @@ function DisplayProfile() {
   const [popupType, setPopupType] = useState<"favorite" | "reading">("favorite");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Book[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const navigate = useNavigate();
   const MAX_FAVORITE_BOOKS = 3;
@@ -171,6 +172,17 @@ function DisplayProfile() {
     }
   };
 
+  const onBioUpdate = (updatedBio: string) => {
+    if (profile) {
+      setProfile({ ...profile, bio: updatedBio });
+    }
+    setShowBioForm(false);
+  };
+
+  const onCancel = () => {
+    setShowBioForm(false);
+  };
+
   const favoriteBookSlots = Array.from({ length: MAX_FAVORITE_BOOKS }, (_, i) => profile?.favoriteBooks?.[i] || null);
 
   if (isLoading) return <div className="text-white text-center py-20">Loading...</div>;
@@ -221,26 +233,60 @@ function DisplayProfile() {
               >Upload Photo</button>
             </div>
           </div>
+        )}
 
-          <div className="md:col-span-2 space-y-6">
-            <section className="border border-zinc-700 p-6 rounded-xl bg-zinc-900">
-              <h2 className="text-xl font-bold mb-3">Currently Reading</h2>
-              {profile.currentlyReading ? (
-                <div className="relative p-4 border border-zinc-700 rounded bg-zinc-800">
+        <main className="space-y-4 px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <section className="border border-zinc-600 flex flex-col text-center px-4 py-4">
+              <h2 className="font-semibold mb-2 text-lg">
+                {profile.name || "Name not set"}
+              </h2>
+              <p className="text-zinc-400 text-sm mb-2">{profile.username}</p>
+              <p className="text-sm">{profile.bio || "No bio yet"}</p>
+            </section>
+            <section className="border border-zinc-600 flex flex-col text-center px-4 py-4">
+              <h2 className="font-semibold mb-4 text-lg">Currently Reading</h2>
+
+              <div className="flex justify-center">
+                {profile.currentlyReading ? (
+                  <div className="relative flex flex-col items-center p-4 border border-zinc-700 rounded-lg bg-zinc-900 min-h-[200px] w-64">
+                    <button
+                      onClick={handleRemoveCurrentlyReading}
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-600 hover:bg-red-700 text-white rounded-sm flex items-center justify-center text-xs font-bold"
+                      title="Remove currently reading"
+                    >
+                      ×
+                    </button>
+
+                    {profile.currentlyReading.thumbnail ? (
+                      <img
+                        src={profile.currentlyReading.thumbnail}
+                        alt={profile.currentlyReading.title}
+                        className="w-16 h-20 object-cover rounded mb-3"
+                      />
+                    ) : (
+                      <div className="w-16 h-20 bg-gray-600 rounded mb-3 flex items-center justify-center text-xs">
+                        No Cover
+                      </div>
+                    )}
+
+                    <h3 className="font-medium text-sm text-center mb-1 line-clamp-2">
+                      {profile.currentlyReading.title}
+                    </h3>
+                    <p className="text-zinc-400 text-xs text-center line-clamp-2">
+                      by {profile.currentlyReading.authors.join(", ")}
+                    </p>
+                  </div>
+                ) : (
                   <button
-                    onClick={() => handleRemoveBook(profile.currentlyReading!.id, "reading")}
-                    className="absolute top-1 right-1 text-red-500 hover:text-red-600"
-                  >×</button>
-                  <img src={profile.currentlyReading.thumbnail || ""} className="w-20 h-28 mb-2 mx-auto" />
-                  <h3 className="text-sm font-semibold text-center">{profile.currentlyReading.title}</h3>
-                  <p className="text-xs text-center text-zinc-400">by {profile.currentlyReading.authors.join(", ")}</p>
-                </div>
-              ) : (
-                <button
-                  onClick={() => openPopup("reading")}
-                  className="w-full border border-dashed border-zinc-600 p-8 text-zinc-400 text-sm rounded hover:border-zinc-400"
-                >+ Add Book</button>
-              )}
+                    onClick={() => openPopup("reading")}
+                    className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-zinc-600 rounded-lg bg-zinc-900 hover:bg-zinc-800 hover:border-zinc-500 transition-colors min-h-[200px] w-64"
+                  >
+                    <div className="text-4xl text-zinc-500 mb-2">+</div>
+                    <span className="text-zinc-400 text-sm">Add Book</span>
+                  </button>
+                )}
+              </div>
             </section>
 
             <section className="border border-zinc-700 p-6 rounded-xl bg-zinc-900">
@@ -314,6 +360,9 @@ function DisplayProfile() {
             </div>
           </div>
         )}
+        <Link to={`/post-feed/${currentUser?.displayName}`} x>
+          <span className="mt-4 block">View your posts</span>
+        </Link>
       </div>
     </div>
   );
