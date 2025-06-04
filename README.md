@@ -19,24 +19,24 @@ set up a database and get the database url using pgAdmin 4.
 1. Download pgAdmin4
 2. Register a new server, by right clicking on the "Servers" tab, and then clicking "Register -> Server"
    - a. On launch you will be asked to create a password, create one and remember it - it'll be important!
-     b. Select a name, keep server group as the default
-     c. In the Connection tab, set host name/address to localhost
-     d. In the password field, enter in the password you created when you first launched pgAdmin4. Select save password if you wish.
-     e. Leave all other fields as the default. Click save to register your server!
+   - b. Select a name, keep server group as the default
+   - c. In the Connection tab, set host name/address to localhost
+   - d. In the password field, enter in the password you created when you first launched pgAdmin4. Select save password if you wish.
+   - e. Leave all other fields as the default. Click save to register your server!
 3. We will now be setting up Prisma ORM to work with out database.
    - a. In your .env file (remember to create it in either ./src/backend or in the top level directory), define a variable
      DATABASE_URL.
-     b. Set this variable to the database url, which will have the following format: postgresql://USER:PASSWORD@HOST:PORT/DATABASE
-     All required information for this can be easily found in pgAdmin 4 by clicking the 2nd tab from the top on the left
+   - b. Set this variable to the database url, which will have the following format: postgresql://USER:PASSWORD@HOST:PORT/DATABASE
+   - All required information for this can be easily found in pgAdmin 4 by clicking the 2nd tab from the top on the left
      navigation bar, titled 'Query Tool Workspace', and then selecting your server.
      - i Your USER will be the field in the User tab, most likely postgres.
-       ii. Your PASSWORD will be the password you set for the database when launching pgAdmin4 and subsequently used to register the server.
-       iii. Your HOST is the value you set for Host name/address, which is localhost for our purposes
-       iv. Your PORT is the port the server is running on, which should be 5432 since this is the default value.
-       v. Your DATABASE is your database name, and the value can be found by going to the tab we previously mentioned. By default, this should just be 'postgres'
-   * c. Set your current working directory in our project to src/backend
-     d. Run the command 'npx prisma db push', to sync your database with the prisma schema.
-     e. db push should automatically generate a prisma client. However, to be safe run 'npx prisma generate'!
+     - ii. Your PASSWORD will be the password you set for the database when launching pgAdmin4 and subsequently used to register the server.
+     - iii. Your HOST is the value you set for Host name/address, which is localhost for our purposes
+     - iv. Your PORT is the port the server is running on, which should be 5432 since this is the default value.
+     - v. Your DATABASE is your database name, and the value can be found by going to the tab we previously mentioned. By default, this should just be 'postgres'
+   - c. Set your current working directory in our project to src/backend
+   - d. Run the command 'npx prisma db push', to sync your database with the prisma schema.
+   - e. db push should automatically generate a prisma client. However, to be safe run 'npx prisma generate'!
 
 The database is now set up
 
@@ -59,9 +59,9 @@ you would need to do the following:
 6. With Firebase Admin SDK, select 'Generate new private key', which will download a .json file with admin credentials
 7. In your .env file, set the following environment variables, whose values will all be found in the json file:
    - a. FIREBASE_PROJECT_ID, this is the value of the key "project_id" in the json file
-     b. FIREBASE_CLIENT_EMAIL, this is the value of the key "client_email" in the json file
-     c. FIREBASE_PRIVATE_KEY, this is the value of the key "private_key" in the json file.
-     i. IMPORTANT!! Copy the entire value (including the hyphens and BEGIN/END PRIVATE KEY) but when you are pasting it into your .env file, replace the \n's with actual return characters.
+   - b. FIREBASE_CLIENT_EMAIL, this is the value of the key "client_email" in the json file
+   - c. FIREBASE_PRIVATE_KEY, this is the value of the key "private_key" in the json file.
+   - i. IMPORTANT!! Copy the entire value (including the hyphens and BEGIN/END PRIVATE KEY) but when you are pasting it into your .env file, replace the \n's with actual return characters.
 8. Return to your project overview and click on the 'Authentication' tab
 9. Enable authentication, and set Email/Password as your method
 
