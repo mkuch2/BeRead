@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "server": "tsx --watch --env-file=./src/backend/.env ./src/backend/server.ts",
+    "server:local": "tsx --watch --env-file=.env ./server.ts",
     "build": "tsc -b && vite build",
     "start": "npm run build && npm run server",
     "lint": "eslint .",

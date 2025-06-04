@@ -73,7 +73,37 @@ router.put(
     }
   }
 );
+router.put(
+  "/update-bio",
+  verifyToken,
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const userEmail = req.user?.email;
+      const { bio } = req.body;
 
+      if (!userEmail) {
+        res.status(401).json({ msg: "Unauthorized" });
+        return;
+      }
+
+      const updatedUser = await prisma.users.update({
+        where: { email: userEmail },
+        data: { bio },
+        select: {
+          username: true,
+          name: true,
+          bio: true,
+          email: true,
+        },
+      });
+
+      res.status(200).json({ profile: updatedUser });
+    } catch (e) {
+      console.error("Error updating bio:", e);
+      res.status(500).json({ msg: "Internal server error" });
+    }
+  }
+);
 router.get("/user", async (req: Request, res: Response): Promise<void> => {
   const uid = req.query.query as string;
 
