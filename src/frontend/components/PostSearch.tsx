@@ -187,7 +187,7 @@ const PostSearch = ({ onSearch, hasSearched }: PostSearchProps) => {
           </div>
 
           {/* ── PAGINATION CONTROLS ── */}
-          {hasSearched && sorted.length > 0 && (
+          {hasSearched && sorted.length > 0 && totalPages > 1 && (
             <div className="flex justify-center items-center space-x-4 mt-6 mb-6">
               <Button
                 variant="outline"

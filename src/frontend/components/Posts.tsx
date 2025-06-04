@@ -1,32 +1,20 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { type PostInterface } from "./PostSearch";
 import { Post } from "@/frontend/components/Post";
 import { Button } from "./ui/button";
 
-export default function Posts() {
-  const [posts, setPosts] = useState<PostInterface[]>([]);
-  const [error, setError] = useState<string | null>(null);
+interface PostsProps {
+  posts: PostInterface[];
+  error: string | null;
+  loading: boolean;
+}
+
+export default function Posts({ posts, error, loading }: PostsProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 4;
 
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
-
-  useEffect(() => {
-    const getPosts = async () => {
-      try {
-        const response = await axios.get("/api/posts");
-        console.log("getPosts response", response);
-
-        setPosts(response.data);
-      } catch (e) {
-        console.log("Error getting all posts", e);
-        setError("Error getting posts");
-      }
-    };
-    getPosts();
-  }, []);
 
   const totalPages = Math.ceil(posts.length / postsPerPage);
 
@@ -34,6 +22,12 @@ export default function Posts() {
 
   if (error) {
     return <div>{error}</div>;
+  }
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+  if (posts.length === 0) {
+    return <div>No posts found</div>;
   }
 
   return (
@@ -58,7 +52,7 @@ export default function Posts() {
       </div>
 
       {/* ── PAGINATION CONTROLS ── */}
-      {posts.length >= 0 && (
+      {posts.length > 0 && totalPages > 1 && (
         <div className="flex justify-center items-center space-x-4 mt-6 mb-6">
           <Button
             variant="outline"
