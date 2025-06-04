@@ -9,7 +9,6 @@ function Home() {
       <main>
         <HomeDashboard />
       </main>
-      <PostSearch />
     </>
   );
 }

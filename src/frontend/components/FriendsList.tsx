@@ -10,6 +10,7 @@ import {
 import { useEffect, useState } from "react";
 import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import NavBar from "./NavBar";
+import { Link } from "react-router";
 
 interface RelationshipResponse {
   id: string;
@@ -107,6 +108,7 @@ export default function FriendsList() {
   return (
     <div className="space-y-4">
       <NavBar />
+      <Link to="/friend-search">Find Friends</Link>
       <h2 className="text-xl font-semibold">Friends List</h2>
       {friends.length === 0 ? (
         <p className="text-gray-500">

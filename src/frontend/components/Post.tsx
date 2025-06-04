@@ -142,7 +142,7 @@ export function Post({
 
   if (preview) {
     return (
-      <Card className="max-w-2xl mx-auto mb-6">
+      <Card className="w-full h-full mb-6 flex flex-col">
         <CardHeader>
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
             <Link
@@ -183,7 +183,7 @@ export function Post({
             </p>
           </CardContent>
         </Link>
-        <CardFooter className="mt-4 pt-4 border-t">
+        <CardFooter className="mt-auto pt-4 border-t">
           <blockquote className="italic text-sm text-muted-foreground">
             "{quote}"
           </blockquote>
