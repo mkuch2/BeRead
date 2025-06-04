@@ -103,7 +103,7 @@ export default function BioForm({
               <FormItem>
                 <FormLabel>Bio</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Textarea className="text-center" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

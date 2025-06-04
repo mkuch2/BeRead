@@ -5,7 +5,6 @@ import {
   type AuthContextType,
 } from "@/frontend/hooks/useAuthContext";
 import { useNavigate, Link } from "react-router";
-import { FirebaseError } from "firebase/app";
 import NavBar from "@/frontend/components/NavBar";
 import BioForm from "@/frontend/components/BioForm";
 
@@ -386,7 +385,7 @@ function DisplayProfile() {
                       />
                     ) : (
                       <>
-                        <p className="text-sm mb-2">
+                        <p className="text-sm mb-2 text-center">
                           {profile.bio || "No bio yet"}
                         </p>
                         <div className="flex justify-center">
