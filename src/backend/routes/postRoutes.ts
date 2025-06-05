@@ -577,4 +577,38 @@ router.post(
   }
 );
 
+router.get("/posts/friends", verifyToken, async (req: AuthRequest, res: Response) => {
+  const uid = req.user?.uid;
+
+  try {
+    // Get all accepted relationships for the current user
+    const relationships = await prisma.relationships.findMany({
+      where: {
+        OR: [
+          { requester_id: uid, status: "ACCEPTED" },
+          { addressee_id: uid, status: "ACCEPTED" },
+        ],
+      },
+    });
+
+    // Get all friend user IDs (excluding self)
+    const friendIds = relationships.map(r =>
+      r.requester_id === uid ? r.addressee_id : r.requester_id
+    );
+
+    // Get all posts by friends
+    const posts = await prisma.posts.findMany({
+      where: {
+        user_id: { in: friendIds },
+      },
+      orderBy: { published_at: "desc" },
+    });
+
+    res.status(200).json(posts);
+  } catch (e) {
+    console.log("Error getting friends' posts:", e);
+    res.status(500).json({ error: "Failed to get friends' posts" });
+  }
+});
+
 export default router;
