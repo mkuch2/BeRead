@@ -12,6 +12,7 @@ import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import NavBar from "./NavBar";
 import { Link } from "react-router";
 import FriendRequest from "./FriendRequest";
+import { Post } from "./Post";
 
 interface RelationshipResponse {
   id: string;
@@ -42,11 +43,26 @@ interface FriendInterface {
   currentlyReadingThumbnail: string;
 }
 
+interface PostInterface {
+  id: string;
+  book_title: string;
+  pages: string;
+  content: string;
+  quote: string;
+  username: string;
+  published_at: string;
+  likes: number;
+  dislikes: number;
+  author: string[];
+  thumbnail?: string | null;
+}
+
 export default function FriendsList() {
   const [loading, setLoading] = useState<boolean>(false);
   const [friends, setFriends] = useState<FriendInterface[]>([]);
   const [requests, setRequests] = useState<RelationshipResponse[]>([]);
   const { currentUser, getToken } = useAuthContext() as AuthContextType;
+  const [friendPosts, setFriendPosts] = useState<PostInterface[]>([]);
 
   const getRequests = useCallback(async () => {
     if (!currentUser) {
@@ -136,6 +152,23 @@ export default function FriendsList() {
     getRequests();
   }, [getRequests]);
 
+    useEffect(() => {
+    const fetchFriendPosts = async () => {
+      if (!currentUser) return;
+      const token = await getToken();
+      try {
+        const response = await axios.get("/api/posts/friends", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setFriendPosts(response.data);
+      } catch (e) {
+        console.log("Error fetching friends' posts:", e);
+        setFriendPosts([]);
+      }
+    };
+    fetchFriendPosts();
+  }, [currentUser, getToken]);
+
   const onRequestAction = useCallback(async () => {
     await getRequests();
     await getFriends();
@@ -148,13 +181,13 @@ export default function FriendsList() {
   return (
     <div className="space-y-4">
       <NavBar />
-      <h2 className="text-xl font-semibold">Friends List</h2>
       <Link
         to="/friend-search"
         className="bg-white text-black px-4 py-1 text-sm rounded-full font-medium hover:opacity-90"
       >
         Find Friends
       </Link>
+      <h2 className="text-xl font-semibold mt-2">Friends List</h2>
       {friends.length === 0 ? (
         <p className="text-gray-500 mt-6">
           No friends yet. Send some friend requests!
@@ -196,6 +229,32 @@ export default function FriendsList() {
             />
           ))}
         </div>
+      </div>
+      <div>
+        <h1 className="text-xl font-semibold mt-6">Friends' Posts</h1>
+        {friendPosts.length === 0 ? (
+          <p className="text-gray-500 mt-2">No posts from friends yet.</p>
+        ) : (
+          <div className="grid gap-4 mt-2">
+            {friendPosts.map((post) => (
+              <Post
+                username={post.username}
+                published_at={post.published_at}
+                title={post.book_title}
+                content={post.content}
+                quote={post.quote}
+                likes={post.likes}
+                dislikes={post.dislikes}
+                post_id={post.id}
+                author={post.author}
+                preview={true}
+                post={post}
+                key={post.id}
+                thumbnail={post.thumbnail ?? null}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
