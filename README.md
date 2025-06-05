@@ -92,3 +92,8 @@ and use it from there.
 
 Our backend server runs on port 5004, while our frontend server runs on
 port 5173.
+
+If running npm run build gives you an error regarding unused variables in a prisma
+folder, you may have to go in and manually add '@ts-expect-error' before
+the lines which are causing errors. Although I don't think this should happen, as it
+didn't happen to me on a clean test run!
