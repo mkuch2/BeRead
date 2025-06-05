@@ -5,14 +5,12 @@ import { Link } from "react-router";
 interface FriendRequestProps {
   username: string;
   reqId: string;
-  requester_id: string;
   onRequestAction: () => void;
 }
 
 export default function FriendRequest({
   username,
   reqId,
-  requester_id,
   onRequestAction,
 }: FriendRequestProps) {
   const { currentUser } = useAuthContext() as AuthContextType;
