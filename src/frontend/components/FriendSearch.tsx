@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { Link } from "react-router";
 
 interface User {
   id: string;
@@ -68,13 +69,15 @@ function UserSearch({ onSelectUser }: UserSearchProps) {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 justify-center">
         {(users ?? []).map((user) => (
-          <div
-            key={user.id}
-            className="bg-zinc-900 p-4 rounded-md shadow-md text-center cursor-pointer hover:bg-zinc-800 transition-colors"
-            onClick={() => onSelectUser?.(user)}
-          >
-            <h3 className="font-semibold text-sm mb-1">{user.username}</h3>
-          </div>
+          <>
+            <Link
+              key={user.id}
+              to={`/display-profile/${user.username}`}
+              className="bg-zinc-900 p-4 rounded-md shadow-md text-center cursor-pointer hover:bg-zinc-800 transition-colors block"
+            >
+              {user.username}
+            </Link>
+          </>
         ))}
       </div>
 

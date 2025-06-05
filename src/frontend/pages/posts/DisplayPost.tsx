@@ -80,34 +80,37 @@ const DisplayPost = () => {
       {loading ? (
         <div>Loading...</div>
       ) : (
-        <div className="space-y-3 mt-6">
-          <Post
-            username={post.username}
-            published_at={post.published_at}
-            title={post.book_title}
-            content={post.content}
-            quote={post.quote}
-            likes={post.likes}
-            dislikes={post.dislikes}
-            post_id={post.id}
-            author={post.author}
-            preview={false}
-            post={post}
-            thumbnail={post.thumbnail}
-          ></Post>
-
-          <CommentForm post_id={post.id} onCommentAdd={refreshComments} />
-
-          <div className="w-full">
+        <div className="flex justify-center items-start gap-16 mt-10 px-6">
+          {/* Left side: Post + Add Comment */}
+          <div className="flex flex-col space-y-6 w-[500px]">
+            <Post
+              username={post.username}
+              published_at={post.published_at}
+              title={post.book_title}
+              content={post.content}
+              quote={post.quote}
+              likes={post.likes}
+              dislikes={post.dislikes}
+              post_id={post.id}
+              author={post.author}
+              preview={false}
+              post={post}
+              thumbnail={post.thumbnail}
+            />
+            <CommentForm post_id={post.id} onCommentAdd={refreshComments} />
+          </div>
+  
+          {/* Right side: Comments */}
+          <div className="flex flex-col w-[450px] space-y-4">
             {comments.map((comment) => (
               <Comment
                 key={comment.id}
                 username={comment.username}
                 published_at={comment.published_at}
                 content={comment.content}
-                comment_id={comment.id}
                 likes={comment.likes}
                 dislikes={comment.dislikes}
+                comment_id={comment.id}
                 post_id={post.id}
                 onReplyAdd={refreshComments}
               />

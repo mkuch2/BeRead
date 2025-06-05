@@ -1,17 +1,14 @@
 import {
   Card,
   CardHeader,
-  CardTitle,
   CardContent,
-  CardFooter,
 } from "@/frontend/components/ui/card";
 import { Button } from "@/frontend/components/ui/button";
 import { formatDate } from "../lib/utils";
 import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import ReplyForm from "./ReplyForm";
-import { useCallback } from "react";
 
 export interface CommentProps {
   username: string;
@@ -51,19 +48,18 @@ export function Comment({
   const [loading, setLoading] = useState<boolean>(false);
   const [likes, setLikes] = useState<number>(initialLikes);
   const [dislikes, setDislikes] = useState<number>(initialDislikes);
-  const [reactionError, setReactionError] = useState<string>("");
-  const { currentUser, getToken } = useAuthContext() as AuthContextType;
   const [userReaction, setUserReaction] = useState<string | null>(null);
   const [replies, setReplies] = useState<CommentInterface[]>([]);
   const [showReplyForm, setShowReplyForm] = useState<boolean>(false);
+  const { currentUser, getToken } = useAuthContext() as AuthContextType;
 
   useEffect(() => {
     async function getReplies() {
       try {
-        const response = await axios.get(`/api/comments/replies/${comment_id}`);
-        setReplies(response.data);
+        const res = await axios.get(`/api/comments/replies/${comment_id}`);
+        setReplies(res.data);
       } catch (e) {
-        console.log("Error getting replies: ", e);
+        console.error("Error fetching replies:", e);
       }
     }
 
@@ -71,65 +67,41 @@ export function Comment({
   }, [comment_id]);
 
   useEffect(() => {
-    async function getReactions() {
+    async function fetchReaction() {
       if (!currentUser) return;
-
-      console.log("Comment id:", comment_id);
-
       try {
         const token = await getToken();
-
-        const reactions = await axios.get(
+        const res = await axios.get(
           `/api/comment-reaction?query=${encodeURIComponent(comment_id)}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-
-        console.log("Comment reactions", reactions);
-
-        setUserReaction(reactions.data?.type || null);
+        setUserReaction(res.data?.type || null);
       } catch (e) {
-        console.log("Error getting comment reactions: ", e);
-        setReactionError("Error getting comment reactions");
+        console.error("Error fetching comment reaction:", e);
       }
     }
 
-    getReactions();
+    fetchReaction();
   }, [currentUser, comment_id, getToken]);
 
   const handleReaction = async (type: string) => {
     if (!currentUser) return;
-
     setLoading(true);
 
     try {
-      const newType = userReaction === type ? "none" : type;
-
       const token = await getToken();
-      const response = await axios.post(
+      const newType = userReaction === type ? "none" : type;
+      const res = await axios.post(
         "/api/comment-reaction",
-        {
-          comment_id: comment_id,
-          type: newType,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { comment_id, type: newType },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      console.log("comment reaction response", response);
-
       setUserReaction(newType === "none" ? null : newType);
-      setLikes(response.data.comment.likes);
-      setDislikes(response.data.comment.dislikes);
+      setLikes(res.data.comment.likes);
+      setDislikes(res.data.comment.dislikes);
     } catch (e) {
-      console.log("Error updating comment reaction: ", e);
-      setReactionError("Error updating comment reaction");
+      console.error("Failed to update comment reaction:", e);
     } finally {
       setLoading(false);
     }
@@ -137,61 +109,48 @@ export function Comment({
 
   const handleReply = useCallback(async () => {
     setShowReplyForm(false);
-
     try {
-      const response = await axios.get(`/api/comments/replies/${comment_id}`);
-      setReplies(response.data);
+      const res = await axios.get(`/api/comments/replies/${comment_id}`);
+      setReplies(res.data);
     } catch (e) {
-      console.log("Error getting replies in handleReply: ", e);
+      console.error("Error fetching replies after reply:", e);
     }
-
-    if (onReplyAdd) {
-      onReplyAdd();
-    }
+    if (onReplyAdd) onReplyAdd();
   }, [comment_id, onReplyAdd]);
 
   return (
-    <div className="space-y-3 mt-6 w-full">
-      <Card>
-        <CardHeader>
-          {username} posted at {formattedDate}:
+    <div className="w-full max-w-md">
+      <Card className="p-4 bg-[#1c1c1e] text-white rounded-md shadow-sm">
+        <CardHeader className="text-sm text-muted-foreground pb-2">
+          <span className="font-medium">{username}</span>{" "}
+          <span className="text-xs">posted at {formattedDate}</span>
         </CardHeader>
         <CardContent>
-          <div>{content}</div>
-          <div className="flex space-x-4 justify-end">
-            <button
-              onClick={() => handleReaction("like")}
-              disabled={loading}
-              className="cursor-pointer"
-            >
-              <p
-                className={`hover:text-white ${
-                  userReaction === "like"
-                    ? "text-gray-400 font-bold"
-                    : "text-gray-600"
-                }`}
+          <p className="text-sm mb-3">{content}</p>
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => handleReaction("like")}
+                disabled={loading}
+                className="flex items-center gap-1 cursor-pointer"
               >
-                Like {likes}
-              </p>
-            </button>
-            <button
-              onClick={() => handleReaction("dislike")}
-              disabled={loading}
-              className="cursor-pointer"
-            >
-              <p
-                className={`hover:text-white ${
-                  userReaction === "dislike"
-                    ? "text-gray-400 font-bold"
-                    : "text-gray-600"
-                }`}
+                <span className="text-green-400">👍</span>
+                <span>{likes}</span>
+              </button>
+              <button
+                onClick={() => handleReaction("dislike")}
+                disabled={loading}
+                className="flex items-center gap-1 cursor-pointer"
               >
-                Dislike {dislikes}
-              </p>
-            </button>
+                <span className="text-red-400">👎</span>
+                <span>{dislikes}</span>
+              </button>
+            </div>
             <Button
               onClick={() => setShowReplyForm(!showReplyForm)}
               disabled={!currentUser}
+              size="sm"
+              className="text-xs"
             >
               Reply
             </Button>
@@ -209,7 +168,7 @@ export function Comment({
       )}
 
       {replies.length > 0 && (
-        <div className="replies mt-6 w-[95%] ml-auto">
+        <div className="mt-4 pl-4 border-l border-zinc-700">
           {replies.map((reply) => (
             <Comment
               key={reply.id}

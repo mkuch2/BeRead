@@ -159,158 +159,104 @@ export function Post({
 
   if (preview) {
     return (
-      <Card className="w-full h-full mb-6 flex flex-col">
-        <CardHeader>
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <Link to={`/display-profile/${username}`} className="hover:underline">
-              <span className="font-medium">{username}</span>
-            </Link>
-            <span className="text-xs">posted</span>
-            <span className="text-xs">{formattedDate}</span>
-          </div>
-          <Link
-            to="/display-post"
-            state={{ post: post }}
-            className="book-card"
-            style={{ cursor: "pointer" }}
-          >
-            {/* Thumbnail (Preview Mode) */}
-            <div className="row-span-2 border-b border-zinc-700">
+      <div className="w-full flex justify-center px-4">
+        <Card className="w-full max-w-sm mb-6 rounded-lg border border-zinc-800 bg-zinc-900 text-white shadow-sm">
+          <CardHeader className="px-4 pt-3 pb-1">
+            <div className="flex justify-between items-center text-xs text-zinc-400">
+              <Link to={`/display-profile/${username}`} className="font-semibold text-white hover:underline">
+                {username}
+              </Link>
+              <span>{formattedDate}</span>
+            </div>
+          </CardHeader>
+  
+          <Link to="/display-post" state={{ post }} className="cursor-pointer">
+            <div className="w-full h-44 overflow-hidden flex justify-center items-center border-y border-zinc-800">
               {renderThumbnail(true)}
             </div>
-            <CardTitle className="mt-2 text-xl">{decodedTitle}</CardTitle>
-            <CardTitle className="italic text-sm">
-              {author.join(", ")}
-            </CardTitle>
-          </Link>
-        </CardHeader>
-
-        <Link
-          to="/display-post"
-          state={{ post: post }}
-          className="book-card"
-          style={{ cursor: "pointer" }}
-        >
-          <CardContent className="mt-1">
-            <p className="whitespace-pre-wrap text-base text-foreground">
-              {content}
-            </p>
-          </CardContent>
-        </Link>
-        <CardFooter className="mt-auto pt-4 border-t">
-          <blockquote className="italic text-sm text-muted-foreground">
-            "{quote}"
-          </blockquote>
-
-          <div className="flex space-x-4 justify-end">
-            <button
-              onClick={() => handleReaction("like")}
-              disabled={loading}
-              className="cursor-pointer"
-            >
-              <p
-                className={`${
-                  userReaction === "like"
-                    ? "text-gray-400 font-bold"
-                    : "text-gray-600"
-                }`}
-              >
-                Like {likes}
-              </p>
-            </button>
-            <button
-              onClick={() => handleReaction("dislike")}
-              disabled={loading}
-              className="cursor-pointer"
-            >
-              <p
-                className={`${
-                  userReaction === "dislike"
-                    ? "text-gray-400 font-bold"
-                    : "text-gray-600"
-                }`}
-              >
-                Dislike {dislikes}
-              </p>
-            </button>
-          </div>
-        </CardFooter>
-      </Card>
-    );
-  }
-
-  return (
-    <Card className="max-w-2xl mx-auto mb-6">
-      <div className="grid grid-cols-[1fr_2fr] grid-rows-[1fr_2fr_auto] gap-4">
-        {/* Card top-left */}
-        <div className="row-span-2 px-4 py-2 flex items-center justify-center border-zinc-700">
-          {renderThumbnail(false)}
-        </div>
-
-        {/* Card top-right */}
-        <div className="px-4 py-2 border-b border-zinc-700">
-          <h2 className="text-xl font-semibold">{decodedTitle}</h2>
-          <h3 className="italic text-sm text-muted-foreground">
-            {author.join(", ")}
-          </h3>
-        </div>
-        <div className="px-4 py-2 border-zinc-700 overflow-y-auto">
-          <p className="whitespace-pre-wrap text-base text-foreground">
-            {content}
-          </p>
-        </div>
-
-        {/* Card bottom */}
-        <div className="px-4 py-2 border-t col-span-2">
-          <blockquote className="italic text-sm text-muted-foreground">
-            "{quote}"
-          </blockquote>
-
-          <div className="mt-2 flex items-center justify-between">
-            {/* Card bottom-left */}
-            <div className="text-sm text-muted-foreground">
-              <Link to={`/display-profile/${username}`} className="hover:underline">
-                <span className="font-medium">{username}</span>
-              </Link>
-              <span className="text-xs">{formattedDate}</span>
+  
+            <div className="px-4 py-2 text-center">
+              <CardTitle className="text-lg font-bold leading-snug">{decodedTitle}</CardTitle>
+              <p className="italic text-xs text-zinc-400">{author.join(", ")}</p>
+              <p className="mt-1 text-sm text-zinc-100 whitespace-pre-wrap">{content}</p>
             </div>
-
-            {/* Card bottom-right */}
-            <div className="flex space-x-4">
+          </Link>
+  
+          <CardFooter className="px-4 py-2 border-t border-zinc-800 flex flex-col items-center gap-1">
+            <blockquote className="italic text-xs text-zinc-500 text-center">"{quote}"</blockquote>
+            <div className="flex gap-6 mt-1 text-sm">
               <button
                 onClick={() => handleReaction("like")}
                 disabled={loading}
                 className="cursor-pointer"
               >
-                <p
-                  className={`${
-                    userReaction === "like"
-                      ? "text-gray-400 font-bold"
-                      : "text-gray-600"
-                  }`}
-                >
-                  Like {likes}
-                </p>
+                <span className={`flex items-center gap-1 ${userReaction === "like" ? "text-green-400 font-semibold" : "text-zinc-400"}`}>
+                  👍 {likes}
+                </span>
               </button>
               <button
                 onClick={() => handleReaction("dislike")}
                 disabled={loading}
                 className="cursor-pointer"
               >
-                <p
-                  className={`${
-                    userReaction === "dislike"
-                      ? "text-gray-400 font-bold"
-                      : "text-gray-600"
-                  }`}
-                >
-                  Dislike {dislikes}
-                </p>
+                <span className={`flex items-center gap-1 ${userReaction === "dislike" ? "text-red-400 font-semibold" : "text-zinc-400"}`}>
+                  👎 {dislikes}
+                </span>
               </button>
             </div>
-          </div>
-        </div>
+          </CardFooter>
+        </Card>
       </div>
-    </Card>
+    );
+  }
+  
+  return (
+    <div className="w-full flex justify-start px-4">
+      <Card className="w-full max-w-md rounded-lg border border-zinc-800 bg-zinc-900 text-white">
+        <CardHeader className="px-4 pt-3 pb-1">
+          <div className="flex justify-between items-center text-xs text-zinc-400">
+            <Link to={`/display-profile/${username}`} className="font-semibold text-white hover:underline">
+              {username}
+            </Link>
+            <span>{formattedDate}</span>
+          </div>
+        </CardHeader>
+  
+        <div className="w-full h-52 overflow-hidden flex justify-center items-center border-y border-zinc-800">
+          {renderThumbnail(true)}
+        </div>
+  
+        <div className="px-4 py-2 text-center">
+          <CardTitle className="text-lg font-bold leading-snug">{decodedTitle}</CardTitle>
+          <p className="italic text-xs text-zinc-400">{author.join(", ")}</p>
+          <p className="mt-1 text-sm text-zinc-100 whitespace-pre-wrap">{content}</p>
+        </div>
+  
+        <CardFooter className="px-4 py-2 border-t border-zinc-800 flex flex-col items-center gap-1">
+          <blockquote className="italic text-xs text-zinc-500 text-center">"{quote}"</blockquote>
+          <div className="flex gap-6 mt-1 text-sm">
+            <button
+              onClick={() => handleReaction("like")}
+              disabled={loading}
+              className="cursor-pointer"
+            >
+              <span className={`flex items-center gap-1 ${userReaction === "like" ? "text-green-400 font-semibold" : "text-zinc-400"}`}>
+                👍 {likes}
+              </span>
+            </button>
+            <button
+              onClick={() => handleReaction("dislike")}
+              disabled={loading}
+              className="cursor-pointer"
+            >
+              <span className={`flex items-center gap-1 ${userReaction === "dislike" ? "text-red-400 font-semibold" : "text-zinc-400"}`}>
+                👎 {dislikes}
+              </span>
+            </button>
+          </div>
+        </CardFooter>
+      </Card>
+    </div>
   );
+  
 }

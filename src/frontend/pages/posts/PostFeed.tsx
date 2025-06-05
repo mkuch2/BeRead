@@ -18,7 +18,6 @@ export default function PostFeed() {
       try {
         const response = await axios.get("/api/posts");
         console.log("getPosts response", response);
-
         setPosts(response.data);
       } catch (e) {
         console.log("Error getting all posts", e);
@@ -37,8 +36,30 @@ export default function PostFeed() {
   return (
     <>
       <NavBar />
-      <PostSearch onSearch={handleSearch} hasSearched={hasSearched} />
-      {!hasSearched && <Posts posts={posts} error={error} loading={loading} />}
+      <div className="min-h-screen bg-black text-white font-sans px-4 pt-6 border border-zinc-600">
+        {/* --- Search Bar --- */}
+        <div className="max-w-3xl mx-auto mb-6">
+          <PostSearch onSearch={handleSearch} hasSearched={hasSearched} />
+        </div>
+
+        {/* --- Feed Header --- */}
+        {!hasSearched && (
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-2xl font-semibold mb-4 px-2">My Posts</h2>
+
+            {/* --- Loading/Error State --- */}
+            {loading && <p className="text-zinc-400 text-sm">Loading...</p>}
+            {error && (
+              <p className="text-red-500 text-sm mb-4">{error}</p>
+            )}
+
+            {/* --- Posts List --- */}
+            <div className="space-y-6">
+              <Posts posts={posts} error={error} loading={loading} />
+            </div>
+          </div>
+        )}
+      </div>
     </>
   );
 }
