@@ -23,7 +23,7 @@ set up a database and get the database url using pgAdmin 4.
    - c. In the Connection tab, set host name/address to localhost
    - d. In the password field, enter in the password you created when you first launched pgAdmin4. Select save password if you wish.
    - e. Leave all other fields as the default. Click save to register your server!
-3. We will now be setting up Prisma ORM to work with out database.
+3. We will now be setting up Prisma ORM to work with our database.
    - a. In your .env file (remember to create it in the top level directory), define a variable
      DATABASE_URL.
    - b. Set this variable to the database url, which will have the following format: postgresql://USER:PASSWORD@HOST:PORT/DATABASE
