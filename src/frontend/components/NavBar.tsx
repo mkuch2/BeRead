@@ -90,6 +90,13 @@ export default function NavBar() {
               >
                 Profile
               </Link>
+
+              <Link
+                to="/add-post"
+                className="text-sm text-zinc-400 hover:text-white transition"
+              >
+                Create post
+              </Link>
             </>
           )}
 
