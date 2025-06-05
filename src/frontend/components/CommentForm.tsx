@@ -116,12 +116,12 @@ export default function CommentForm({
       setLoading(false);
     }
   }
-
+ 
   return (
     <Form {...form}>
       <form 
         onSubmit={form.handleSubmit(onSubmit)} 
-        className="flex w-full max-w-2xl mx-auto items-center gap-2 mt-8"
+        className="flex w-full max-w-md ml-4 items-center gap-1 mt-6"
       >
         <FormField
           control={form.control}
