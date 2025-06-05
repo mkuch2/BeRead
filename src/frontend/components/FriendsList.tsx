@@ -156,7 +156,7 @@ export default function FriendsList() {
         Find Friends
       </Link>
       {friends.length === 0 ? (
-        <p className="text-gray-500">
+        <p className="text-gray-500 mt-6">
           No friends yet. Send some friend requests!
         </p>
       ) : (
