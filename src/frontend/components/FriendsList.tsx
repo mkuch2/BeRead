@@ -7,10 +7,11 @@ import {
   CardFooter,
 } from "@/frontend/components/ui/card";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import NavBar from "./NavBar";
 import { Link } from "react-router";
+import FriendRequest from "./FriendRequest";
 
 interface RelationshipResponse {
   id: string;
@@ -44,62 +45,101 @@ interface FriendInterface {
 export default function FriendsList() {
   const [loading, setLoading] = useState<boolean>(false);
   const [friends, setFriends] = useState<FriendInterface[]>([]);
+  const [requests, setRequests] = useState<RelationshipResponse[]>([]);
   const { currentUser, getToken } = useAuthContext() as AuthContextType;
 
-  useEffect(() => {
-    async function getFriends() {
-      if (!currentUser) {
-        console.log("Current user not found");
-        return;
-      }
-
-      setLoading(true);
-
-      try {
-        const token = await getToken();
-
-        const response = await axios.get("/api/friends", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const friends = response.data.map(
-          (relationship: RelationshipResponse) => {
-            if (relationship.requester_id === currentUser?.uid) {
-              return {
-                uid: relationship.addressee_id,
-                username: relationship.addressee.username,
-                name: relationship.addressee.name,
-                currentlyReadingTitle:
-                  relationship.addressee.currentlyReadingTitle,
-                currentlyReadingThumbnail:
-                  relationship.addressee.currentlyReadingThumbnail,
-              };
-            } else {
-              return {
-                uid: relationship.requester_id,
-                username: relationship.requester.username,
-                name: relationship.requester.name,
-                currentlyReadingTitle:
-                  relationship.requester.currentlyReadingTitle,
-                currentlyReadingThumbnail:
-                  relationship.requester.currentlyReadingThumbnail,
-              };
-            }
-          }
-        );
-
-        setFriends(friends);
-      } catch (e) {
-        console.log("Error getting friends: ", e);
-      } finally {
-        setLoading(false);
-      }
+  const getRequests = useCallback(async () => {
+    if (!currentUser) {
+      console.log("Current user not found");
+      return;
     }
 
-    getFriends();
+    setLoading(true);
+
+    console.log("Get requests being called");
+
+    try {
+      const token = await getToken();
+
+      const response = await axios.get("/api/friend-requests", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("friendlist get requests response", response);
+      setRequests(response.data);
+    } catch (e) {
+      console.log("Error getting requests", e);
+      setRequests([]);
+    } finally {
+      setLoading(false);
+    }
   }, [currentUser, getToken]);
+
+  const getFriends = useCallback(async () => {
+    if (!currentUser) {
+      console.log("Current user not found");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const token = await getToken();
+
+      const response = await axios.get("/api/friends", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const friends = response.data.map(
+        (relationship: RelationshipResponse) => {
+          if (relationship.requester_id === currentUser?.uid) {
+            return {
+              uid: relationship.addressee_id,
+              username: relationship.addressee.username,
+              name: relationship.addressee.name,
+              currentlyReadingTitle:
+                relationship.addressee.currentlyReadingTitle,
+              currentlyReadingThumbnail:
+                relationship.addressee.currentlyReadingThumbnail,
+            };
+          } else {
+            return {
+              uid: relationship.requester_id,
+              username: relationship.requester.username,
+              name: relationship.requester.name,
+              currentlyReadingTitle:
+                relationship.requester.currentlyReadingTitle,
+              currentlyReadingThumbnail:
+                relationship.requester.currentlyReadingThumbnail,
+            };
+          }
+        }
+      );
+
+      setFriends(friends);
+    } catch (e) {
+      console.log("Error getting friends: ", e);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentUser, getToken]);
+
+  useEffect(() => {
+    getFriends();
+  }, [getFriends]);
+
+  useEffect(() => {
+    getRequests();
+  }, [getRequests]);
+
+  const onRequestAction = useCallback(async () => {
+    await getRequests();
+    await getFriends();
+  }, [getFriends, getRequests]);
 
   if (loading) {
     return <div>Loading friends...</div>;
@@ -124,7 +164,9 @@ export default function FriendsList() {
           {friends.map((friend) => (
             <Card key={friend.uid} className="p-4">
               <CardHeader>
-                <CardTitle>{friend.name || friend.username}</CardTitle>
+                <Link to={`/display-profile/${friend.username}`}>
+                  <CardTitle>{friend.name || friend.username}</CardTitle>{" "}
+                </Link>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-600">@{friend.username}</p>
@@ -141,6 +183,21 @@ export default function FriendsList() {
           ))}
         </div>
       )}
+
+      <div>
+        <h1>Incoming Friend Requests</h1>
+        <div>
+          {requests.map((request) => (
+            <FriendRequest
+              username={request.requester.username}
+              reqId={request.id}
+              requester_id={request.requester_id}
+              key={request.id}
+              onRequestAction={onRequestAction}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

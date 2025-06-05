@@ -1,7 +1,6 @@
 import { type Request, type Response, Router } from "express";
 import prismaClient from "../prismaClient";
 import verifyToken, { type AuthRequest } from "../middleware/authMiddleware";
-import { body, query, matchedData, validationResult } from "express-validator";
 
 const router: Router = Router();
 const prisma = prismaClient;
@@ -34,7 +33,7 @@ router.post(
           status: "PENDING",
         },
       });
-      res.json(relationship);
+      res.status(200).json(relationship);
     } catch (e) {
       res.status(400).json({ error: "Friend request failed" });
     }
@@ -57,9 +56,33 @@ router.put(
         },
         data: { status },
       });
-      res.json(relationship);
+      res.status(200).json(relationship);
     } catch (e) {
       res.status(400).json({ error: "Update failed" });
+    }
+  }
+);
+
+router.delete(
+  "/friend-request/reject/:id",
+  verifyToken,
+  async (req: AuthRequest, res: Response) => {
+    const id = req.params.id;
+
+    if (!id) {
+      res.status(400).json({ error: "Missing required parameter" });
+    }
+
+    try {
+      const relationship = await prisma.relationships.delete({
+        where: {
+          id: id,
+        },
+      });
+
+      res.status(200).json(relationship);
+    } catch (e) {
+      res.status(500).json({ error: "Could not delete relationship" });
     }
   }
 );
@@ -118,7 +141,7 @@ router.get("/friends", verifyToken, async (req: AuthRequest, res: Response) => {
         },
       },
     });
-    res.json(friends);
+    res.status(200).json(friends);
   } catch (e) {
     res.status(500).json({ error: "Failed to get friends" });
   }
@@ -136,11 +159,30 @@ router.get(
           addressee_id: uid,
           status: "PENDING",
         },
-        include: {
-          requester: { select: { username: true, name: true } },
+        select: {
+          id: true,
+          requester_id: true,
+          addressee_id: true,
+          status: true,
+          requester: {
+            select: {
+              username: true,
+              name: true,
+              currentlyReadingTitle: true,
+              currentlyReadingThumbnail: true,
+            },
+          },
+          addressee: {
+            select: {
+              username: true,
+              name: true,
+              currentlyReadingTitle: true,
+              currentlyReadingThumbnail: true,
+            },
+          },
         },
       });
-      res.json(requests);
+      res.status(200).json(requests);
     } catch (e) {
       res.status(500).json({ error: "Failed to get requests" });
     }
@@ -162,7 +204,7 @@ router.get(
           status: true,
         },
       });
-      res.json(requests);
+      res.status(200).json(requests);
     } catch (e) {
       res.status(500).json({ error: "Failed to get requests" });
     }
@@ -188,9 +230,36 @@ router.get(
           status: true,
         },
       });
-      res.json(request);
+      res.status(200).json(request);
     } catch (e) {
       res.status(500).json({ error: "Failed to get requests" });
+    }
+  }
+);
+
+router.get(
+  "/friend-request/received/:id",
+  verifyToken,
+  async (req: AuthRequest, res: Response) => {
+    const uid = req.user?.uid;
+    const requestee_id = req.params.id;
+
+    try {
+      const request = await prisma.relationships.findUnique({
+        where: {
+          unique_relationship: {
+            requester_id: requestee_id,
+            addressee_id: uid!,
+          },
+        },
+        select: {
+          status: true,
+        },
+      });
+
+      res.status(200).json(request);
+    } catch (e) {
+      res.status(500).json({ error: "Failed to get recieved requests" });
     }
   }
 );

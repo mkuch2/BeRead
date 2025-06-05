@@ -18,6 +18,7 @@ export default function PostFeed() {
       try {
         const response = await axios.get("/api/posts");
         console.log("getPosts response", response);
+
         setPosts(response.data);
       } catch (e) {
         console.log("Error getting all posts", e);
@@ -45,7 +46,7 @@ export default function PostFeed() {
         {/* --- Feed Header --- */}
         {!hasSearched && (
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl font-semibold mb-4 px-2">My Posts</h2>
+            <h2 className="text-2xl font-semibold mb-4 px-2">Today’s Posts</h2>
 
             {/* --- Loading/Error State --- */}
             {loading && <p className="text-zinc-400 text-sm">Loading...</p>}
