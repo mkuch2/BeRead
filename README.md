@@ -6,7 +6,7 @@ all the required dependencies.
 In order to set up everything running you will have to set up .env file in the project as well
 as a few other programs.
 
-The .env file can go in either the top level directory, or in ./src/backend/.
+The .env file must go in the top level of the directory.
 
 ## PostgreSQL
 
@@ -24,7 +24,7 @@ set up a database and get the database url using pgAdmin 4.
    - d. In the password field, enter in the password you created when you first launched pgAdmin4. Select save password if you wish.
    - e. Leave all other fields as the default. Click save to register your server!
 3. We will now be setting up Prisma ORM to work with out database.
-   - a. In your .env file (remember to create it in either ./src/backend or in the top level directory), define a variable
+   - a. In your .env file (remember to create it in the top level directory), define a variable
      DATABASE_URL.
    - b. Set this variable to the database url, which will have the following format: postgresql://USER:PASSWORD@HOST:PORT/DATABASE
    - All required information for this can be easily found in pgAdmin 4 by clicking the 2nd tab from the top on the left
