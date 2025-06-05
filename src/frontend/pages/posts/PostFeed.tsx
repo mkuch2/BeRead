@@ -36,7 +36,7 @@ export default function PostFeed() {
   return (
     <>
       <NavBar />
-      <div className="min-h-screen bg-black text-white font-sans px-4 pt-6">
+      <div className="min-h-screen bg-black text-white font-sans px-4 pt-6 border border-zinc-600">
         {/* --- Search Bar --- */}
         <div className="max-w-3xl mx-auto mb-6">
           <PostSearch onSearch={handleSearch} hasSearched={hasSearched} />
