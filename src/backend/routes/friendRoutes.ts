@@ -91,20 +91,26 @@ router.delete(
   "/friend-request/:id",
   verifyToken,
   async (req: AuthRequest, res: Response) => {
-    const addressee_id = req.params.id;
-    const requester_id = req.user?.uid;
+    const otherUserId = req.params.id;
+    const currentUserId = req.user?.uid;
 
     try {
-      const relationship = await prisma.relationships.delete({
+      const relationships = await prisma.relationships.deleteMany({
         where: {
-          unique_relationship: {
-            requester_id: requester_id!,
-            addressee_id: addressee_id,
-          },
+          OR: [
+            {
+              requester_id: currentUserId,
+              addressee_id: otherUserId,
+            },
+            {
+              requester_id: otherUserId,
+              addressee_id: currentUserId,
+            },
+          ],
         },
       });
 
-      res.status(200).json(relationship);
+      res.status(200).json(relationships);
     } catch (e) {
       res.status(500).json({ error: "Could not delete relationship" });
     }
