@@ -91,10 +91,10 @@ export default function UserProfile(profile: UserProfileProps) {
       });
 
       console.log("Delete response", response);
-      setFriendStatus("PENDING");
+      setFriendStatus(null);
     } catch (e) {
       console.log("Error deleting relationship", e);
-      setFriendStatus(null);
+      setFriendStatus("Pending");
     } finally {
       setLoading(false);
     }
@@ -170,7 +170,7 @@ export default function UserProfile(profile: UserProfileProps) {
                       disabled={loading}
                       className="bg-green-600 text-white px-4 py-2 rounded text-sm"
                     >
-                      <span>Friends ✓</span>
+                      <span>Friends</span>
                     </button>
                   ) : (
                     <button
