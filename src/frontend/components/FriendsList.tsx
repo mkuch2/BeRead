@@ -108,8 +108,13 @@ export default function FriendsList() {
   return (
     <div className="space-y-4">
       <NavBar />
-      <Link to="/friend-search">Find Friends</Link>
       <h2 className="text-xl font-semibold">Friends List</h2>
+      <Link 
+        to="/friend-search"
+        className="bg-white text-black px-4 py-1 text-sm rounded-full font-medium hover:opacity-90"
+      >
+        Find Friends
+      </Link>
       {friends.length === 0 ? (
         <p className="text-gray-500">
           No friends yet. Send some friend requests!
