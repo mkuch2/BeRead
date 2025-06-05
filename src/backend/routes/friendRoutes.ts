@@ -13,6 +13,9 @@ router.post(
     const { addressee_id } = req.body;
     const requester_id = req.user?.uid as string;
 
+    console.log("Addressee id: ", addressee_id);
+    console.log("Request id: ", requester_id);
+
     if (!addressee_id || !requester_id) {
       res.status(400).json({ error: "Missing required parameters" });
       return;
@@ -57,6 +60,30 @@ router.put(
       res.json(relationship);
     } catch (e) {
       res.status(400).json({ error: "Update failed" });
+    }
+  }
+);
+
+router.delete(
+  "/friend-request/:id",
+  verifyToken,
+  async (req: AuthRequest, res: Response) => {
+    const addressee_id = req.params.id;
+    const requester_id = req.user?.uid;
+
+    try {
+      const relationship = await prisma.relationships.delete({
+        where: {
+          unique_relationship: {
+            requester_id: requester_id!,
+            addressee_id: addressee_id,
+          },
+        },
+      });
+
+      res.status(200).json(relationship);
+    } catch (e) {
+      res.status(500).json({ error: "Could not delete relationship" });
     }
   }
 );
@@ -114,6 +141,54 @@ router.get(
         },
       });
       res.json(requests);
+    } catch (e) {
+      res.status(500).json({ error: "Failed to get requests" });
+    }
+  }
+);
+
+router.get(
+  "/friend-request/sent",
+  verifyToken,
+  async (req: AuthRequest, res: Response) => {
+    const uid = req.user?.uid;
+
+    try {
+      const requests = await prisma.relationships.findMany({
+        where: {
+          requester_id: uid,
+        },
+        select: {
+          status: true,
+        },
+      });
+      res.json(requests);
+    } catch (e) {
+      res.status(500).json({ error: "Failed to get requests" });
+    }
+  }
+);
+
+router.get(
+  "/friend-request/sent/:id",
+  verifyToken,
+  async (req: AuthRequest, res: Response) => {
+    const uid = req.user?.uid;
+    const addressee_id = req.params.id;
+
+    try {
+      const request = await prisma.relationships.findUnique({
+        where: {
+          unique_relationship: {
+            requester_id: uid!,
+            addressee_id: addressee_id,
+          },
+        },
+        select: {
+          status: true,
+        },
+      });
+      res.json(request);
     } catch (e) {
       res.status(500).json({ error: "Failed to get requests" });
     }

@@ -239,6 +239,30 @@ router.get("/user/profile/:username", async (req: Request, res: Response) => {
   }
 });
 
+router.get("/user/username/:username", async (req: Request, res: Response) => {
+  const username = req.params.username;
+
+  if (!username) {
+    res.status(400).json({ error: "Missing required parameter" });
+  }
+
+  try {
+    const uid = await prisma.users.findUnique({
+      where: {
+        username: username,
+      },
+      select: {
+        firebase_uid: true,
+      },
+    });
+
+    res.status(200).json(uid);
+  } catch (e) {
+    console.log("Error getting user, ", e);
+    res.status(500).json({ error: "Could not get user" });
+  }
+});
+
 router.put(
   "/user/:id/bio",
   verifyToken,

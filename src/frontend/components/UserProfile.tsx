@@ -1,5 +1,8 @@
 import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import axios from "axios";
+import { useEffect, useState } from "react";
+
 interface Book {
   id: string;
   title: string;
@@ -20,6 +23,10 @@ interface UserProfileProps {
 
 export default function UserProfile(profile: UserProfileProps) {
   const { currentUser } = useAuthContext() as AuthContextType;
+  const [loading, setLoading] = useState<boolean>(false);
+  const [friendStatus, setFriendStatus] = useState<string | null>(null);
+
+  const navigate = useNavigate();
 
   const MAX_FAVORITE_BOOKS = 3;
 
@@ -30,6 +37,111 @@ export default function UserProfile(profile: UserProfileProps) {
       return { book, index };
     }
   );
+
+  useEffect(() => {
+    async function getFriendStatus() {
+      const token = await currentUser?.getIdToken();
+      try {
+        const responseUser = await axios.get(
+          `/api/user/username/${profile.username}`
+        );
+
+        const uid = responseUser.data.firebase_uid;
+
+        const response = await axios.get(`/api/friend-request/sent/${uid}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        console.log("getFriendStatus respnse", response);
+
+        if (!response.data) {
+          return;
+        }
+
+        setFriendStatus(response.data.status);
+      } catch (e) {
+        console.log("Error getting friend status", e);
+      }
+    }
+
+    getFriendStatus();
+  }, [profile.username, currentUser]);
+
+  const handleRemoveFriend = async () => {
+    setLoading(true);
+    try {
+      const responseUser = await axios.get(
+        `/api/user/username/${profile.username}`
+      );
+
+      const uid = responseUser.data.firebase_uid;
+      const token = await currentUser?.getIdToken();
+
+      if (!token) {
+        console.log("Error getting user token");
+        return;
+      }
+
+      const response = await axios.delete(`/api/friend-request/${uid}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Delete response", response);
+      setFriendStatus("PENDING");
+    } catch (e) {
+      console.log("Error deleting relationship", e);
+      setFriendStatus(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddFriend = async () => {
+    setLoading(true);
+    try {
+      const responseUser = await axios.get(
+        `/api/user/username/${profile.username}`
+      );
+
+      const uid = responseUser.data.firebase_uid;
+
+      const token = await currentUser?.getIdToken();
+
+      if (!token) {
+        console.log("Error getting user token");
+        return;
+      }
+
+      console.log("token", token);
+
+      console.log("responseUser", responseUser);
+
+      const response = await axios.post(
+        "/api/friend-request",
+        {
+          addressee_id: uid,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("Response after sending friend request", response.data);
+
+      setFriendStatus("PENDING");
+    } catch (e) {
+      console.log("Error sending friend request, ", e);
+      setFriendStatus(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -44,14 +156,31 @@ export default function UserProfile(profile: UserProfileProps) {
               <p className="text-sm">{profile?.bio || "No bio yet"}</p>
               {currentUser && (
                 <div className="flex justify-center mt-auto">
-                  <button
-                    onClick={() => {
-                      console.log(`Add ${profile.username} as friend`);
-                    }}
-                    className="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm cursor-pointer"
-                  >
-                    Add Friend
-                  </button>
+                  {friendStatus === "PENDING" ? (
+                    <button
+                      onClick={handleRemoveFriend}
+                      disabled={loading}
+                      className="bg-gray-800 text-white px-4 py-2 rounded text-sm cursor-pointer hover:bg-gray-900"
+                    >
+                      <span>Request Pending</span>
+                    </button>
+                  ) : friendStatus === "ACCEPTED" ? (
+                    <button
+                      onClick={handleRemoveFriend}
+                      disabled={loading}
+                      className="bg-green-600 text-white px-4 py-2 rounded text-sm"
+                    >
+                      <span>Friends ✓</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleAddFriend}
+                      className="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm cursor-pointer"
+                      disabled={loading}
+                    >
+                      Add Friend
+                    </button>
+                  )}
                 </div>
               )}
             </section>
