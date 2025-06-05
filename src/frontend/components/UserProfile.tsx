@@ -1,5 +1,5 @@
 import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -26,8 +26,6 @@ export default function UserProfile(profile: UserProfileProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [friendStatus, setFriendStatus] = useState<string | null>(null);
 
-  const navigate = useNavigate();
-
   const MAX_FAVORITE_BOOKS = 3;
 
   const favoriteBookSlots = Array.from(
@@ -48,19 +46,34 @@ export default function UserProfile(profile: UserProfileProps) {
 
         const uid = responseUser.data.firebase_uid;
 
-        const response = await axios.get(`/api/friend-request/sent/${uid}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const requesteeResponse = await axios.get(
+          `/api/friend-request/sent/${uid}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-        console.log("getFriendStatus respnse", response);
+        const addresseeResponse = await axios.get(
+          `/api/friend-request/received/${uid}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-        if (!response.data) {
-          return;
+        console.log("getFriendStatus requestee respnse", requesteeResponse);
+        console.log("getfriendstatu addressee response", addresseeResponse);
+
+        if (requesteeResponse.data && requesteeResponse.data.status) {
+          setFriendStatus(requesteeResponse.data.status);
+        } else if (addresseeResponse.data && addresseeResponse.data.status) {
+          setFriendStatus(addresseeResponse.data.status);
+        } else {
+          setFriendStatus(null);
         }
-
-        setFriendStatus(response.data.status);
       } catch (e) {
         console.log("Error getting friend status", e);
       }
@@ -168,7 +181,7 @@ export default function UserProfile(profile: UserProfileProps) {
                     <button
                       onClick={handleRemoveFriend}
                       disabled={loading}
-                      className="bg-green-600 text-white px-4 py-2 rounded text-sm"
+                      className="bg-green-600 text-white px-4 py-2 rounded text-sm cursor-pointer hover:bg-red-500 hover:text-content-`Remove friend`"
                     >
                       <span>Friends</span>
                     </button>
