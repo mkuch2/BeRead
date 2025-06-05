@@ -149,7 +149,7 @@ export default function FriendsList() {
     <div className="space-y-4">
       <NavBar />
       <h2 className="text-xl font-semibold">Friends List</h2>
-      <Link 
+      <Link
         to="/friend-search"
         className="bg-white text-black px-4 py-1 text-sm rounded-full font-medium hover:opacity-90"
       >
@@ -191,7 +191,6 @@ export default function FriendsList() {
             <FriendRequest
               username={request.requester.username}
               reqId={request.id}
-              requester_id={request.requester_id}
               key={request.id}
               onRequestAction={onRequestAction}
             />
