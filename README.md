@@ -89,3 +89,6 @@ In the console, you can run 'npm run build' and then 'npm run server' and then
 open the link for the server, or you can run 'npm run server' and 'npm run dev'
 in two terminal instances simultaneously, and then open the link for the dev server
 and use it from there.
+
+Our backend server runs on port 5004, while our frontend server runs on
+port 5173.
