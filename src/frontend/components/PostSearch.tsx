@@ -124,7 +124,7 @@ const PostSearch = ({ onSearch, hasSearched }: PostSearchProps) => {
           {/* 1) FILTER KEYWORD */}
           <div className="flex-1">
             <Input
-              placeholder="Filter by key-words"
+              placeholder="Filter by keyword"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               className="w-full"
