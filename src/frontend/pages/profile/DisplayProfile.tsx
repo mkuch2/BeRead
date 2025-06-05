@@ -527,7 +527,7 @@ function DisplayProfile() {
             </div>
           </div>
         )}
-        <Link to={`/post-feed/${currentUser?.displayName}`} x>
+        <Link to={`/post-feed/${currentUser?.displayName}`}>
           <span className="mt-4 block">View your posts</span>
         </Link>
       </div>

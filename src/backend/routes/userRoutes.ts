@@ -253,4 +253,28 @@ router.put(
   }
 );
 
+router.get("/users", async (req: Request, res: Response): Promise<void> => {
+  const query = req.query.query as string;
+  if (!query) {
+    res.json({ users: [] });
+    return;
+  }
+
+  const users = await prisma.users.findMany({
+    where: {
+      username: {
+        contains: query,
+        mode: "insensitive"
+      }
+    },
+    select: {
+      id: true,
+      username: true,
+      name: true,
+    }
+  });
+
+  res.json({ users });
+});
+
 export default router;

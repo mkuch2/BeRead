@@ -65,7 +65,7 @@ const router = createBrowserRouter([
         <FriendSearch />
       </ProtectedRoute>
     )
-  }
+  },
   { path: "/post-feed", Component: PostFeed },
   { path: "/post-feed/:username", Component: UserPosts },
 ]);
