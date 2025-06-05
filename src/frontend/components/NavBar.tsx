@@ -1,10 +1,41 @@
 import { Link, useNavigate } from "react-router";
 import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import { FirebaseError } from "firebase/app";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 export default function NavBar() {
   const navigate = useNavigate();
   const { currentUser, signOut } = useAuthContext() as AuthContextType;
+  const [friendReqs, setFriendReqs] = useState<boolean>(false);
+
+  useEffect(() => {
+    const getFriendRequests = async () => {
+      const token = await currentUser?.getIdToken();
+
+      if (!token) {
+        console.log("Error getting user token");
+      }
+
+      try {
+        const response = await axios.get("/api/friend-requests", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        console.log("navbar getFriendReqs response", response);
+
+        if (response.data.length > 0) {
+          setFriendReqs(true);
+        }
+      } catch (e) {
+        console.log("Error getting friend requests", e);
+      }
+    };
+
+    getFriendRequests();
+  });
 
   const handleSignOut = async () => {
     try {
@@ -37,12 +68,22 @@ export default function NavBar() {
             ""
           ) : (
             <>
-              <Link
-                to="/friends"
-                className="text-sm text-zinc-400 hover:text-white transition"
-              >
-                Friends
-              </Link>
+              {friendReqs ? (
+                <Link
+                  to="/friends"
+                  className="text-sm text-zinc-400 hover:text-white transition font-bold italic"
+                >
+                  Friends
+                </Link>
+              ) : (
+                <Link
+                  to="/friends"
+                  className="text-sm text-zinc-400 hover:text-white transition"
+                >
+                  Friends
+                </Link>
+              )}
+
               <Link
                 to="/display-profile"
                 className="text-sm text-zinc-400 hover:text-white transition"

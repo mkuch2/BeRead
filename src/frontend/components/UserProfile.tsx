@@ -1,5 +1,5 @@
 import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -25,8 +25,6 @@ export default function UserProfile(profile: UserProfileProps) {
   const { currentUser } = useAuthContext() as AuthContextType;
   const [loading, setLoading] = useState<boolean>(false);
   const [friendStatus, setFriendStatus] = useState<string | null>(null);
-
-  const navigate = useNavigate();
 
   const MAX_FAVORITE_BOOKS = 3;
 
