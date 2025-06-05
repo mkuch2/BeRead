@@ -6,7 +6,7 @@ all the required dependencies.
 In order to set up everything running you will have to set up .env file in the project as well
 as a few other programs.
 
-The .env file must go in the top level of the directory.
+The .env file must go in the top level of the project directory.
 
 ## PostgreSQL
 
@@ -44,7 +44,8 @@ The database is now set up
 
 We used Firebase for our user authentication.
 
-For testing purposes for graders, the required env variables which we used are all in the submission.
+For testing purposes for graders, the required env variables which we used are all in the submission and so
+these steps are not needed.
 
 However, for the average cloner, if you wanted to set up your own Firebase project, so that you are admin,
 you would need to do the following:
