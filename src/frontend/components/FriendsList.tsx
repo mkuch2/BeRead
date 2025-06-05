@@ -181,21 +181,26 @@ export default function FriendsList() {
   return (
     <div className="space-y-4">
       <NavBar />
-      <Link
-        to="/friend-search"
-        className="bg-white text-black px-4 py-1 text-sm rounded-full font-medium hover:opacity-90"
-      >
-        Find Friends
-      </Link>
-      <h2 className="text-xl font-semibold mt-2">Friends List</h2>
+      <div className="flex justify-start">
+        <Link
+          to="/friend-search"
+          className="bg-white text-black px-2 text-sm rounded-full font-medium hover:opacity-90"
+        >
+          Find Friends
+        </Link>
+      </div>
+      <h2 className="text-xl font-semibold">Friends List</h2>
       {friends.length === 0 ? (
         <p className="text-gray-500 mt-6">
           No friends yet. Send some friend requests!
         </p>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {friends.map((friend) => (
-            <Card key={friend.uid} className="p-4">
+            <Card
+              key={friend.uid}
+              className="py-1 px-2 max-w-xs w-full mx-auto"
+            >
               <CardHeader>
                 <Link to={`/display-profile/${friend.username}`}>
                   <CardTitle>{friend.name || friend.username}</CardTitle>{" "}
@@ -218,20 +223,24 @@ export default function FriendsList() {
       )}
 
       <div>
-        <h1>Incoming Friend Requests</h1>
-        <div>
-          {requests.map((request) => (
-            <FriendRequest
-              username={request.requester.username}
-              reqId={request.id}
-              key={request.id}
-              onRequestAction={onRequestAction}
-            />
-          ))}
-        </div>
+        <h1 className="text-xl font-semibold mt-6">Incoming Friend Requests</h1>
+        {requests.length === 0 ? (
+          <p className="text-gray-500 mt-2">No incoming friend requests.</p>
+        ) : (
+          <div>
+            {requests.map((request) => (
+              <FriendRequest
+                username={request.requester.username}
+                reqId={request.id}
+                key={request.id}
+                onRequestAction={onRequestAction}
+              />
+            ))}
+          </div>
+        )}
       </div>
       <div>
-        <h1 className="text-xl font-semibold mt-6">Friends' Posts</h1>
+        <h1 className="text-xl font-semibold mt-6">Friend's Posts</h1>
         {friendPosts.length === 0 ? (
           <p className="text-gray-500 mt-2">No posts from friends yet.</p>
         ) : (
