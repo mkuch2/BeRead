@@ -8,7 +8,8 @@
     "server": "tsx --watch --env-file=./.env ./src/backend/server.ts",
     "server:local": "tsx --watch --env-file=.env ./src/backend/server.ts",
     "build": "tsc -b && vite build",
-    "start": "npm run build && npm run server",
+    "build:backend": "tsc --project tsconfig.backend.json",
+    "start": "tsx --env-file=.env ./src/backend/server.ts",
     "lint": "eslint .",
     "preview": "vite preview"
   },
