@@ -1,0 +1,33 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+.env
+
+#Prisma
+src/backend/generated/prisma/
+src/backend/prisma/migrations/
+
+src/backend/service-account-file.json
+src/backend/cs-35l-9a5f0-firebase-adminsdk-fbsvc-2f3919cb5a.json

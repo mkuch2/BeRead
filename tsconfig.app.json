@@ -29,8 +29,13 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"],
+  "include": ["src", "tsconfig.backend.json"],
 
-  "exclude": ["src/backend/generated/**/*", "dist/**", "node_modules/**", "src/backend/generated/prisma"],
+  "exclude": [
+    "src/backend/generated/**/*",
+    "dist/**",
+    "node_modules/**",
+    "src/backend/generated/prisma"
+  ],
   "noUnusedLocals": false
 }

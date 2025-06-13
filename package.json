@@ -9,7 +9,7 @@
     "server:local": "tsx --watch --env-file=.env ./src/backend/server.ts",
     "build": "tsc -b && vite build",
     "build:backend": "tsc --project tsconfig.backend.json",
-    "start": "tsx --env-file=.env ./src/backend/server.ts",
+    "start": "tsx ./src/backend/server.ts",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -46,6 +46,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
+    "@flydotio/dockerfile": "^0.7.10",
     "@types/express": "^5.0.1",
     "@types/node": "^22.15.17",
     "@types/node-fetch": "^2.6.12",

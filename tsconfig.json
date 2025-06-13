@@ -3,7 +3,8 @@
   "exclude": ["src/backend/generated/prisma"],
   "references": [
     { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
+    { "path": "./tsconfig.node.json" },
+    { "path": "./tsconfig.backend.json" }
   ],
   "compilerOptions": {
     /* shadcn */

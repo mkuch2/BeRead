@@ -103,6 +103,6 @@ app.all("/{*splat}", (_req: Request, res: Response): void => {
   res.sendFile(path.join(__dirname, "..", "..", "dist", "index.html"));
 });
 
-app.listen(PORT, (): void => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(Number(PORT), "0.0.0.0", (): void => {
+  console.log(`Server is running on http://0.0.0.0:${PORT}`);
 });
