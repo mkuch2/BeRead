@@ -7,6 +7,7 @@ import express, {
 } from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import { logger } from "./utils/logger";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import postRoutes from "./routes/postRoutes";
@@ -54,7 +55,7 @@ app.use(express.static(path.join(__dirname, "..", "..", "dist")));
 async function handleBookSearch(req: Request, res: Response): Promise<void> {
   const query = req.query.query as string; // gets user search input
 
-  console.log(query);
+  logger.log(query);
   if (!query) {
     res.status(400).json({ error: "Query parameter required" });
     return;

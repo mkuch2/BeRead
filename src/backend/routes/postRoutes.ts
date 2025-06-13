@@ -1,5 +1,6 @@
 import { type Request, type Response, Router } from "express";
 import prismaClient from "../prismaClient";
+import { logger } from "../utils/logger";
 import verifyToken, { type AuthRequest } from "../middleware/authMiddleware";
 import {
   param,
@@ -43,7 +44,7 @@ router.get("/post/:id", async (req: Request, res: Response): Promise<void> => {
 
     res.status(200).json(post);
   } catch (e) {
-    console.log("Error getting post: ", e);
+    logger.log("Error getting post: ", e);
     res.status(500).json({ error: "Error getting post" });
   }
 });
@@ -71,7 +72,7 @@ router.post(
     max: 128,
   }),
   body("thumbnail")
-    .optional({ nullable: true }) 
+    .optional({ nullable: true })
     .isString()
     .isLength({ max: 255 })
     .trim(),
@@ -81,7 +82,7 @@ router.post(
     //Result object has validation errors
     if (!result.isEmpty()) {
       //Send back array of all errors
-      console.log("Errors occurred!");
+      logger.log("Errors occurred!");
       res.status(400).json({ errors: result.array() });
       return;
     }
@@ -89,9 +90,9 @@ router.post(
     //Get data as an object
     const data = { ...req.body, ...matchedData(req) };
 
-    console.log("Raw body", req.body);
+    logger.log("Raw body", req.body);
 
-    console.log("Data :", data);
+    logger.log("Data :", data);
     if (!data) {
       res.status(400).json({ error: "Request body not found" });
       return;
@@ -116,7 +117,7 @@ router.post(
       res.status(200).json(post);
       return;
     } catch (e) {
-      console.log("Server error sending post", e);
+      logger.log("Server error sending post", e);
 
       if (e instanceof Error) {
         res.status(500).json({ error: e.message });
@@ -137,7 +138,7 @@ router.get("/posts", async (_req: Request, res: Response) => {
 
     res.status(200).json(posts);
   } catch (e) {
-    console.log("Error getting posts, ", e);
+    logger.log("Error getting posts, ", e);
     res.status(500).json({ error: "Server failed to get posts" });
   }
 });
@@ -158,7 +159,7 @@ router.get("/posts/recent", async (_req: Request, res: Response) => {
 
     res.status(200).json(posts);
   } catch (e) {
-    console.log("Error getting recent posts, ", e);
+    logger.log("Error getting recent posts, ", e);
     res.status(500).json({ error: "Server failed to get recent posts" });
   }
 });
@@ -168,7 +169,7 @@ router.get(
   query("query").isString().trim().isLength({ max: 100 }).escape(),
   async (req: Request, res: Response): Promise<void> => {
     const errors = validationResult(req);
-    console.log("Errors, ", errors);
+    logger.log("Errors, ", errors);
     if (!errors.isEmpty()) {
       res.status(400).json({ errors: errors.array() });
       return;
@@ -189,10 +190,10 @@ router.get(
         orderBy: { published_at: "desc" },
       });
 
-      console.log("Server posts: ", posts);
+      logger.log("Server posts: ", posts);
       res.status(200).json(posts);
     } catch (e) {
-      console.log("Error getting posts: ", e);
+      logger.log("Error getting posts: ", e);
       res.status(500).json({ error: "Failed to get posts" });
     }
   }
@@ -227,7 +228,7 @@ router.get(
 
       res.status(200).json(posts);
     } catch (e) {
-      console.log("Error getting user posts: ", e);
+      logger.log("Error getting user posts: ", e);
       res.status(500).json({ error: "Failed to get user posts" });
     }
   }
@@ -245,7 +246,7 @@ router.post(
       return;
     }
 
-    console.log("Comment data: ", data);
+    logger.log("Comment data: ", data);
 
     try {
       const comment = await prisma.comments.create({
@@ -263,7 +264,7 @@ router.post(
       res.status(200).json(comment);
       return;
     } catch (e) {
-      console.log("Server error sending comment", e);
+      logger.log("Server error sending comment", e);
 
       if (e instanceof Error) {
         res.status(500).json({ error: e.message });
@@ -292,7 +293,7 @@ router.get("/comments", async (req: Request, res: Response): Promise<void> => {
 
     res.status(200).json(comments);
   } catch (e) {
-    console.log("Error getting posts: ", e);
+    logger.log("Error getting posts: ", e);
     res.status(500).json({ error: "Failed to get posts" });
   }
 });
@@ -312,7 +313,7 @@ router.get("/comments/replies/:id", async (req: Request, res: Response) => {
 
     res.status(200).json(replies);
   } catch (e) {
-    console.log("Error getting replies", e);
+    logger.log("Error getting replies", e);
     res.status(500).json({ error: "Could not get replies" });
   }
 });
@@ -325,8 +326,8 @@ router.get(
       const uid = req.user?.uid;
       const post_id = req.query.query as string;
 
-      console.log("Post_id", post_id);
-      console.log("uid", uid);
+      logger.log("Post_id", post_id);
+      logger.log("uid", uid);
 
       if (!uid || !post_id) {
         res.status(400).json({ error: "Missing either userid or postid" });
@@ -342,11 +343,11 @@ router.get(
         },
       });
 
-      console.log("Reaction server: ", reaction);
+      logger.log("Reaction server: ", reaction);
 
       res.status(200).json(reaction);
     } catch (e) {
-      console.log("Error getting user reaction: ", e);
+      logger.log("Error getting user reaction: ", e);
       res.status(500).json({ error: "Could not get user reaction" });
     }
   }
@@ -440,7 +441,7 @@ router.post(
 
       res.status(200).json(result);
     } catch (e) {
-      console.log("Error updating reaction: ", e);
+      logger.log("Error updating reaction: ", e);
       res.status(500).json({ error: "Error updating reaction" });
     }
   }
@@ -459,8 +460,8 @@ router.get(
         return;
       }
 
-      console.log("Uid: ", uid);
-      console.log("Server Comment id:", comment_id);
+      logger.log("Uid: ", uid);
+      logger.log("Server Comment id:", comment_id);
 
       const reaction = await prisma.comment_reactions.findUnique({
         where: {
@@ -471,11 +472,11 @@ router.get(
         },
       });
 
-      console.log("Comment reaction server: ", reaction);
+      logger.log("Comment reaction server: ", reaction);
 
       res.status(200).json(reaction);
     } catch (e) {
-      console.log("Error getting user reaction: ", e);
+      logger.log("Error getting user reaction: ", e);
       res.status(500).json({ error: "Could not get user reaction" });
     }
   }
@@ -489,7 +490,7 @@ router.post(
       const uid = req.user?.uid as string;
       const { comment_id, type } = req.body;
 
-      console.log("Post comment_id", comment_id);
+      logger.log("Post comment_id", comment_id);
 
       if (!uid) {
         res.status(400).json({ error: "User id not found" });
@@ -571,44 +572,48 @@ router.post(
 
       res.status(200).json(result);
     } catch (e) {
-      console.log("Error updating reaction: ", e);
+      logger.log("Error updating reaction: ", e);
       res.status(500).json({ error: "Error updating reaction" });
     }
   }
 );
 
-router.get("/posts/friends", verifyToken, async (req: AuthRequest, res: Response) => {
-  const uid = req.user?.uid;
+router.get(
+  "/posts/friends",
+  verifyToken,
+  async (req: AuthRequest, res: Response) => {
+    const uid = req.user?.uid;
 
-  try {
-    // Get all accepted relationships for the current user
-    const relationships = await prisma.relationships.findMany({
-      where: {
-        OR: [
-          { requester_id: uid, status: "ACCEPTED" },
-          { addressee_id: uid, status: "ACCEPTED" },
-        ],
-      },
-    });
+    try {
+      // Get all accepted relationships for the current user
+      const relationships = await prisma.relationships.findMany({
+        where: {
+          OR: [
+            { requester_id: uid, status: "ACCEPTED" },
+            { addressee_id: uid, status: "ACCEPTED" },
+          ],
+        },
+      });
 
-    // Get all friend user IDs (excluding self)
-    const friendIds = relationships.map(r =>
-      r.requester_id === uid ? r.addressee_id : r.requester_id
-    );
+      // Get all friend user IDs (excluding self)
+      const friendIds = relationships.map((r) =>
+        r.requester_id === uid ? r.addressee_id : r.requester_id
+      );
 
-    // Get all posts by friends
-    const posts = await prisma.posts.findMany({
-      where: {
-        user_id: { in: friendIds },
-      },
-      orderBy: { published_at: "desc" },
-    });
+      // Get all posts by friends
+      const posts = await prisma.posts.findMany({
+        where: {
+          user_id: { in: friendIds },
+        },
+        orderBy: { published_at: "desc" },
+      });
 
-    res.status(200).json(posts);
-  } catch (e) {
-    console.log("Error getting friends' posts:", e);
-    res.status(500).json({ error: "Failed to get friends' posts" });
+      res.status(200).json(posts);
+    } catch (e) {
+      logger.log("Error getting friends' posts:", e);
+      res.status(500).json({ error: "Failed to get friends' posts" });
+    }
   }
-});
+);
 
 export default router;

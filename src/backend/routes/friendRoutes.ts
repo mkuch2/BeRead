@@ -1,4 +1,5 @@
 import { type Request, type Response, Router } from "express";
+import { logger } from "../utils/logger";
 import prismaClient from "../prismaClient";
 import verifyToken, { type AuthRequest } from "../middleware/authMiddleware";
 
@@ -12,8 +13,8 @@ router.post(
     const { addressee_id } = req.body;
     const requester_id = req.user?.uid as string;
 
-    console.log("Addressee id: ", addressee_id);
-    console.log("Request id: ", requester_id);
+    logger.log("Addressee id: ", addressee_id);
+    logger.log("Request id: ", requester_id);
 
     if (!addressee_id || !requester_id) {
       res.status(400).json({ error: "Missing required parameters" });

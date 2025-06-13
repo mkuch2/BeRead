@@ -1,4 +1,5 @@
 import { type Request, type Response, Router } from "express";
+import { logger } from "../utils/logger";
 import prismaClient from "../prismaClient";
 import verifyToken, { type AuthRequest } from "../middleware/authMiddleware";
 import {
@@ -19,7 +20,7 @@ router.get(
   async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const userEmail = req.user?.email;
-      console.log("User email: ", userEmail);
+      logger.log("User email: ", userEmail);
 
       const userProfile = await prisma.users.findUnique({
         where: { email: userEmail },
@@ -31,7 +32,7 @@ router.get(
         },
       });
 
-      console.log("User profile:", userProfile);
+      logger.log("User profile:", userProfile);
 
       if (!userProfile) {
         res.status(404).json({ msg: "User not found" });
@@ -114,7 +115,7 @@ router.put(
 router.get("/user", async (req: Request, res: Response): Promise<void> => {
   const uid = req.query.query as string;
 
-  console.log(uid);
+  logger.log(uid);
 
   if (!uid) {
     res.status(400).json({ error: "Query parameter required" });
@@ -139,7 +140,7 @@ router.get("/user", async (req: Request, res: Response): Promise<void> => {
     res.json(user);
   } catch (e) {
     if (e instanceof Error) {
-      console.log("Error: ", e.message);
+      logger.log("Error: ", e.message);
       res.status(500).json({ error: "Server error" });
     }
   }
@@ -167,14 +168,14 @@ router.get("/user/:id", async (req: Request, res: Response) => {
 
     res.status(200).json(user);
   } catch (e) {
-    console.log("Error getting user: ", e);
+    logger.log("Error getting user: ", e);
     res.status(500).json({ error: "Error getting user" });
   }
 });
 
 router.get("/user/profile/:username", async (req: Request, res: Response) => {
   const username = req.params.username;
-  console.log("Get username request parameters", req.params);
+  logger.log("Get username request parameters", req.params);
 
   if (!username) {
     res.status(400).json({ error: "Missing parameter required" });
@@ -234,7 +235,7 @@ router.get("/user/profile/:username", async (req: Request, res: Response) => {
 
     res.status(200).json(formattedProfile);
   } catch (e) {
-    console.log("Error getting user: ", e);
+    logger.log("Error getting user: ", e);
     res.status(500).json({ error: "Error getting user" });
   }
 });
@@ -258,7 +259,7 @@ router.get("/user/username/:username", async (req: Request, res: Response) => {
 
     res.status(200).json(uid);
   } catch (e) {
-    console.log("Error getting user, ", e);
+    logger.log("Error getting user, ", e);
     res.status(500).json({ error: "Could not get user" });
   }
 });
@@ -279,7 +280,7 @@ router.put(
 
     const data = matchedData(req);
 
-    console.log("data: ", data);
+    logger.log("data: ", data);
 
     try {
       const updatedBio = await prisma.users.update({
@@ -301,7 +302,7 @@ router.put(
         res.status(500).json({ error: "Could not update bio" });
       }
     } catch (e) {
-      console.log("Error updating bio, ", e);
+      logger.log("Error updating bio, ", e);
       res.status(500).json({ error: "Error updating bio" });
     }
   }
@@ -318,14 +319,14 @@ router.get("/users", async (req: Request, res: Response): Promise<void> => {
     where: {
       username: {
         contains: query,
-        mode: "insensitive"
-      }
+        mode: "insensitive",
+      },
     },
     select: {
       id: true,
       username: true,
       name: true,
-    }
+    },
   });
 
   res.json({ users });
