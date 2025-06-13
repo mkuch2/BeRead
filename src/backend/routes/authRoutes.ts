@@ -65,7 +65,7 @@ router.post(
         },
       });
     } catch (e) {
-      logger.log.error("Unexpected signup error:", e);
+      logger.log("Unexpected signup error:", e);
       if (e instanceof PrismaClientKnownRequestError && e.code === "P2002") {
         const target = (e.meta?.target as string[]) || [];
         const field = target[0] || "field";
@@ -145,7 +145,7 @@ router.get(
 
       res.status(200).json({ profile: formattedProfile });
     } catch (e) {
-      logger.log.error(e);
+      logger.log(e);
       res.status(500).json({ msg: "Server error" });
     }
   }
@@ -198,7 +198,7 @@ router.post(
 
       res.status(201).json({ msg: "Book added to favorites", favoriteBook });
     } catch (e) {
-      logger.log.error(e);
+      logger.log(e);
       res.status(500).json({ msg: "Server error" });
     }
   }
@@ -241,7 +241,7 @@ router.post(
 
       res.status(200).json({ msg: "Currently reading book set successfully" });
     } catch (e) {
-      logger.log.error(e);
+      logger.log(e);
       res.status(500).json({ msg: "Server error" });
     }
   }
@@ -283,7 +283,7 @@ router.delete(
         .status(200)
         .json({ msg: "Currently reading book removed successfully" });
     } catch (e) {
-      logger.log.error(e);
+      logger.log(e);
       res.status(500).json({ msg: "Server error" });
     }
   }
@@ -330,7 +330,7 @@ router.delete(
 
       res.status(200).json({ msg: "Book removed from favorites" });
     } catch (e) {
-      logger.log.error(e);
+      logger.log(e);
       res.status(500).json({ msg: "Server error" });
     }
   }
