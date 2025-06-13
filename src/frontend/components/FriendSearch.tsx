@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router";
+import { logger } from "@/frontend/lib/logger";
 
 interface User {
   id: string;
@@ -24,27 +25,27 @@ function UserSearch({ onSelectUser }: UserSearchProps) {
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
 
-    const searchUsers = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!query.trim()) return;
+  const searchUsers = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query.trim()) return;
 
-        setLoading(true);
-        setError(null);
+    setLoading(true);
+    setError(null);
 
-        try {
-            const response = await axios.get<UserSearchResponse>(
-                `/api/users?query=${encodeURIComponent(query)}` // This may need to be changed
-            );
-            setUsers(response.data.users ?? []); // used axios to make HTTP request from browser (/api/users handled by server.ts in backend)
-            setHasSearched(true);
-            console.log("Response:", response.data.users);
-        } catch (err) {
-            setError("Failed to fetch users. Please try again.");
-            setUsers([]);
-        } finally {
-            setLoading(false);
-        }
-    };
+    try {
+      const response = await axios.get<UserSearchResponse>(
+        `/api/users?query=${encodeURIComponent(query)}` // This may need to be changed
+      );
+      setUsers(response.data.users ?? []); // used axios to make HTTP request from browser (/api/users handled by server.ts in backend)
+      setHasSearched(true);
+      logger.log("Response:", response.data.users);
+    } catch (err) {
+      setError("Failed to fetch users. Please try again.");
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black text-white px-8 py-4">
@@ -81,9 +82,11 @@ function UserSearch({ onSelectUser }: UserSearchProps) {
         ))}
       </div>
 
-      {users.length === 0 && !loading && hasSearched && <p>No users match this username.</p>}
+      {users.length === 0 && !loading && hasSearched && (
+        <p>No users match this username.</p>
+      )}
     </div>
   );
-};
+}
 
 export default UserSearch;

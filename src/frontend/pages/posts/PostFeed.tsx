@@ -5,6 +5,7 @@ import PostSearch, {
 } from "@/frontend/components/PostSearch";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { logger } from "@/frontend/lib/logger";
 
 export default function PostFeed() {
   const [hasSearched, setHasSearched] = useState<boolean>(false);
@@ -17,11 +18,11 @@ export default function PostFeed() {
     const getPosts = async () => {
       try {
         const response = await axios.get("/api/posts");
-        console.log("getPosts response", response);
+        logger.log("getPosts response", response);
 
         setPosts(response.data);
       } catch (e) {
-        console.log("Error getting all posts", e);
+        logger.log("Error getting all posts", e);
         setError("Error getting posts");
       } finally {
         setLoading(false);
@@ -50,9 +51,7 @@ export default function PostFeed() {
 
             {/* --- Loading/Error State --- */}
             {loading && <p className="text-zinc-400 text-sm">Loading...</p>}
-            {error && (
-              <p className="text-red-500 text-sm mb-4">{error}</p>
-            )}
+            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
             {/* --- Posts List --- */}
             <div className="space-y-6">

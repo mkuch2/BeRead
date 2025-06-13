@@ -3,6 +3,7 @@ import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import { FirebaseError } from "firebase/app";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { logger } from "@/frontend/lib/logger";
 
 export default function NavBar() {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ export default function NavBar() {
       const token = await currentUser?.getIdToken();
 
       if (!token) {
-        console.log("Error getting user token");
+        logger.log("Error getting user token");
       }
 
       try {
@@ -24,13 +25,13 @@ export default function NavBar() {
           },
         });
 
-        console.log("navbar getFriendReqs response", response);
+        logger.log("navbar getFriendReqs response", response);
 
         if (response.data.length > 0) {
           setFriendReqs(true);
         }
       } catch (e) {
-        console.log("Error getting friend requests", e);
+        logger.log("Error getting friend requests", e);
       }
     };
 
@@ -44,7 +45,7 @@ export default function NavBar() {
       navigate("/home");
     } catch (e) {
       if (e instanceof FirebaseError) {
-        console.log(e.code, e.message);
+        logger.log(e.code, e.message);
       }
     }
   };

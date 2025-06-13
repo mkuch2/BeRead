@@ -4,6 +4,7 @@ import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import axios from "axios";
 import { type PostInterface } from "./PostSearch";
 import { Post } from "./Post";
+import { logger } from "@/frontend/lib/logger";
 
 export default function HomeDashboard() {
   const { currentUser } = useAuthContext() as AuthContextType;
@@ -21,7 +22,7 @@ export default function HomeDashboard() {
   const [postsLoading, setPostsLoading] = useState<boolean>(false);
   const MAXPOSTS = 4;
 
-  console.log(currentUser);
+  logger.log(currentUser);
 
   useEffect(() => {
     setPostsLoading(true);
@@ -30,11 +31,11 @@ export default function HomeDashboard() {
         const response = await axios.get("/api/posts/recent");
         const slicedPosts = response.data.slice(0, MAXPOSTS);
 
-        console.log("Get posts slicedPOsts", slicedPosts);
+        logger.log("Get posts slicedPOsts", slicedPosts);
 
         setPosts(slicedPosts);
       } catch (e) {
-        console.log("Error getting posts", e);
+        logger.log("Error getting posts", e);
       } finally {
         setPostsLoading(false);
       }
@@ -43,13 +44,13 @@ export default function HomeDashboard() {
     getPosts();
   }, []);
 
-  console.log("Posts: ", posts);
+  logger.log("Posts: ", posts);
 
   useEffect(() => {
     setUserLoading(true);
     async function getCurrentlyReading() {
       if (!currentUser) {
-        console.log("Could not get user");
+        logger.log("Could not get user");
         return;
       }
 
@@ -66,7 +67,7 @@ export default function HomeDashboard() {
           setCurrentlyReadingAuthors(authors);
         }
       } catch (e) {
-        console.log("Error getting user's reading information", e);
+        logger.log("Error getting user's reading information", e);
       } finally {
         setUserLoading(false);
       }

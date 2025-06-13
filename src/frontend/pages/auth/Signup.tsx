@@ -2,7 +2,7 @@ import { useNavigate, Link } from "react-router";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-
+import { logger } from "@/frontend/lib/logger";
 import { Button } from "@/frontend/components/ui/button";
 import { Input } from "@/frontend/components/ui/input";
 import {
@@ -100,7 +100,7 @@ function Signup() {
 
       navigate("/home");
     } catch (e: any) {
-      console.error("Signup error:", e);
+      logger.error("Signup error:", e);
 
       if (isAxiosError(e)) {
         if (e.response) {
@@ -113,9 +113,9 @@ function Signup() {
         if (user) {
           try {
             await user.delete();
-            console.log("Deleted Firebase user due to backend error");
+            logger.log("Deleted Firebase user due to backend error");
           } catch (deleteError) {
-            console.log("Error deleting Firebase user:", deleteError);
+            logger.log("Error deleting Firebase user:", deleteError);
           }
           return;
         }

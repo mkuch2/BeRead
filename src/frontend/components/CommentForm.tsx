@@ -14,6 +14,7 @@ import axios from "axios";
 import { Button } from "./ui/button";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { logger } from "@/frontend/lib/logger";
 
 interface CommentFormProps {
   post_id: string;
@@ -69,7 +70,7 @@ export default function CommentForm({
 
         setUsername(user.data.username);
       } catch (e) {
-        console.log("Could not get username: ", e);
+        logger.log("Could not get username: ", e);
       }
     }
 
@@ -77,7 +78,7 @@ export default function CommentForm({
   }, [uid]);
 
   async function onSubmit(data: FormFields) {
-    console.log("Submitted comment:", data);
+    logger.log("Submitted comment:", data);
 
     setLoading(true);
     const token = await getToken();
@@ -98,7 +99,7 @@ export default function CommentForm({
         }
       );
 
-      console.log(createdComment);
+      logger.log(createdComment);
 
       form.reset();
 
@@ -106,7 +107,7 @@ export default function CommentForm({
         onCommentAdd();
       }
     } catch (e) {
-      console.log("Error creating post: ", e);
+      logger.log("Error creating post: ", e);
 
       form.setError("root", {
         type: "server",
@@ -116,11 +117,11 @@ export default function CommentForm({
       setLoading(false);
     }
   }
- 
+
   return (
     <Form {...form}>
-      <form 
-        onSubmit={form.handleSubmit(onSubmit)} 
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
         className="flex w-full max-w-md ml-4 items-center gap-1 mt-6"
       >
         <FormField
@@ -131,10 +132,7 @@ export default function CommentForm({
             <FormItem className="flex-1">
               <FormLabel className="sr-only">Comment</FormLabel>
               <FormControl>
-                <Textarea 
-                  {...field} 
-                  placeholder="Add a comment..."
-                />
+                <Textarea {...field} placeholder="Add a comment..." />
               </FormControl>
               <FormMessage />
             </FormItem>

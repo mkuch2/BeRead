@@ -6,6 +6,7 @@ import CommentForm from "../../components/CommentForm";
 import Comment, { type CommentInterface } from "../../components/Comment";
 import axios from "axios";
 import NavBar from "../../components/NavBar";
+import { logger } from "@/frontend/lib/logger";
 
 const DisplayPost = () => {
   const { state } = useLocation();
@@ -16,15 +17,15 @@ const DisplayPost = () => {
 
   const postId = state.post.id;
 
-  console.log("DisplayPost initial post object:", post);
-  console.log("DisplayPost initial thumbnail:", post.thumbnail);
+  logger.log("DisplayPost initial post object:", post);
+  logger.log("DisplayPost initial thumbnail:", post.thumbnail);
 
   useEffect(() => {
     async function getPost() {
       setLoading(true);
       try {
         const response = await axios.get(`/api/post/${postId}`);
-        console.log("GET /api/post/:id response.data:", response.data);
+        logger.log("GET /api/post/:id response.data:", response.data);
         setPost((post) => ({
           ...post,
           likes: response.data.likes,
@@ -32,7 +33,7 @@ const DisplayPost = () => {
           thumbnail: response.data.thumbnail ?? post.thumbnail ?? null,
         }));
       } catch (e) {
-        console.log("Error getting post: ", e);
+        logger.log("Error getting post: ", e);
       } finally {
         setLoading(false);
       }
@@ -48,7 +49,7 @@ const DisplayPost = () => {
           `/api/comments?query=${encodeURIComponent(postId)}`
         );
 
-        console.log("Comments promise: ", response);
+        logger.log("Comments promise: ", response);
 
         setComments(response.data);
       } catch (e) {
@@ -65,14 +66,14 @@ const DisplayPost = () => {
         `/api/comments?query=${encodeURIComponent(postId)}`
       );
       setComments(response.data);
-      console.log("Comments refreshed after new comment");
+      logger.log("Comments refreshed after new comment");
     } catch (e) {
-      console.log("Error refreshing comments: ", e);
+      logger.log("Error refreshing comments: ", e);
     }
   };
 
-  console.log("Comments: ", comments);
-  console.log("Authors in DisplayPost:", post.author);
+  logger.log("Comments: ", comments);
+  logger.log("Authors in DisplayPost:", post.author);
 
   return (
     <>
@@ -99,7 +100,7 @@ const DisplayPost = () => {
             />
             <CommentForm post_id={post.id} onCommentAdd={refreshComments} />
           </div>
-  
+
           {/* Right side: Comments */}
           <div className="flex flex-col w-[450px] space-y-4">
             {comments.map((comment) => (

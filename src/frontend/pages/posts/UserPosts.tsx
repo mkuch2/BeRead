@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { type PostInterface } from "@/frontend/components/PostSearch";
 import axios from "axios";
 import { useParams } from "react-router";
+import { logger } from "@/frontend/lib/logger";
 
 export default function UserPosts() {
   const [posts, setPosts] = useState<PostInterface[]>([]);
@@ -19,7 +20,7 @@ export default function UserPosts() {
 
         setPosts(response.data);
       } catch (e) {
-        console.log("Error getting user posts: ", e);
+        logger.log("Error getting user posts: ", e);
         setError("Error getting user's posts.");
       } finally {
         setLoading(false);

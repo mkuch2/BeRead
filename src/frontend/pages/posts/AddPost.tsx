@@ -1,5 +1,3 @@
-33
-
 import React, { useState, useEffect } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { useNavigate } from "react-router";
@@ -23,6 +21,7 @@ import axios from "axios";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import NavBar from "../../components/NavBar";
+import { logger } from "@/frontend/lib/logger";
 
 interface Book {
   id: string;
@@ -92,7 +91,7 @@ type FormFields = z.infer<typeof PostSchema>;
 //       return null;
 //     }
 //   } catch (err) {
-//     console.error("fetchThumbnail error:", err);
+//     logger.error("fetchThumbnail error:", err);
 //     return null;
 //   }
 // };
@@ -125,7 +124,7 @@ export default function AddPost() {
 
         setUsername(user.data.username);
       } catch (e) {
-        console.log("Could not get username: ", e);
+        logger.log("Could not get username: ", e);
       }
     }
 
@@ -164,8 +163,8 @@ export default function AddPost() {
     const token = await getToken();
     setLoading(true);
 
-    console.log("selectedBook:", selectedBook);
-    console.log("thumbnail:", thumbnail);
+    logger.log("selectedBook:", selectedBook);
+    logger.log("thumbnail:", thumbnail);
 
     //Send post to database
     try {
@@ -188,25 +187,23 @@ export default function AddPost() {
         },
       });
 
-      console.log("POST /api/post response:", response.data);
+      logger.log("POST /api/post response:", response.data);
 
       setSelectedBook(null);
       setThumbnail(null);
       form.reset();
       navigate("/display-post", { state: { post: response.data } });
-
     } catch (error: any) {
-      console.log("Error creating post: ", error);
+      logger.log("Error creating post: ", error);
 
       if (error.response && error.response.data) {
-        console.error("Validation errors from server:", error.response.data);
+        logger.error("Validation errors from server:", error.response.data);
       }
-  
+
       form.setError("root", {
         type: "server",
         message: "Could not upload post, please try again.",
       });
-      
     } finally {
       setLoading(false);
     }
@@ -224,97 +221,116 @@ export default function AddPost() {
               {form.formState.errors.root.message}
             </div>
           )}
-          
-<Form {...form}>
-  <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-4xl mx-auto mt-8 space-y-6 p-6 bg-black text-white rounded-md">
-    <div className="grid md:grid-cols-3 gap-6">
-      {thumbnail && (
-        <div className="md:col-span-1 flex items-start justify-center">
-          <img
-            src={thumbnail}
-            alt={selectedBook?.title + ' cover'}
-            className="w-36 h-auto rounded-lg shadow-lg"
-          />
-        </div>
-      )}
-      <div className="md:col-span-2 space-y-4">
-        <FormField
-          control={form.control}
-          name="book_title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-white">Book Title</FormLabel>
-              <FormControl>
-                <Input className="bg-zinc-800 text-white" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
-        <FormField
-          control={form.control}
-          name="quote"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-white">Quote or description</FormLabel>
-              <FormControl>
-                <Textarea className="bg-zinc-800 text-white" rows={2} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="max-w-4xl mx-auto mt-8 space-y-6 p-6 bg-black text-white rounded-md"
+            >
+              <div className="grid md:grid-cols-3 gap-6">
+                {thumbnail && (
+                  <div className="md:col-span-1 flex items-start justify-center">
+                    <img
+                      src={thumbnail}
+                      alt={selectedBook?.title + " cover"}
+                      className="w-36 h-auto rounded-lg shadow-lg"
+                    />
+                  </div>
+                )}
+                <div className="md:col-span-2 space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="book_title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">Book Title</FormLabel>
+                        <FormControl>
+                          <Input
+                            className="bg-zinc-800 text-white"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-        <FormField
-          control={form.control}
-          name="content"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-white">Content</FormLabel>
-              <FormControl>
-                <Textarea className="bg-zinc-800 text-white" rows={4} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                  <FormField
+                    control={form.control}
+                    name="quote"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">
+                          Quote or description
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea
+                            className="bg-zinc-800 text-white"
+                            rows={2}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-        <FormField
-          control={form.control}
-          name="pages"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-white">Pages Read</FormLabel>
-              <FormControl>
-                <Input className="bg-zinc-800 text-white" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                  <FormField
+                    control={form.control}
+                    name="content"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">Content</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            className="bg-zinc-800 text-white"
+                            rows={4}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-        <div className="flex gap-4 mt-4">
-          <Button type="submit" disabled={loading || !isValid}>Submit</Button>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => {
-              setSelectedBook(null);
-              setThumbnail(null);
-            }}
-          >
-            Change book
-          </Button>
-        </div>
-      </div>
-    </div>
-  </form>
-</Form>
+                  <FormField
+                    control={form.control}
+                    name="pages"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">Pages Read</FormLabel>
+                        <FormControl>
+                          <Input
+                            className="bg-zinc-800 text-white"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
+                  <div className="flex gap-4 mt-4">
+                    <Button type="submit" disabled={loading || !isValid}>
+                      Submit
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => {
+                        setSelectedBook(null);
+                        setThumbnail(null);
+                      }}
+                    >
+                      Change book
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </Form>
         </>
       )}
     </>
   );
 }
-

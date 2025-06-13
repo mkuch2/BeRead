@@ -4,7 +4,6 @@ import {
   CardHeader,
   CardTitle,
   CardContent,
-  CardFooter,
 } from "@/frontend/components/ui/card";
 
 import { useCallback, useEffect, useState } from "react";
@@ -13,6 +12,7 @@ import NavBar from "./NavBar";
 import { Link } from "react-router";
 import FriendRequest from "./FriendRequest";
 import { Post } from "./Post";
+import { logger } from "@/frontend/lib/logger";
 
 interface RelationshipResponse {
   id: string;
@@ -66,13 +66,13 @@ export default function FriendsList() {
 
   const getRequests = useCallback(async () => {
     if (!currentUser) {
-      console.log("Current user not found");
+      logger.log("Current user not found");
       return;
     }
 
     setLoading(true);
 
-    console.log("Get requests being called");
+    logger.log("Get requests being called");
 
     try {
       const token = await getToken();
@@ -83,10 +83,10 @@ export default function FriendsList() {
         },
       });
 
-      console.log("friendlist get requests response", response);
+      logger.log("friendlist get requests response", response);
       setRequests(response.data);
     } catch (e) {
-      console.log("Error getting requests", e);
+      logger.log("Error getting requests", e);
       setRequests([]);
     } finally {
       setLoading(false);
@@ -95,7 +95,7 @@ export default function FriendsList() {
 
   const getFriends = useCallback(async () => {
     if (!currentUser) {
-      console.log("Current user not found");
+      logger.log("Current user not found");
       return;
     }
 
@@ -138,7 +138,7 @@ export default function FriendsList() {
 
       setFriends(friends);
     } catch (e) {
-      console.log("Error getting friends: ", e);
+      logger.log("Error getting friends: ", e);
     } finally {
       setLoading(false);
     }
@@ -152,7 +152,7 @@ export default function FriendsList() {
     getRequests();
   }, [getRequests]);
 
-    useEffect(() => {
+  useEffect(() => {
     const fetchFriendPosts = async () => {
       if (!currentUser) return;
       const token = await getToken();
@@ -162,7 +162,7 @@ export default function FriendsList() {
         });
         setFriendPosts(response.data);
       } catch (e) {
-        console.log("Error fetching friends' posts:", e);
+        logger.log("Error fetching friends' posts:", e);
         setFriendPosts([]);
       }
     };

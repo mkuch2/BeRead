@@ -1,6 +1,6 @@
 import { type Request, type Response, Router } from "express";
 import prismaClient from "../prismaClient";
-import { logger } from "../utils/logger";
+import { logger } from "@/backend/utils/logger";
 import verifyToken, { type AuthRequest } from "../middleware/authMiddleware";
 import {
   param,

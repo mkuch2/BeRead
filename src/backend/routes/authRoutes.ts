@@ -9,7 +9,7 @@ import {
 } from "express-validator";
 import prismaClient from "../prismaClient";
 import bcrypt from "bcryptjs";
-import { logger } from "../utils/logger";
+import { logger } from "@/backend/utils/logger";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library.js";
 import verifyToken, { type AuthRequest } from "../middleware/authMiddleware";
 

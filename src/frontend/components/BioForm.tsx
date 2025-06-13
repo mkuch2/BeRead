@@ -13,6 +13,7 @@ import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import { Button } from "@/frontend/components/ui/button";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
+import { logger } from "@/frontend/lib/logger";
 import axios from "axios";
 
 const BioSchema = z.object({
@@ -56,11 +57,11 @@ export default function BioForm({
       const uid = currentUser?.uid;
 
       if (!token) {
-        console.log("Error getting user token in handleSetBio");
+        logger.log("Error getting user token in handleSetBio");
         return;
       }
       if (!uid) {
-        console.log("Error getting userid in handleSetBio");
+        logger.log("Error getting userid in handleSetBio");
         return;
       }
 
@@ -82,7 +83,7 @@ export default function BioForm({
         onBioUpdate(updatedBio);
       }
     } catch (e) {
-      console.log("Error updating bio, ", e);
+      logger.log("Error updating bio, ", e);
       form.setError("root", {
         type: "server",
         message: "Could not update bio, please try again.",

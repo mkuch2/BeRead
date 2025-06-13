@@ -1,14 +1,11 @@
-import {
-  Card,
-  CardHeader,
-  CardContent,
-} from "@/frontend/components/ui/card";
+import { Card, CardHeader, CardContent } from "@/frontend/components/ui/card";
 import { Button } from "@/frontend/components/ui/button";
 import { formatDate } from "../lib/utils";
 import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import axios from "axios";
 import { useEffect, useState, useCallback } from "react";
 import ReplyForm from "./ReplyForm";
+import { logger } from "@/frontend/lib/logger";
 
 export interface CommentProps {
   username: string;
@@ -59,7 +56,7 @@ export function Comment({
         const res = await axios.get(`/api/comments/replies/${comment_id}`);
         setReplies(res.data);
       } catch (e) {
-        console.error("Error fetching replies:", e);
+        logger.error("Error fetching replies:", e);
       }
     }
 
@@ -77,7 +74,7 @@ export function Comment({
         );
         setUserReaction(res.data?.type || null);
       } catch (e) {
-        console.error("Error fetching comment reaction:", e);
+        logger.error("Error fetching comment reaction:", e);
       }
     }
 
@@ -101,7 +98,7 @@ export function Comment({
       setLikes(res.data.comment.likes);
       setDislikes(res.data.comment.dislikes);
     } catch (e) {
-      console.error("Failed to update comment reaction:", e);
+      logger.error("Failed to update comment reaction:", e);
     } finally {
       setLoading(false);
     }
@@ -113,7 +110,7 @@ export function Comment({
       const res = await axios.get(`/api/comments/replies/${comment_id}`);
       setReplies(res.data);
     } catch (e) {
-      console.error("Error fetching replies after reply:", e);
+      logger.error("Error fetching replies after reply:", e);
     }
     if (onReplyAdd) onReplyAdd();
   }, [comment_id, onReplyAdd]);

@@ -1,0 +1,1 @@
+{"root":["./src/backend/firebase-admin.ts","./src/backend/prismaclient.ts","./src/backend/server.ts","./src/backend/middleware/authmiddleware.ts","./src/backend/routes/authroutes.ts","./src/backend/routes/friendroutes.ts","./src/backend/routes/postroutes.ts","./src/backend/routes/userroutes.ts","./src/backend/utils/logger.ts"],"version":"5.8.3"}

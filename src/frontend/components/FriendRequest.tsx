@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import { Link } from "react-router";
+import { logger } from "@/frontend/lib/logger";
 
 interface FriendRequestProps {
   username: string;
@@ -19,7 +20,7 @@ export default function FriendRequest({
     const token = await currentUser?.getIdToken();
 
     if (!token) {
-      console.log("Error getting user token");
+      logger.log("Error getting user token");
       return;
     }
 
@@ -37,9 +38,9 @@ export default function FriendRequest({
       );
 
       onRequestAction();
-      console.log("accept response", response);
+      logger.log("accept response", response);
     } catch (e) {
-      console.log("Error accepting request", e);
+      logger.log("Error accepting request", e);
     }
   };
 
@@ -47,7 +48,7 @@ export default function FriendRequest({
     const token = await currentUser?.getIdToken();
 
     if (!token) {
-      console.log("Error getting user token");
+      logger.log("Error getting user token");
       return;
     }
 
@@ -62,9 +63,9 @@ export default function FriendRequest({
       );
 
       onRequestAction();
-      console.log("Reject request response", response);
+      logger.log("Reject request response", response);
     } catch (e) {
-      console.log("Error rejecting request", e);
+      logger.log("Error rejecting request", e);
     }
   };
 

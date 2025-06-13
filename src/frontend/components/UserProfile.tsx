@@ -2,6 +2,7 @@ import { useAuthContext, type AuthContextType } from "../hooks/useAuthContext";
 import { Link } from "react-router";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { logger } from "@/frontend/lib/logger";
 
 interface Book {
   id: string;
@@ -64,8 +65,8 @@ export default function UserProfile(profile: UserProfileProps) {
           }
         );
 
-        console.log("getFriendStatus requestee respnse", requesteeResponse);
-        console.log("getfriendstatu addressee response", addresseeResponse);
+        logger.log("getFriendStatus requestee respnse", requesteeResponse);
+        logger.log("getfriendstatu addressee response", addresseeResponse);
 
         if (requesteeResponse.data && requesteeResponse.data.status) {
           setFriendStatus(requesteeResponse.data.status);
@@ -75,7 +76,7 @@ export default function UserProfile(profile: UserProfileProps) {
           setFriendStatus(null);
         }
       } catch (e) {
-        console.log("Error getting friend status", e);
+        logger.log("Error getting friend status", e);
       }
     }
 
@@ -93,7 +94,7 @@ export default function UserProfile(profile: UserProfileProps) {
       const token = await currentUser?.getIdToken();
 
       if (!token) {
-        console.log("Error getting user token");
+        logger.log("Error getting user token");
         return;
       }
 
@@ -103,10 +104,10 @@ export default function UserProfile(profile: UserProfileProps) {
         },
       });
 
-      console.log("Delete response", response);
+      logger.log("Delete response", response);
       setFriendStatus(null);
     } catch (e) {
-      console.log("Error deleting relationship", e);
+      logger.log("Error deleting relationship", e);
       setFriendStatus("Pending");
     } finally {
       setLoading(false);
@@ -125,13 +126,13 @@ export default function UserProfile(profile: UserProfileProps) {
       const token = await currentUser?.getIdToken();
 
       if (!token) {
-        console.log("Error getting user token");
+        logger.log("Error getting user token");
         return;
       }
 
-      console.log("token", token);
+      logger.log("token", token);
 
-      console.log("responseUser", responseUser);
+      logger.log("responseUser", responseUser);
 
       const response = await axios.post(
         "/api/friend-request",
@@ -145,11 +146,11 @@ export default function UserProfile(profile: UserProfileProps) {
         }
       );
 
-      console.log("Response after sending friend request", response.data);
+      logger.log("Response after sending friend request", response.data);
 
       setFriendStatus("PENDING");
     } catch (e) {
-      console.log("Error sending friend request, ", e);
+      logger.log("Error sending friend request, ", e);
       setFriendStatus(null);
     } finally {
       setLoading(false);

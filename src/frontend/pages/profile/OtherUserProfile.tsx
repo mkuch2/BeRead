@@ -7,6 +7,7 @@ import {
   useAuthContext,
   type AuthContextType,
 } from "@/frontend/hooks/useAuthContext";
+import { logger } from "@/frontend/lib/logger";
 
 export default function OtherUserProfile() {
   const { username } = useParams<{ username: string }>();
@@ -35,7 +36,7 @@ export default function OtherUserProfile() {
     currentlyReading?: Book;
   }
 
-  console.log(currentUser);
+  logger.log(currentUser);
 
   useEffect(() => {
     if (currentUser?.displayName === username) {
@@ -60,7 +61,7 @@ export default function OtherUserProfile() {
 
         setProfile(response.data);
       } catch (e) {
-        console.log("Error getting profile: ", e);
+        logger.log("Error getting profile: ", e);
         setErrorMessage("Could not get user profile");
       } finally {
         setIsLoading(false);
@@ -71,7 +72,7 @@ export default function OtherUserProfile() {
   }, [username]);
 
   if (!username) {
-    console.log("Could not get username");
+    logger.log("Could not get username");
     setErrorMessage("Could not get user's username");
   }
 

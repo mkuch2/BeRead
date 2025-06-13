@@ -5,6 +5,7 @@ import {
   type AuthContextType,
 } from "@/frontend/hooks/useAuthContext";
 import { useNavigate, Link } from "react-router";
+import { logger } from "@/frontend/lib/logger";
 import NavBar from "@/frontend/components/NavBar";
 import BioForm from "@/frontend/components/BioForm";
 
@@ -56,14 +57,14 @@ function DisplayProfile() {
 
     try {
       const token = await getToken();
-      console.log("Token received:", token ? "Token exists" : "No token");
+      logger.log("Token received:", token ? "Token exists" : "No token");
 
       if (!token) {
         setError(true);
         throw new Error("No authentication token available");
       }
 
-      console.log(
+      logger.log(
         "Making request to /api/display-profile with Authorization header"
       );
 
@@ -73,18 +74,18 @@ function DisplayProfile() {
         },
       });
 
-      console.log("Response received:", response.data);
+      logger.log("Response received:", response.data);
       setProfile(response.data.profile);
     } catch (e) {
-      console.error("Error in fetchProfile:", e);
+      logger.error("Error in fetchProfile:", e);
       if (axios.isAxiosError(e)) {
-        console.error("Axios Error Details:");
-        console.error("- Status:", e.response?.status);
-        console.error("- Status Text:", e.response?.statusText);
-        console.error("- Response Data:", e.response?.data);
+        logger.error("Axios Error Details:");
+        logger.error("- Status:", e.response?.status);
+        logger.error("- Status Text:", e.response?.statusText);
+        logger.error("- Response Data:", e.response?.data);
 
         if (e.response?.status === 401) {
-          console.log("Authentication failed - redirecting to login");
+          logger.log("Authentication failed - redirecting to login");
           navigate("/login");
           return;
         }
@@ -133,7 +134,7 @@ function DisplayProfile() {
 
       setSearchResults(response.data.books || []);
     } catch (e) {
-      console.error("Error searching books:", e);
+      logger.error("Error searching books:", e);
       setSearchResults([]);
     } finally {
       setIsSearching(false);
@@ -176,7 +177,7 @@ function DisplayProfile() {
       closePopup();
       fetchProfile();
     } catch (e) {
-      console.error("Error adding favorite book:", e);
+      logger.error("Error adding favorite book:", e);
       if (axios.isAxiosError(e) && e.response?.data?.msg) {
         setErrorMessage(e.response.data.msg);
       } else {
@@ -206,7 +207,7 @@ function DisplayProfile() {
       closePopup();
       fetchProfile();
     } catch (e) {
-      console.error("Error setting currently reading book:", e);
+      logger.error("Error setting currently reading book:", e);
       if (axios.isAxiosError(e) && e.response?.data?.msg) {
         setErrorMessage(e.response.data.msg);
       } else {
@@ -228,7 +229,7 @@ function DisplayProfile() {
 
       fetchProfile();
     } catch (e) {
-      console.error("Error removing favorite book:", e);
+      logger.error("Error removing favorite book:", e);
       if (axios.isAxiosError(e) && e.response?.data?.msg) {
         setErrorMessage(e.response.data.msg);
       } else {
@@ -250,7 +251,7 @@ function DisplayProfile() {
 
       fetchProfile();
     } catch (e) {
-      console.error("Error removing currently reading book:", e);
+      logger.error("Error removing currently reading book:", e);
       if (axios.isAxiosError(e) && e.response?.data?.msg) {
         setErrorMessage(e.response.data.msg);
       } else {
@@ -275,7 +276,7 @@ function DisplayProfile() {
       });
       fetchProfile();
     } catch (e) {
-      console.error("Failed to upload photo", e);
+      logger.error("Failed to upload photo", e);
     }
   };
 

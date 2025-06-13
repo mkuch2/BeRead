@@ -7,6 +7,7 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import auth from "./firebase";
+import { logger } from "./lib/logger";
 import { AuthContext } from "./hooks/useAuthContext";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -50,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       return user.uid;
     } catch (e) {
-      console.log("Error getting user id: ", e);
+      logger.log("Error getting user id: ", e);
       throw e;
     }
   }

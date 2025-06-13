@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Link } from "react-router";
+import { logger } from "@/frontend/lib/logger";
 
 interface Book {
   id: string;
@@ -40,7 +40,7 @@ const BookSearch = ({ onSelectBook }: BookSearchProps) => {
       );
       setBooks(response.data.books); // used axios to make HTTP request from browser (/api/books handled by server.ts in backend)
       setHasSearched(true);
-      console.log("Response:", response.data.books);
+      logger.log("Response:", response.data.books);
     } catch (err) {
       setError("Failed to fetch books. Please try again.");
     } finally {

@@ -14,6 +14,7 @@ import axios from "axios";
 import { Button } from "./ui/button";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { logger } from "@/frontend/lib/logger";
 
 interface ReplyFormProps {
   post_id: string;
@@ -73,7 +74,7 @@ export default function ReplyForm({
 
         setUsername(user.data.username);
       } catch (e) {
-        console.log("Could not get username: ", e);
+        logger.log("Could not get username: ", e);
       }
     }
 
@@ -81,7 +82,7 @@ export default function ReplyForm({
   }, [uid]);
 
   async function onSubmit(data: FormFields) {
-    console.log("Submitted reply:", data);
+    logger.log("Submitted reply:", data);
 
     setLoading(true);
     const token = await getToken();
@@ -103,7 +104,7 @@ export default function ReplyForm({
         }
       );
 
-      console.log(createdReply);
+      logger.log(createdReply);
 
       form.reset();
 
@@ -111,7 +112,7 @@ export default function ReplyForm({
         onReplyAdd();
       }
     } catch (e) {
-      console.log("Error creating post: ", e);
+      logger.log("Error creating post: ", e);
 
       form.setError("root", {
         type: "server",

@@ -7,7 +7,7 @@ import express, {
 } from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import { logger } from "./utils/logger";
+import { logger } from "@/backend/utils/logger";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import postRoutes from "./routes/postRoutes";
